@@ -12,7 +12,7 @@
 		TaskCreationErrorType,
 		type ScoutingScope
 	} from '$lib/types/scouting';
-	import SelectField from '$lib/components/SelectField.svelte';
+	import SelectField from '$lib/components/formfields/SelectField.svelte';
 
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
 	let selectedScope: string | null = null;
