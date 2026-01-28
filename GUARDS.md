@@ -45,7 +45,7 @@ If all pass → page loads
 ### Example: Dashboard Protection
 
 ```typescript
-// src/routes/label/dashboard/+page.ts
+// src/routes/labels/dashboard/+page.ts
 export async function load() {
     await executeGuards({
         rules: [
@@ -60,9 +60,9 @@ export async function load() {
 
 | From | To | Condition |
 |------|-----|-----------|
-| `/` (home) | `/label/dashboard` | Always |
-| `/label/dashboard` | `/label/create` | No labels exist |
-| `/label/dashboard` | `/user/register` | No players exist (after label check) |
+| `/` (home) | `/labels/dashboard` | Always |
+| `/labels/dashboard` | `/labels/create` | No labels exist |
+| `/labels/dashboard` | `/user/register` | No players exist (after label check) |
 
 ## Adding New Guards
 
@@ -270,7 +270,7 @@ test('requireLabel redirects when no labels', async () => {
     const result = await requireLabel();
     
     expect(result.allowed).toBe(false);
-    expect(result.redirectTo).toBe('/label/create');
+    expect(result.redirectTo).toBe('/labels/create');
 });
 ```
 

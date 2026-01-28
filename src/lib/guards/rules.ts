@@ -10,14 +10,14 @@ export const requireLabel: GuardCheck = async () => {
         const labels = await api<any[]>('/api/labels');
 
         if (!labels || labels.length === 0) {
-            return redirectResult('/label/create', 'No label found, redirecting to creation');
+            return redirectResult('/labels/create', 'No label found, redirecting to creation');
         }
 
         return passResult('Label exists');
     } catch (error) {
         console.error('Error checking labels:', error);
         // On error, redirect to creation page as safe fallback
-        return redirectResult('/label/create', 'Error checking labels, redirecting to creation');
+        return redirectResult('/labels/create', 'Error checking labels, redirecting to creation');
     }
 };
 

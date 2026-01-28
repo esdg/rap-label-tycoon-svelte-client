@@ -43,12 +43,12 @@ export const requireAdmin: GuardCheck = async () => {
         const user = await api<any>('/api/auth/current');
 
         if (!user.isAdmin) {
-            return redirectResult('/label/dashboard', 'Admin access required');
+            return redirectResult('/labels/dashboard', 'Admin access required');
         }
 
         return passResult('Admin access granted');
     } catch (error) {
-        return redirectResult('/label/dashboard', 'Could not verify admin status');
+        return redirectResult('/labels/dashboard', 'Could not verify admin status');
     }
 };
 
@@ -61,12 +61,12 @@ export function requireFeature(featureName: string): GuardCheck {
             const features = await api<Record<string, boolean>>('/api/features');
 
             if (!features[featureName]) {
-                return redirectResult('/label/dashboard', `Feature ${featureName} not enabled`);
+                return redirectResult('/labels/dashboard', `Feature ${featureName} not enabled`);
             }
 
             return passResult(`Feature ${featureName} enabled`);
         } catch (error) {
-            return redirectResult('/label/dashboard', 'Could not check feature flags');
+            return redirectResult('/labels/dashboard', 'Could not check feature flags');
         }
     };
 }
@@ -98,14 +98,14 @@ export function requireBankroll(minimumAmount: number): GuardCheck {
 
             if (label.bankroll < minimumAmount) {
                 return redirectResult(
-                    '/label/dashboard',
+                    '/labels/dashboard',
                     `Insufficient funds. Need at least ${minimumAmount}`
                 );
             }
 
             return passResult('Sufficient bankroll');
         } catch (error) {
-            return redirectResult('/label/dashboard', 'Could not check bankroll');
+            return redirectResult('/labels/dashboard', 'Could not check bankroll');
         }
     };
 }
@@ -119,12 +119,12 @@ export function requireTaskCompleted(taskId: string): GuardCheck {
             const task = await api<any>(`/api/tasks/${taskId}`);
 
             if (!task.isCompleted) {
-                return redirectResult('/label/dashboard', `Task ${taskId} must be completed first`);
+                return redirectResult('/labels/dashboard', `Task ${taskId} must be completed first`);
             }
 
             return passResult('Required task completed');
         } catch (error) {
-            return redirectResult('/label/dashboard', 'Could not check task status');
+            return redirectResult('/labels/dashboard', 'Could not check task status');
         }
     };
 }
@@ -138,12 +138,12 @@ export function requireOwnership(resourceType: string, resourceId: string): Guar
             const ownership = await api<any>(`/api/${resourceType}/${resourceId}/ownership`);
 
             if (!ownership.isOwner) {
-                return redirectResult('/label/dashboard', 'You do not own this resource');
+                return redirectResult('/labels/dashboard', 'You do not own this resource');
             }
 
             return passResult('Ownership verified');
         } catch (error) {
-            return redirectResult('/label/dashboard', 'Could not verify ownership');
+            return redirectResult('/labels/dashboard', 'Could not verify ownership');
         }
     };
 }

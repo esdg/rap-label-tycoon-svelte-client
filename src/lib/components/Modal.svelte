@@ -2,12 +2,31 @@
 	import { modalStore } from '$lib/stores/modal';
 	import TaskModal from './modals/TaskModal.svelte';
 	import ExampleModal2 from './modals/ExampleModal2.svelte';
+	import { onMount } from 'svelte';
 
 	// Get the current modal state from the store
 	let modalState = $modalStore;
 
 	// Subscribe to store changes
 	$: modalState = $modalStore;
+
+	// Lock body scroll when modal is open
+	$: if (typeof document !== 'undefined') {
+		if (modalState.isOpen) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
+	}
+
+	onMount(() => {
+		return () => {
+			// Cleanup: restore scroll on unmount
+			if (typeof document !== 'undefined') {
+				document.body.style.overflow = '';
+			}
+		};
+	});
 
 	/**
 	 * Close modal when clicking on the backdrop

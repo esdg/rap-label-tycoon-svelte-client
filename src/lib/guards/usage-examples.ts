@@ -16,7 +16,7 @@ export async function load() {
         rules: [
             {
                 name: 'redirect-to-dashboard',
-                check: preventAccess('/label/dashboard', 'Redirecting to dashboard')
+                check: preventAccess('/labels/dashboard', 'Redirecting to dashboard')
             }
         ]
     });
@@ -25,7 +25,7 @@ export async function load() {
 
 // ============================================================================
 // EXAMPLE 2: Dashboard with multiple requirements
-// File: src/routes/label/dashboard/+page.ts
+// File: src/routes/labels/dashboard/+page.ts
 // ============================================================================
 /*
 import { executeGuards } from '$lib/guards';
@@ -98,7 +98,7 @@ export async function load() {
 
 // ============================================================================
 // EXAMPLE 6: Resource-specific protection with ownership
-// File: src/routes/label/[id]/edit/+page.ts
+// File: src/routes/labels/[id]/edit/+page.ts
 // ============================================================================
 /*
 import type { PageLoad } from './$types';
@@ -213,7 +213,7 @@ export async function load() {
 
                     if (lastPlayed === today) {
                         return redirectResult(
-                            '/label/dashboard',
+                            '/labels/dashboard',
                             'Already completed today\'s challenge'
                         );
                     }
@@ -303,7 +303,7 @@ export const load: PageLoad = async () => {
                         
                         if (!stats || stats.length === 0) {
                             return redirectResult(
-                                '/label/dashboard',
+                                '/labels/dashboard',
                                 'No stats available yet'
                             );
                         }

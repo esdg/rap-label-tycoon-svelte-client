@@ -45,7 +45,7 @@
 			player.set(response);
 
 			// Navigate to label creation page
-			await goto('/label/create');
+			await goto('/labels/create');
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'An error occurred during registration';
 		} finally {

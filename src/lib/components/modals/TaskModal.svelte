@@ -78,7 +78,9 @@
 		padding: calc(32px * var(--task-scale));
 		gap: calc(24px * var(--task-scale));
 		min-width: 0;
+		min-height: 0;
 		position: relative;
+		overflow: hidden;
 	}
 
 	.task-modal__close {
@@ -112,6 +114,9 @@
 		flex-direction: column;
 		gap: calc(24px * var(--task-scale));
 		margin-top: calc(8px * var(--task-scale));
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
 	}
 
 	.task-modal__title {
@@ -166,6 +171,7 @@
 
 		.task-modal__content {
 			padding: 24px;
+			overflow: hidden;
 		}
 	}
 
