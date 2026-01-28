@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
 // Define modal types
-export type ModalType = 'example1' | 'example2' | null;
+export type ModalType = 'task-modal' | 'example2' | null;
 
 interface ModalState {
     type: ModalType;

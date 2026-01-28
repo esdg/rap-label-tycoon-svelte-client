@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { openExampleModal1, openExampleModal2 } from '$lib/modals/usage';
+	import { openTaskModal, openExampleModal2 } from '$lib/modals/usage';
 
 	// Example: Open modal with user data
 	const handleOpenModal1WithData = () => {
@@ -8,7 +8,7 @@
 			username: 'john_doe',
 			email: 'john@example.com'
 		};
-		openExampleModal1(userData);
+		openTaskModal(userData);
 	};
 
 	// Example: Open modal with different data
@@ -35,7 +35,7 @@
 				</p>
 				<div class="flex gap-4">
 					<button
-						on:click={() => openExampleModal1()}
+						on:click={() => openTaskModal()}
 						class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors"
 					>
 						Open Modal 1
@@ -103,16 +103,16 @@
 				<h2 class="mb-4 text-2xl font-semibold text-gray-800">Quick Code Example</h2>
 				<pre class="overflow-x-auto rounded bg-gray-100 p-4 text-sm text-gray-800"><code
 						>{`// In any Svelte component
-import { openExampleModal1 } from '$lib/modals/usage';
+import { openTaskModal } from '$lib/modals/usage';
 
 // Open modal without data
 function handleClick() {
-  openExampleModal1();
+  openTaskModal();
 }
 
 // Open modal with data
 function handleClickWithData() {
-  openExampleModal1({ userId: 123, name: 'John' });
+  openTaskModal({ userId: 123, name: 'John' });
 }`}</code
 					></pre>
 			</section>
@@ -125,7 +125,7 @@ function handleClickWithData() {
 ├── components/
 │   ├── Modal.svelte (Main modal wrapper)
 │   └── modals/
-│       ├── ExampleModal1.svelte
+│       ├── TaskModal.svelte
 │       └── ExampleModal2.svelte
 ├── stores/
 │   └── modal.ts (Modal state management)

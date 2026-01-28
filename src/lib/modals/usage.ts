@@ -4,11 +4,25 @@
 import { modalStore } from '$lib/stores/modal';
 
 /**
- * Example 1: Open Example Modal 1
+ * Example 1: Open Task Modal
  * Call this function from any page or component
  */
-export const openExampleModal1 = (data?: Record<string, any>) => {
-    modalStore.open('example1', data);
+export const openTaskModal = (data?: Record<string, any>) => {
+    modalStore.open('task-modal', data);
+};
+
+/**
+ * Example 1a: Open Scout Talents sub-modal
+ */
+export const openScoutTalentsModal = (data?: Record<string, any>) => {
+    modalStore.open('task-modal', { ...data, subModal: 'scout' });
+};
+
+/**
+ * Example 1b: Open Sign Artist sub-modal
+ */
+export const openSignArtistModal = (data?: Record<string, any>) => {
+    modalStore.open('task-modal', { ...data, subModal: 'sign' });
 };
 
 /**
@@ -43,10 +57,10 @@ export const updateModalData = (data: Record<string, any>) => {
  * Usage Example 1: Open modal from a button click in a Svelte component
  *
  * <script lang="ts">
- *   import { openExampleModal1, openExampleModal2 } from '$lib/modals/usage';
+ *   import { openTaskModal, openExampleModal2 } from '$lib/modals/usage';
  * </script>
  *
- * <button on:click={() => openExampleModal1()}>
+ * <button on:click={() => openTaskModal()}>
  *   Open Modal 1
  * </button>
  *
@@ -59,7 +73,7 @@ export const updateModalData = (data: Record<string, any>) => {
  * Usage Example 2: Open modal with data
  *
  * <script lang="ts">
- *   import { openExampleModal1 } from '$lib/modals/usage';
+ *   import { openTaskModal } from '$lib/modals/usage';
  *
  *   const user = {
  *     name: 'John Doe',
@@ -67,7 +81,7 @@ export const updateModalData = (data: Record<string, any>) => {
  *   };
  * </script>
  *
- * <button on:click={() => openExampleModal1(user)}>
+ * <button on:click={() => openTaskModal(user)}>
  *   Open Modal with User Data
  * </button>
  */
@@ -78,12 +92,12 @@ export const updateModalData = (data: Record<string, any>) => {
  * File: src/routes/+page.svelte
  *
  * <script lang="ts">
- *   import { openExampleModal1, openExampleModal2 } from '$lib/modals/usage';
+ *   import { openTaskModal, openExampleModal2 } from '$lib/modals/usage';
  * </script>
  *
  * <main>
  *   <h1>Welcome</h1>
- *   <button on:click={() => openExampleModal1()}>
+ *   <button on:click={() => openTaskModal()}>
  *     Click me for Modal 1
  *   </button>
  *   <button on:click={() => openExampleModal2()}>
