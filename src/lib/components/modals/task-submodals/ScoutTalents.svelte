@@ -12,6 +12,7 @@
 		TaskCreationErrorType,
 		type ScoutingScope
 	} from '$lib/types/scouting';
+	import SelectField from '$lib/components/SelectField.svelte';
 
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
 	let selectedScope: string | null = null;
@@ -19,6 +20,25 @@
 	let scoutingScopes: ScoutingScope[] = [];
 	let loading = false;
 	let error: string | null = null;
+
+	// Prepare choices for SelectField components
+	$: scoutingTypeChoices = [
+		{ name: ScoutingTypeNames[ScoutingType.Rappers], value: ScoutingType.Rappers },
+		{ name: ScoutingTypeNames[ScoutingType.Beatmakers], value: ScoutingType.Beatmakers }
+	];
+
+	$: scopeChoices = scoutingScopes.map((scope) => ({
+		name: scope.displayName,
+		value: scope.id,
+		title: scope.description
+	}));
+
+	$: genreChoices = Object.values(RapMusicStyle)
+		.filter((v) => typeof v === 'number')
+		.map((genre) => ({
+			name: RapMusicStyleNames[genre as RapMusicStyle],
+			value: genre
+		}));
 
 	onMount(async () => {
 		try {
@@ -28,24 +48,6 @@
 			console.error(err);
 		}
 	});
-
-	function toggleScoutingType(type: ScoutingType) {
-		scoutingType = type;
-	}
-
-	function toggleScope(scopeId: string) {
-		selectedScope = scopeId;
-	}
-
-	function toggleGenre(genre: RapMusicStyle) {
-		const newGenres = new Set(selectedGenres);
-		if (newGenres.has(genre)) {
-			newGenres.delete(genre);
-		} else {
-			newGenres.add(genre);
-		}
-		selectedGenres = newGenres;
-	}
 
 	function getErrorMessage(errorCode: number, defaultMessage: string): string {
 		const errorMessages: Record<number, string> = {
@@ -123,11 +125,6 @@
 	function handleCancel() {
 		modalStore.close();
 	}
-
-	// Get all genre values for rendering
-	const allGenres = Object.values(RapMusicStyle).filter(
-		(v) => typeof v === 'number'
-	) as RapMusicStyle[];
 </script>
 
 <section class="flex flex-col gap-6 px-6 md:px-8 pb-6 h-full" aria-label="Scout Talents">
@@ -142,74 +139,41 @@
 	{/if}
 
 	<!-- Scout For -->
-	<div class="flex flex-col gap-3">
-		<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Scout for</label>
-		<div class="flex flex-wrap gap-2">
-			<button
-				class="px-5 py-2.5 border rounded transition-all duration-200 font-medium text-sm
-					{scoutingType === ScoutingType.Rappers
-					? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-					: 'bg-white border-gray-300 text-gray-700 hover:border-indigo-500 hover:text-indigo-600 hover:shadow-sm'}"
-				on:click={() => toggleScoutingType(ScoutingType.Rappers)}
-			>
-				{ScoutingTypeNames[ScoutingType.Rappers]}
-			</button>
-			<button
-				class="px-5 py-2.5 border rounded transition-all duration-200 font-medium text-sm
-					{scoutingType === ScoutingType.Beatmakers
-					? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-					: 'bg-white border-gray-300 text-gray-700 hover:border-indigo-500 hover:text-indigo-600 hover:shadow-sm'}"
-				on:click={() => toggleScoutingType(ScoutingType.Beatmakers)}
-			>
-				{ScoutingTypeNames[ScoutingType.Beatmakers]}
-			</button>
-		</div>
-	</div>
+	<SelectField
+		label="Scout for"
+		choices={scoutingTypeChoices}
+		mode="toggle"
+		bind:value={scoutingType}
+		defaultValue={ScoutingType.Rappers}
+		labelFor="scouting-type-btn"
+	/>
 
 	<!-- Coverage -->
-	<div class="flex flex-col gap-3">
-		<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Coverage</label>
-		<div class="flex flex-wrap gap-2">
-			{#each scoutingScopes as scope}
-				<button
-					class="px-5 py-2.5 border rounded transition-all duration-200 font-medium text-sm
-						{selectedScope === scope.id
-						? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-						: 'bg-white border-gray-300 text-gray-700 hover:border-indigo-500 hover:text-indigo-600 hover:shadow-sm'}"
-					on:click={() => toggleScope(scope.id)}
-					title={scope.description}
-				>
-					{scope.displayName}
-				</button>
-			{/each}
-		</div>
-	</div>
+	<SelectField
+		label="Coverage"
+		choices={scopeChoices}
+		mode="toggle"
+		bind:value={selectedScope}
+		labelFor="scouting-scope-btn"
+	/>
 
 	<!-- Genre -->
-	<div class="flex flex-col gap-3">
-		<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider"
-			>Genre (multi-select)</label
-		>
-		<div class="flex flex-wrap gap-2">
-			{#each allGenres as genre}
-				<button
-					class="px-5 py-2.5 border rounded transition-all duration-200 font-medium text-sm
-						{selectedGenres.has(genre)
-						? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-						: 'bg-white border-gray-300 text-gray-700 hover:border-indigo-500 hover:text-indigo-600 hover:shadow-sm'}"
-					on:click={() => toggleGenre(genre)}
-				>
-					{RapMusicStyleNames[genre]}
-				</button>
-			{/each}
-		</div>
-	</div>
+	<SelectField
+		label="Genre"
+		choices={genreChoices}
+		mode="multi"
+		bind:value={selectedGenres}
+		labelFor="genre-btn"
+	/>
 
 	<!-- Prospector -->
 	<div class="flex flex-col gap-3">
-		<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Prospector</label>
+		<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider" for="prospector-btn"
+			>Prospector</label
+		>
 		<div class="flex flex-wrap gap-2">
 			<button
+				id="prospector-btn"
 				class="px-5 py-2.5 border rounded font-medium text-sm bg-indigo-600 border-indigo-600 text-white shadow-sm opacity-75 cursor-not-allowed"
 				disabled
 			>
