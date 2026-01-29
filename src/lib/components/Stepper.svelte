@@ -2,6 +2,8 @@
 	import { createEventDispatcher } from 'svelte';
 
 	// Props
+	let className = '';
+	export { className as class };
 	export let padding: string = '8px';
 	export let activeStepIndex: number = 0;
 	export let buttonColor: string = '#e5e7eb';
@@ -28,7 +30,7 @@
 	}
 </script>
 
-<div class="stepper-container w-full">
+<div class="stepper-container w-full {className}">
 	<div class="flex items-end" style="gap: {padding};">
 		{#each stepLabels as label, index}
 			<div class="step-wrapper flex flex-col items-center" style={getStepStyle(index)}>

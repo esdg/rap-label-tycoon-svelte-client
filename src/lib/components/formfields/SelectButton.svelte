@@ -1,4 +1,6 @@
 <script lang="ts">
+	let className = '';
+	export { className as class };
 	export let label: string;
 	export let value: any;
 	export let selected: boolean = false;
@@ -13,7 +15,7 @@
 		{selected
 		? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
 		: 'bg-white border-gray-300 text-gray-700 hover:border-indigo-500 hover:text-indigo-600 hover:shadow-sm'}
-		{disabled ? 'opacity-75 cursor-not-allowed' : ''}"
+		{disabled ? 'opacity-75 cursor-not-allowed' : ''} {className}"
 	on:click
 	{disabled}
 	{title}

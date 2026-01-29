@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { clickOutside } from '$lib/utils/clickOutside';
 
 	// Props
+	let className = '';
+	export { className as class };
 	export let options: Array<{ name: string; value: any; disabled?: boolean }> = [];
 	export let value: any = null;
 	export let placeholder: string = 'Select an option';
@@ -69,7 +71,7 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div
-	class="relative w-full"
+	class="relative w-full {className}"
 	use:clickOutside
 	on:click_outside={handleClickOutside}
 	bind:this={dropdownElement}

@@ -169,7 +169,7 @@
 
 	<div class="flex-grow">
 		<ContentPanel activeStepIndex={currentStep} transition="slide" duration={300}>
-			<ContentPanelItem>
+			<ContentPanelItem class="space-y-6">
 				<!-- Scout For -->
 				<SelectField
 					label="Scout for"

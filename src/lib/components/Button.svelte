@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 
+	let className = '';
+	export { className as class };
 	export let color: string = 'indigo'; // Background color theme
 	export let style: 'normal' | 'hollow' = 'normal'; // Button style
 	export let text: string = 'Button'; // Button text
@@ -49,7 +51,7 @@
 
 <button
 	on:click={handleClick}
-	class="{baseClasses} {colorClasses} {stateClasses} {loadingClass} {widthClass}"
+	class="{baseClasses} {colorClasses} {stateClasses} {loadingClass} {widthClass} {className}"
 	{disabled}
 	aria-label={altText || text}
 	type="button"

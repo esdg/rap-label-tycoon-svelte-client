@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { setContext, onMount } from 'svelte';
+	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 
 	// Props
+	let className = '';
+	export { className as class };
 	export let activeStepIndex: number = 0;
 	export let transition: 'none' | 'fade' | 'slide' = 'fade';
 	export let duration: number = 300;
@@ -53,7 +55,7 @@
 	}
 </script>
 
-<div class="content-panel">
+<div class="content-panel {className}">
 	<slot />
 </div>
 

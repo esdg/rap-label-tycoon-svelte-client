@@ -2,7 +2,10 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { cubicOut, cubicIn } from 'svelte/easing';
 	import type { Writable } from 'svelte/store';
-	import type { FlyParams, FadeParams } from 'svelte/transition';
+
+	// Props
+	let className = '';
+	export { className as class };
 
 	type TransitionType = 'none' | 'fade' | 'slide';
 	type Direction = 'forward' | 'backward';
@@ -100,7 +103,7 @@
 </script>
 
 {#if isActive}
-	<div class="content-panel-item" in:transitionIn out:transitionOut>
+	<div class="content-panel-item {className}" in:transitionIn out:transitionOut>
 		<slot />
 	</div>
 {/if}

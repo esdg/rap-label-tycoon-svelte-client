@@ -1,4 +1,6 @@
 <script lang="ts">
+	let className = '';
+	export { className as class };
 	export let label: string;
 	export let choices: Array<{ name: string; value: any; title?: string }>;
 	export let mode: 'toggle' | 'multi' = 'toggle';
@@ -26,7 +28,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-3 {className}">
 	<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider" for={labelFor}>
 		{label}
 		{#if mode === 'multi'}
