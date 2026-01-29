@@ -14,6 +14,7 @@
 	} from '$lib/types/scouting';
 	import SelectField from '$lib/components/formfields/SelectField.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import Stepper from '$lib/components/Stepper.svelte';
 
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
 	let selectedScope: string | null = null;
@@ -126,6 +127,13 @@
 	function handleCancel() {
 		modalStore.close();
 	}
+
+	let currentStep = 0;
+
+	function handleStepChange(event: { detail: number }) {
+		currentStep = event.detail;
+		console.log('Step changed to:', currentStep);
+	}
 </script>
 
 <section class="flex flex-col gap-6 px-6 md:px-8 pb-6 h-full" aria-label="Scout Talents">
@@ -138,6 +146,14 @@
 			{error}
 		</div>
 	{/if}
+
+	<div class="w-full max-w-2xl">
+		<Stepper
+			stepLabels={['Choose', 'Customize', 'Review', 'Complete']}
+			activeStepIndex={currentStep}
+			on:stepClicked={handleStepChange}
+		/>
+	</div>
 
 	<!-- Scout For -->
 	<SelectField
