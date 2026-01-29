@@ -6,7 +6,7 @@
 	let className = '';
 	export { className as class };
 	export let activeStepIndex: number = 0;
-	export let transition: 'none' | 'fade' | 'slide' = 'fade';
+	export let transition: 'none' | 'fade' | 'slide' = 'none';
 	export let duration: number = 300;
 
 	// Track previous step to determine direction

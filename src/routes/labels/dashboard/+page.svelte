@@ -6,7 +6,7 @@
 		modalStore.open('task-modal', {
 			subModal: 'scout',
 			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1769553021/artists/profile_images/hoocbbagpkmy4jnmd2mn.jpg'
+				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
 		});
 	}
 </script>

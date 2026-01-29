@@ -202,35 +202,64 @@
 		</ContentPanel>
 	</div>
 
-	<!-- Prospector -->
-	<div class="flex flex-col gap-3 w-44">
-		<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider" for="prospector-btn"
-			>Prospector</label
-		>
-		<Dropdown
-			{options}
-			bind:value={selectedValue}
-			placeholder="Choose..."
-			on:change={(e) => console.log('Selected:', e.detail)}
-		/>
-	</div>
+	<div class="w-full flex">
+		<!-- Prospector -->
+		<div class="flex gap-3 w-44 items-center">
+			<label
+				class="text-xs font-semibold text-gray-600 uppercase tracking-wider inline-block align-middle"
+				for="prospector-btn">Prospector</label
+			>
+			<Dropdown
+				{options}
+				bind:value={selectedValue}
+				placeholder="Choose..."
+				on:change={(e) => console.log('Selected:', e.detail)}
+			/>
+		</div>
+		<ContentPanel activeStepIndex={currentStep}>
+			<ContentPanelItem class="flex gap-3 pt-2 justify-end">
+				<!-- Actions -->
 
-	<!-- Actions -->
-	<div class="flex gap-3 pt-2">
-		<Button
-			color="indigo"
-			style="normal"
-			text={loading ? 'Starting...' : 'Start Scouting'}
-			altText="Start scouting for talents"
-			{loading}
-			on:clicked={handleStartScouting}
-		/>
-		<Button
-			color="gray"
-			style="hollow"
-			text="Cancel"
-			altText="Cancel scouting task"
-			on:clicked={handleCancel}
-		/>
+				<Button
+					color="gray"
+					style="hollow"
+					text="Cancel"
+					altText="Cancel scouting task"
+					on:clicked={handleCancel}
+				/>
+				<Button
+					color="gray"
+					style="hollow"
+					text="Next"
+					altText="Proceed to next step"
+					on:clicked={() => currentStep++}
+				/>
+			</ContentPanelItem>
+			<ContentPanelItem class="flex gap-3 pt-2 justify-end">
+				<!-- Actions -->
+				<Button
+					color="gray"
+					style="hollow"
+					text="Cancel"
+					altText="Cancel scouting task"
+					on:clicked={handleCancel}
+				/>
+				<Button
+					color="gray"
+					style="hollow"
+					text="Previous"
+					altText="Proceed to previous step"
+					on:clicked={() => currentStep--}
+				/>
+				<Button
+					color="indigo"
+					style="normal"
+					text={loading ? 'Starting...' : 'Start Scouting'}
+					altText="Start scouting for talents"
+					{loading}
+					on:clicked={handleStartScouting}
+				/>
+			</ContentPanelItem>
+		</ContentPanel>
 	</div>
 </section>
