@@ -3,6 +3,7 @@
 	import TaskModal from './modals/TaskModal.svelte';
 	import ExampleModal2 from './modals/ExampleModal2.svelte';
 	import { onMount } from 'svelte';
+	import { clickOutside } from '$lib/utils/clickOutside';
 
 	// Get the current modal state from the store
 	let modalState = $modalStore;
@@ -52,20 +53,28 @@
 	<!-- Modal container -->
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		{#if modalState.type === 'task-modal'}
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<div
 				class="task-modal-shell relative w-full bg-white shadow-lg transition-all duration-300 animate-in fade-in zoom-in-95"
 				role="dialog"
 				aria-modal="true"
 				aria-label="Task modal"
+				use:clickOutside
+				on:click_outside={() => modalStore.close()}
 			>
 				<TaskModal data={modalState.data} />
 			</div>
 		{:else}
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<div
 				class="relative w-full max-w-md rounded-lg bg-white shadow-lg transition-all duration-300 animate-in fade-in zoom-in-95"
 				role="dialog"
 				aria-modal="true"
 				aria-label="Application modal"
+				use:clickOutside
+				on:click_outside={() => modalStore.close()}
 			>
 				<!-- Modal header with close button -->
 				<div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
