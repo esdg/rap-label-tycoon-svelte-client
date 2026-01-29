@@ -4,6 +4,7 @@
 	import { player } from '$lib/stores/player';
 	import { label } from '$lib/stores/label';
 	import type { Label } from '$lib/types/label';
+	import Button from '$lib/components/Button.svelte';
 
 	let currentPlayer = $player;
 	let name: string = '';
@@ -150,13 +151,16 @@
 					</div>
 				</div>
 
-				<button
-					on:click={handleCreateLabel}
+				<Button
+					color="green"
+					style="normal"
+					text={isLoading ? 'Creating Label...' : 'Create Label'}
+					altText="Create new label"
+					fullWidth={true}
+					loading={isLoading}
 					disabled={isLoading}
-					class="w-full mt-8 px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-400 rounded font-medium transition-colors"
-				>
-					{isLoading ? 'Creating Label...' : 'Create Label'}
-				</button>
+					on:clicked={handleCreateLabel}
+				/>
 			</div>
 		{/if}
 	</div>

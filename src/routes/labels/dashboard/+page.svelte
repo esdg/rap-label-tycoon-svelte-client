@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal';
+	import Button from '$lib/components/Button.svelte';
 
 	function openScoutModal() {
 		modalStore.open('task-modal', {
@@ -14,11 +15,12 @@
 	<h1 class="text-3xl font-bold mb-8">Dashboard</h1>
 
 	<div class="space-y-4">
-		<button
-			on:click={openScoutModal}
-			class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors"
-		>
-			Scout Talents
-		</button>
+		<Button
+			color="blue"
+			style="normal"
+			text="Scout Talents"
+			altText="Open scout talents modal"
+			on:clicked={openScoutModal}
+		/>
 	</div>
 </div>

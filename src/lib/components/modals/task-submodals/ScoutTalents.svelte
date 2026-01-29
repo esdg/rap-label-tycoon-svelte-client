@@ -13,6 +13,7 @@
 		type ScoutingScope
 	} from '$lib/types/scouting';
 	import SelectField from '$lib/components/formfields/SelectField.svelte';
+	import Button from '$lib/components/Button.svelte';
 
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
 	let selectedScope: string | null = null;
@@ -184,22 +185,20 @@
 
 	<!-- Actions -->
 	<div class="flex gap-3 pt-2">
-		<button
-			class="px-6 py-3 rounded-md font-semibold text-base transition-all duration-200
-				{loading
-				? 'bg-indigo-400 text-white cursor-wait'
-				: 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-lg active:scale-95'}"
-			on:click={handleStartScouting}
-			disabled={loading}
-		>
-			{loading ? 'Starting...' : 'Start Scouting'}
-		</button>
-		<button
-			class="px-6 py-3 rounded-md font-semibold text-base bg-white text-gray-800 border border-gray-300
-				hover:border-gray-400 hover:shadow-md active:scale-95 transition-all duration-200"
-			on:click={handleCancel}
-		>
-			Cancel
-		</button>
+		<Button
+			color="indigo"
+			style="normal"
+			text={loading ? 'Starting...' : 'Start Scouting'}
+			altText="Start scouting for talents"
+			{loading}
+			on:clicked={handleStartScouting}
+		/>
+		<Button
+			color="gray"
+			style="hollow"
+			text="Cancel"
+			altText="Cancel scouting task"
+			on:clicked={handleCancel}
+		/>
 	</div>
 </section>

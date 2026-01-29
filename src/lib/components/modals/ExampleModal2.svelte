@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Button from '$lib/components/Button.svelte';
+
 	export let data: Record<string, any> | undefined = undefined;
 </script>
 
@@ -19,15 +21,21 @@
 	{/if}
 
 	<div class="flex gap-2 pt-4">
-		<button
-			class="flex-1 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 transition-colors"
-		>
-			Confirm
-		</button>
-		<button
-			class="flex-1 rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-		>
-			Cancel
-		</button>
+		<Button
+			color="green"
+			style="normal"
+			text="Confirm"
+			altText="Confirm action"
+			fullWidth={true}
+			on:clicked={() => {}}
+		/>
+		<Button
+			color="gray"
+			style="hollow"
+			text="Cancel"
+			altText="Cancel action"
+			fullWidth={true}
+			on:clicked={() => {}}
+		/>
 	</div>
 </div>

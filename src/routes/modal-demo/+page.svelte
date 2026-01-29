@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { openTaskModal, openExampleModal2 } from '$lib/modals/usage';
+	import Button from '$lib/components/Button.svelte';
 
 	// Example: Open modal with user data
 	const handleOpenModal1WithData = () => {
@@ -34,18 +35,20 @@
 					at a time.
 				</p>
 				<div class="flex gap-4">
-					<button
-						on:click={() => openTaskModal()}
-						class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors"
-					>
-						Open Modal 1
-					</button>
-					<button
-						on:click={() => openExampleModal2()}
-						class="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 transition-colors"
-					>
-						Open Modal 2
-					</button>
+					<Button
+						color="blue"
+						style="normal"
+						text="Open Modal 1"
+						altText="Open task modal"
+						on:clicked={() => openTaskModal()}
+					/>
+					<Button
+						color="green"
+						style="normal"
+						text="Open Modal 2"
+						altText="Open example modal 2"
+						on:clicked={() => openExampleModal2()}
+					/>
 				</div>
 			</section>
 
@@ -57,18 +60,20 @@
 					modal component and can be used to customize the modal behavior.
 				</p>
 				<div class="flex gap-4">
-					<button
-						on:click={handleOpenModal1WithData}
-						class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors"
-					>
-						Open Modal 1 with User Data
-					</button>
-					<button
-						on:click={handleOpenModal2WithData}
-						class="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 transition-colors"
-					>
-						Open Modal 2 with Form Data
-					</button>
+					<Button
+						color="blue"
+						style="normal"
+						text="Open Modal 1 with User Data"
+						altText="Open task modal with user data"
+						on:clicked={handleOpenModal1WithData}
+					/>
+					<Button
+						color="green"
+						style="normal"
+						text="Open Modal 2 with Form Data"
+						altText="Open example modal 2 with form data"
+						on:clicked={handleOpenModal2WithData}
+					/>
 				</div>
 			</section>
 

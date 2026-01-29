@@ -3,6 +3,7 @@
 	import { api } from '$lib/api';
 	import { player } from '$lib/stores/player';
 	import type { Player } from '$lib/types/player';
+	import Button from '$lib/components/Button.svelte';
 
 	let username: string = '';
 	let email: string = '';
@@ -89,13 +90,16 @@
 				/>
 			</div>
 
-			<button
-				on:click={handleCreateAccount}
+			<Button
+				color="blue"
+				style="normal"
+				text={isLoading ? 'Creating Account...' : 'Create Account'}
+				altText="Create new account"
+				fullWidth={true}
+				loading={isLoading}
 				disabled={isLoading}
-				class="w-full mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 rounded font-medium transition-colors"
-			>
-				{isLoading ? 'Creating Account...' : 'Create Account'}
-			</button>
+				on:clicked={handleCreateAccount}
+			/>
 		</div>
 	</div>
 </div>
