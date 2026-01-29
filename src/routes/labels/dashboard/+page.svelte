@@ -2,7 +2,11 @@
 	import { modalStore } from '$lib/stores/modal';
 
 	function openScoutModal() {
-		modalStore.open('task-modal', { subModal: 'scout' });
+		modalStore.open('task-modal', {
+			subModal: 'scout',
+			imageUrl:
+				'https://res.cloudinary.com/dig430oem/image/upload/v1769553021/artists/profile_images/hoocbbagpkmy4jnmd2mn.jpg'
+		});
 	}
 </script>
 

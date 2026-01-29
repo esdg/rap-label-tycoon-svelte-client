@@ -24,15 +24,6 @@
 			value = newValue;
 		}
 	}
-
-	// Make isSelected reactive to value changes
-	$: isSelected = (choiceValue: any): boolean => {
-		if (mode === 'toggle') {
-			return value === choiceValue;
-		} else {
-			return value instanceof Set && value.has(choiceValue);
-		}
-	};
 </script>
 
 <div class="flex flex-col gap-3">
