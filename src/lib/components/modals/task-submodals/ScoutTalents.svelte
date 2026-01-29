@@ -16,6 +16,8 @@
 	import Button from '$lib/components/Button.svelte';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
+	import ContentPanel from '$lib/components/ContentPanel.svelte';
+	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
 	let selectedScope: string | null = null;
@@ -159,39 +161,46 @@
 
 	<div class="w-full max-w-2xl">
 		<Stepper
-			stepLabels={['Choose', 'Customize', 'Review', 'Complete']}
+			stepLabels={['scouting parameters', 'review & start scouting']}
 			activeStepIndex={currentStep}
 			on:stepClicked={handleStepChange}
 		/>
 	</div>
 
-	<!-- Scout For -->
-	<SelectField
-		label="Scout for"
-		choices={scoutingTypeChoices}
-		mode="toggle"
-		bind:value={scoutingType}
-		defaultValue={ScoutingType.Rappers}
-		labelFor="scouting-type-btn"
-	/>
+	<div class="flex-grow">
+		<ContentPanel activeStepIndex={currentStep} transition="slide" duration={300}>
+			<ContentPanelItem>
+				<!-- Scout For -->
+				<SelectField
+					label="Scout for"
+					choices={scoutingTypeChoices}
+					mode="toggle"
+					bind:value={scoutingType}
+					defaultValue={ScoutingType.Rappers}
+					labelFor="scouting-type-btn"
+				/>
 
-	<!-- Coverage -->
-	<SelectField
-		label="Coverage"
-		choices={scopeChoices}
-		mode="toggle"
-		bind:value={selectedScope}
-		labelFor="scouting-scope-btn"
-	/>
+				<!-- Coverage -->
+				<SelectField
+					label="Coverage"
+					choices={scopeChoices}
+					mode="toggle"
+					bind:value={selectedScope}
+					labelFor="scouting-scope-btn"
+				/>
 
-	<!-- Genre -->
-	<SelectField
-		label="Genre"
-		choices={genreChoices}
-		mode="multi"
-		bind:value={selectedGenres}
-		labelFor="genre-btn"
-	/>
+				<!-- Genre -->
+				<SelectField
+					label="Genre"
+					choices={genreChoices}
+					mode="multi"
+					bind:value={selectedGenres}
+					labelFor="genre-btn"
+				/>
+			</ContentPanelItem>
+			<ContentPanelItem>More content</ContentPanelItem>
+		</ContentPanel>
+	</div>
 
 	<!-- Prospector -->
 	<div class="flex flex-col gap-3 w-44">
