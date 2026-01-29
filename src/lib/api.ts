@@ -1,4 +1,4 @@
-import type { ScoutingScope, ScoutingTaskRequest, ScoutingTaskResponse, TaskCreationErrorResponse } from './types/scouting';
+import type { ScoutingScope, ScoutingTaskRequest, ScoutingTaskResponse, TaskCreationErrorResponse, ScoutingCostPrediction } from './types/scouting';
 
 const API_BASE_URL = 'http://localhost:5122';
 
@@ -42,4 +42,21 @@ export async function createScoutingTask(data: ScoutingTaskRequest): Promise<Sco
     }
 
     return result as ScoutingTaskResponse;
+}
+
+export async function predictScoutingCost(data: ScoutingTaskRequest): Promise<ScoutingCostPrediction> {
+    const fullUrl = `${API_BASE_URL}/api/v1/tasks/scouting/predict-cost`;
+    const response = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to predict scouting cost: ${response.statusText}`);
+    }
+
+    return response.json();
 }

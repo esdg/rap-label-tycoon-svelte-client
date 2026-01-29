@@ -59,6 +59,12 @@ export interface ScoutingTaskRequest {
     scopeId: string;
 }
 
+export interface ScoutingCostPrediction {
+    budgetRequired: number;
+    duration: string;
+    staminaCost: number;
+}
+
 export interface ScoutingTaskResponse {
     id: string;
     labelId: string;

@@ -4,13 +4,19 @@
 	import { label, updateLabelBankroll } from '$lib/stores/label';
 	import { player } from '$lib/stores/player';
 	import { addScoutingTask } from '$lib/stores/tasks';
-	import { fetchScoutingScopes, createScoutingTask, TaskCreationError } from '$lib/api';
+	import {
+		fetchScoutingScopes,
+		createScoutingTask,
+		predictScoutingCost,
+		TaskCreationError
+	} from '$lib/api';
 	import { RapMusicStyle, RapMusicStyleNames } from '$lib/types/musicStyles';
 	import {
 		ScoutingType,
 		ScoutingTypeNames,
 		TaskCreationErrorType,
-		type ScoutingScope
+		type ScoutingScope,
+		type ScoutingCostPrediction
 	} from '$lib/types/scouting';
 	import SelectField from '$lib/components/formfields/SelectField.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -18,6 +24,7 @@
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
+	import { formatDuration } from '$lib/utils/formatDuration';
 
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
 	let selectedScope: string | null = null;
@@ -25,8 +32,10 @@
 	let scoutingScopes: ScoutingScope[] = [];
 	let loading = false;
 	let error: string | null = null;
+	let costPrediction: ScoutingCostPrediction | null = null;
+	let loadingCost = false;
 
-	let selectedValue = 1;
+	let selectedProspectorId = 1;
 
 	const options = [
 		{ name: 'you', value: 1 },
@@ -62,6 +71,36 @@
 			console.error(err);
 		}
 	});
+
+	// Reactive statement to fetch cost prediction when parameters change
+	$: if ($label && $player && selectedScope && selectedGenres.size > 0 && currentStep === 1) {
+		fetchCostPrediction();
+	}
+
+	async function fetchCostPrediction() {
+		if (!$label || !$player || !selectedScope || selectedGenres.size === 0) {
+			return;
+		}
+
+		loadingCost = true;
+		costPrediction = null;
+
+		try {
+			const predictionRequest = {
+				labelId: $label.id,
+				workerId: $player.id,
+				scoutingType: scoutingType,
+				productionStyles: Array.from(selectedGenres),
+				scopeId: selectedScope
+			};
+
+			costPrediction = await predictScoutingCost(predictionRequest);
+		} catch (err) {
+			console.error('Failed to fetch cost prediction:', err);
+		} finally {
+			loadingCost = false;
+		}
+	}
 
 	function getErrorMessage(errorCode: number, defaultMessage: string): string {
 		const errorMessages: Record<number, string> = {
@@ -191,14 +230,55 @@
 
 				<!-- Genre -->
 				<SelectField
-					label="Genre"
+					label="Genre(s)"
 					choices={genreChoices}
 					mode="multi"
 					bind:value={selectedGenres}
 					labelFor="genre-btn"
 				/>
 			</ContentPanelItem>
-			<ContentPanelItem>More content</ContentPanelItem>
+			<ContentPanelItem>
+				<div class="space-y-6">
+					<h3 class="text-xl font-semibold text-gray-900">Cost Estimation</h3>
+
+					{#if loadingCost}
+						<div class="flex items-center justify-center py-8">
+							<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+						</div>
+					{:else if costPrediction}
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+								<div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">
+									Budget Required
+								</div>
+								<div class="text-2xl font-bold text-gray-900">
+									${costPrediction.budgetRequired.toLocaleString()}
+								</div>
+							</div>
+
+							<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+								<div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">
+									Duration
+								</div>
+								<div class="text-2xl font-bold text-gray-900">
+									{formatDuration(costPrediction.duration)}
+								</div>
+							</div>
+
+							<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+								<div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">
+									Stamina Cost
+								</div>
+								<div class="text-2xl font-bold text-gray-900">
+									{costPrediction.staminaCost}
+								</div>
+							</div>
+						</div>
+					{:else}
+						<div class="text-center py-8 text-gray-500">No cost estimation available</div>
+					{/if}
+				</div>
+			</ContentPanelItem>
 		</ContentPanel>
 	</div>
 
@@ -212,7 +292,7 @@
 			<Dropdown
 				class="w-32"
 				{options}
-				bind:value={selectedValue}
+				bind:value={selectedProspectorId}
 				placeholder="Choose..."
 				direction="up"
 				on:change={(e) => console.log('Selected:', e.detail)}
