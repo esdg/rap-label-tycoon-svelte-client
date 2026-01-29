@@ -78,7 +78,7 @@ The list of all components to create, with specification.
 
 ##### inputs
 
-- `initialValue`: The initial numeric value.
+- `value`: the value.
 - `labelText`: The text for the input's label.
 
 ##### output

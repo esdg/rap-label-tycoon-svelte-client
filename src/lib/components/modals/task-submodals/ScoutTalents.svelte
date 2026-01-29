@@ -15,6 +15,7 @@
 	import SelectField from '$lib/components/formfields/SelectField.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Stepper from '$lib/components/Stepper.svelte';
+	import Dropdown from '$lib/components/Dropdown.svelte';
 
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
 	let selectedScope: string | null = null;
@@ -22,6 +23,15 @@
 	let scoutingScopes: ScoutingScope[] = [];
 	let loading = false;
 	let error: string | null = null;
+
+	let selectedValue = 1;
+
+	const options = [
+		{ name: 'you', value: 1 },
+		{ name: 'Option 2', value: 2 },
+		{ name: 'Disabled Option', value: 3, disabled: true },
+		{ name: 'Very Long Option Name That Will Be Truncated', value: 4 }
+	];
 
 	// Prepare choices for SelectField components
 	$: scoutingTypeChoices = [
@@ -184,19 +194,16 @@
 	/>
 
 	<!-- Prospector -->
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-3 w-44">
 		<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider" for="prospector-btn"
 			>Prospector</label
 		>
-		<div class="flex flex-wrap gap-2">
-			<button
-				id="prospector-btn"
-				class="px-5 py-2.5 border rounded font-medium text-sm bg-indigo-600 border-indigo-600 text-white shadow-sm opacity-75 cursor-not-allowed"
-				disabled
-			>
-				You
-			</button>
-		</div>
+		<Dropdown
+			{options}
+			bind:value={selectedValue}
+			placeholder="Choose..."
+			on:change={(e) => console.log('Selected:', e.detail)}
+		/>
 	</div>
 
 	<!-- Actions -->
