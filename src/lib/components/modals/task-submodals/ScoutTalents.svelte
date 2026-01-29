@@ -204,15 +204,17 @@
 
 	<div class="w-full flex">
 		<!-- Prospector -->
-		<div class="flex gap-3 w-44 items-center">
+		<div class="flex gap-3 items-center">
 			<label
 				class="text-xs font-semibold text-gray-600 uppercase tracking-wider inline-block align-middle"
 				for="prospector-btn">Prospector</label
 			>
 			<Dropdown
+				class="w-32"
 				{options}
 				bind:value={selectedValue}
 				placeholder="Choose..."
+				direction="up"
 				on:change={(e) => console.log('Selected:', e.detail)}
 			/>
 		</div>

@@ -11,6 +11,7 @@
 	export let disabled: boolean = false;
 	export let searchable: boolean = false;
 	export let label: string = '';
+	export let direction: 'up' | 'down' = 'down';
 
 	const dispatch = createEventDispatcher<{ change: any }>();
 
@@ -101,9 +102,13 @@
 			{displayText}
 		</span>
 		<svg
-			class="w-5 h-5 transition-transform duration-200 {isOpen ? 'rotate-180' : ''} {disabled
-				? 'text-gray-400'
-				: 'text-gray-500'}"
+			class="w-5 h-5 transition-transform duration-200 {isOpen && direction === 'down'
+				? 'rotate-180'
+				: isOpen && direction === 'up'
+					? 'rotate-0'
+					: direction === 'up'
+						? 'rotate-180'
+						: ''} {disabled ? 'text-gray-400' : 'text-gray-500'}"
 			fill="none"
 			stroke="currentColor"
 			viewBox="0 0 24 24"
@@ -115,8 +120,8 @@
 	<!-- Dropdown Menu -->
 	{#if isOpen}
 		<div
-			class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg
-				animate-in fade-in slide-in-from-top-2 duration-200"
+			class="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg
+				{direction === 'up' ? 'bottom-full mb-1 animate-in-up' : 'mt-1 animate-in-down'}"
 		>
 			<!-- Search Input -->
 			{#if searchable}
@@ -186,7 +191,22 @@
 		}
 	}
 
-	.animate-in {
+	@keyframes slide-in-from-bottom {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-in-down {
 		animation: slide-in-from-top 0.2s ease-out;
+	}
+
+	.animate-in-up {
+		animation: slide-in-from-bottom 0.2s ease-out;
 	}
 </style>
