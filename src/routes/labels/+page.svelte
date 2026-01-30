@@ -7,10 +7,11 @@
 	import type { ScoutingTaskResponse } from '$lib/types/scouting';
 
 	let tasks: ScoutingTaskResponse[] = [];
-	let serverTime: Date | null = null;
+	let serverTimeOffset = 0; // Difference between server time and client time
 	let loading = true;
 	let error: string | null = null;
 	let previousModalState = $modalStore.isOpen;
+	let currentTime = Date.now(); // Current client time, updated every second
 
 	function openScoutModal() {
 		modalStore.open('task-modal', {
@@ -39,7 +40,12 @@
 		try {
 			const { tasks: fetchedTasks, serverTime: serverTimeStr } = await fetchLabelTasks($label.id);
 			tasks = fetchedTasks.filter((task) => !task.claimedAt);
-			serverTime = new Date(serverTimeStr);
+
+			// Calculate offset between server time and client time
+			const serverTime = new Date(serverTimeStr).getTime();
+			const clientTime = Date.now();
+			serverTimeOffset = serverTime - clientTime;
+
 			loading = false;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load tasks';
@@ -47,30 +53,47 @@
 		}
 	}
 
+	function getCurrentServerTime(): number {
+		return currentTime + serverTimeOffset;
+	}
+
 	function isTaskFinished(task: ScoutingTaskResponse): boolean {
-		if (!serverTime) return false;
-		return new Date(task.endTime) <= serverTime;
+		const endTime = new Date(task.endTime).getTime();
+		return endTime <= getCurrentServerTime();
 	}
 
 	function formatTimeRemaining(endTime: string): string {
-		if (!serverTime) return '';
-		const end = new Date(endTime);
-		const diff = end.getTime() - serverTime.getTime();
+		const end = new Date(endTime).getTime();
+		const diff = end - getCurrentServerTime();
 
 		if (diff <= 0) return 'Finished';
 
-		const hours = Math.floor(diff / (1000 * 60 * 60));
+		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+		const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 		const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 		const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
+		if (days > 0) {
+			return `${days}d ${hours}h ${minutes}m`;
+		}
 		return `${hours}h ${minutes}m ${seconds}s`;
 	}
 
 	onMount(() => {
 		loadTasks();
+
+		// Update current time every second for countdown
+		const timeInterval = setInterval(() => {
+			currentTime = Date.now();
+		}, 1000);
+
 		// Refresh tasks every 10 seconds
-		const interval = setInterval(loadTasks, 10000);
-		return () => clearInterval(interval);
+		const taskInterval = setInterval(loadTasks, 10000);
+
+		return () => {
+			clearInterval(timeInterval);
+			clearInterval(taskInterval);
+		};
 	});
 </script>
 
