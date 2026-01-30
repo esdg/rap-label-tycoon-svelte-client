@@ -60,3 +60,18 @@ export async function predictScoutingCost(data: ScoutingTaskRequest): Promise<Sc
 
     return response.json();
 }
+
+// Task API functions
+export async function fetchLabelTasks(labelId: string): Promise<{ tasks: ScoutingTaskResponse[], serverTime: string }> {
+    const fullUrl = `${API_BASE_URL}/api/v1/rap-labels/${labelId}/tasks`;
+    const response = await fetch(fullUrl);
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch label tasks: ${response.statusText}`);
+    }
+
+    const tasks = await response.json();
+    const serverTime = response.headers.get('x-server-time') || new Date().toISOString();
+
+    return { tasks, serverTime };
+}

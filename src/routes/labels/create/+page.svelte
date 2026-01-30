@@ -68,7 +68,7 @@
 			label.set(response);
 
 			// Navigate to label dashboard
-			await goto('/labels/dashboard');
+			await goto('/labels');
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'An error occurred while creating the label';
 		} finally {

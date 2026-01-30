@@ -284,13 +284,12 @@
 
 	<div class="w-full flex">
 		<!-- Prospector -->
-		<div class="flex gap-3 items-center">
+		<div class="flex gap-3 items-center flex w-64">
 			<label
 				class="text-xs font-semibold text-gray-600 uppercase tracking-wider inline-block align-middle"
 				for="prospector-btn">Prospector</label
 			>
 			<Dropdown
-				class="w-32"
 				{options}
 				bind:value={selectedProspectorId}
 				placeholder="Choose..."
