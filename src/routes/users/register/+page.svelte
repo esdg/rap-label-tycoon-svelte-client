@@ -3,13 +3,16 @@
 	import { createPlayer } from '$lib/api';
 	import { player } from '$lib/stores/player';
 	import { firebaseCreateAccount } from '$lib/firebase';
+	import { googleSignInAndRedirect } from '$lib/services/auth';
 	import Button from '$lib/components/Button.svelte';
+	import GoogleSignInButton from '$lib/components/GoogleSignInButton.svelte';
 
 	let username: string = '';
 	let email: string = '';
 	let password: string = '';
 	let confirmPassword: string = '';
 	let isLoading: boolean = false;
+	let isGoogleLoading: boolean = false;
 	let error: string = '';
 
 	async function handleCreateAccount() {
@@ -84,6 +87,31 @@
 			isLoading = false;
 		}
 	}
+
+	async function handleGoogleSignIn() {
+		error = '';
+		isGoogleLoading = true;
+
+		try {
+			const result = await googleSignInAndRedirect();
+			if (!result.success && result.error) {
+				error = result.error;
+			}
+		} catch (err: unknown) {
+			if (err && typeof err === 'object' && 'code' in err) {
+				const firebaseError = err as { code: string; message: string };
+				if (firebaseError.code === 'auth/popup-closed-by-user') {
+					error = 'Sign-in cancelled';
+				} else {
+					error = firebaseError.message || 'Google sign-in failed';
+				}
+			} else {
+				error = err instanceof Error ? err.message : 'Google sign-in failed';
+			}
+		} finally {
+			isGoogleLoading = false;
+		}
+	}
 </script>
 
 <div class="min-h-screen bg-gray-900 text-white p-8">
@@ -152,8 +180,23 @@
 				altText="Create new account"
 				fullWidth={true}
 				loading={isLoading}
-				disabled={isLoading}
+				disabled={isLoading || isGoogleLoading}
 				on:clicked={handleCreateAccount}
+			/>
+
+			<div class="relative my-6">
+				<div class="absolute inset-0 flex items-center">
+					<div class="w-full border-t border-gray-700"></div>
+				</div>
+				<div class="relative flex justify-center text-sm">
+					<span class="px-2 bg-gray-900 text-gray-400">Or continue with</span>
+				</div>
+			</div>
+
+			<GoogleSignInButton
+				loading={isGoogleLoading}
+				disabled={isLoading || isGoogleLoading}
+				on:click={handleGoogleSignIn}
 			/>
 
 			<p class="text-center text-gray-400 mt-4">
