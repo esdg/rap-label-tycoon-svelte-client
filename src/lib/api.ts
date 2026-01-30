@@ -1,4 +1,6 @@
 import type { ScoutingScope, ScoutingTaskRequest, ScoutingTaskResponse, TaskCreationErrorResponse, ScoutingCostPrediction } from './types/scouting';
+import type { Player, CreatePlayerRequest } from './types/player';
+import type { Label } from './types/label';
 
 const API_BASE_URL = 'http://localhost:5122';
 
@@ -17,6 +19,52 @@ export async function api<T>(url: string, options?: RequestInit): Promise<T> {
         throw new Error(`API error: ${response.statusText}`);
     }
     return response.json();
+}
+
+// Player API functions
+export async function createPlayer(data: CreatePlayerRequest): Promise<Player> {
+    return api<Player>('/api/v1/players', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+}
+
+export async function getPlayerById(playerId: string): Promise<Player> {
+    return api<Player>(`/api/v1/players/${playerId}`);
+}
+
+export async function getPlayerByFirebaseUserId(firebaseUserId: string): Promise<Player> {
+    return api<Player>(`/api/v1/players/firebase/${firebaseUserId}`);
+}
+
+// Label API functions
+export async function getLabelById(labelId: string): Promise<Label> {
+    return api<Label>(`/api/v1/rap-labels/${labelId}`);
+}
+
+export async function createLabel(data: {
+    ownerPlayerId: string;
+    name: string;
+    description: string;
+    productionStyles: number[];
+}): Promise<Label> {
+    return api<Label>('/api/v1/rap-labels', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+}
+
+// Fetch all labels for a player
+export async function getPlayerLabels(labelIds: string[]): Promise<Label[]> {
+    if (labelIds.length === 0) return [];
+    const labels = await Promise.all(labelIds.map(id => getLabelById(id)));
+    return labels;
 }
 
 // Scouting API functions

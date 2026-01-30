@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { api } from '$lib/api';
+	import { createLabel } from '$lib/api';
 	import { player } from '$lib/stores/player';
 	import { label } from '$lib/stores/label';
-	import type { Label } from '$lib/types/label';
 	import Button from '$lib/components/Button.svelte';
 
 	let currentPlayer = $player;
@@ -32,7 +31,7 @@
 
 		// Validate inputs
 		if (!currentPlayer?.id) {
-			error = 'Player data not found. Please register first.';
+			error = 'Player data not found. Please log in first.';
 			return;
 		}
 		if (!name.trim()) {
@@ -51,17 +50,11 @@
 		isLoading = true;
 
 		try {
-			const response = await api<Label>('/api/v1/rap-labels', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					ownerPlayerId: currentPlayer.id,
-					name: name.trim(),
-					description: description.trim(),
-					productionStyles
-				})
+			const response = await createLabel({
+				ownerPlayerId: currentPlayer.id,
+				name: name.trim(),
+				description: description.trim(),
+				productionStyles
 			});
 
 			// Store label data in global store
@@ -105,7 +98,8 @@
 
 		{#if !currentPlayer}
 			<div class="p-4 bg-yellow-900/50 border border-yellow-500 rounded text-yellow-200">
-				Please register first before creating a label.
+				Please <a href="/users/login" class="underline">sign in</a> or
+				<a href="/users/register" class="underline">create an account</a> before creating a label.
 			</div>
 		{:else}
 			<div class="space-y-6">

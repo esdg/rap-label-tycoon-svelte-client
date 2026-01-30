@@ -12,6 +12,7 @@
 	let error: string | null = null;
 	let previousModalState = $modalStore.isOpen;
 	let currentTime = Date.now(); // Current client time, updated every second
+	let hasLoadedOnce = false; // Track if we've loaded tasks at least once
 
 	function openScoutModal() {
 		modalStore.open('task-modal', {
@@ -30,12 +31,21 @@
 		previousModalState = $modalStore.isOpen;
 	}
 
+	// Reactively load tasks when label becomes available
+	$: if ($label?.id && !hasLoadedOnce) {
+		hasLoadedOnce = true;
+		loadTasks();
+	}
+
 	async function loadTasks() {
 		if (!$label?.id) {
-			error = 'No label selected';
-			loading = false;
+			// Don't show error if label is not yet loaded - just wait
+			loading = true;
 			return;
 		}
+
+		error = null;
+		loading = true;
 
 		try {
 			const { tasks: fetchedTasks, serverTime: serverTimeStr } = await fetchLabelTasks($label.id);
@@ -80,15 +90,20 @@
 	}
 
 	onMount(() => {
-		loadTasks();
+		// Initial load is handled by the reactive statement that watches $label
+		// Only set up intervals here
 
 		// Update current time every second for countdown
 		const timeInterval = setInterval(() => {
 			currentTime = Date.now();
 		}, 1000);
 
-		// Refresh tasks every 10 seconds
-		const taskInterval = setInterval(loadTasks, 10000);
+		// Refresh tasks every 10 seconds (only if label is available)
+		const taskInterval = setInterval(() => {
+			if ($label?.id) {
+				loadTasks();
+			}
+		}, 10000);
 
 		return () => {
 			clearInterval(timeInterval);
