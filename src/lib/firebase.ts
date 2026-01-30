@@ -1,6 +1,6 @@
 // Firebase Configuration and Initialization
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, type User } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, type User } from 'firebase/auth';
 import { browser } from '$app/environment';
 
 // Your web app's Firebase configuration
@@ -31,6 +31,12 @@ export async function firebaseSignIn(email: string, password: string): Promise<U
 
 export async function firebaseSignOut(): Promise<void> {
     await signOut(auth);
+}
+
+export async function firebaseSignInWithGoogle(): Promise<User> {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    return userCredential.user;
 }
 
 export function onFirebaseAuthStateChanged(callback: (user: User | null) => void): () => void {
