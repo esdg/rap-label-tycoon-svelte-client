@@ -55,14 +55,6 @@
 	}
 </script>
 
-<div class="content-panel {className}">
+<div class="relative w-full {className}">
 	<slot />
 </div>
-
-<style>
-	.content-panel {
-		position: relative;
-		width: 100%;
-		overflow: hidden;
-	}
-</style>

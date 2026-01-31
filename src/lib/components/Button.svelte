@@ -30,11 +30,11 @@
 
 	// Color mapping for hollow style
 	const hollowColorMap: Record<string, string> = {
-		indigo: 'bg-white text-indigo-600 border-indigo-300 hover:border-indigo-400 hover:bg-indigo-50',
-		blue: 'bg-white text-primary-600 border-primary-300 hover:border-primary-400 hover:bg-primary-50',
-		green: 'bg-white text-green-600 border-green-300 hover:border-green-400 hover:bg-green-50',
-		red: 'bg-white text-red-600 border-red-300 hover:border-red-400 hover:bg-red-50',
-		gray: 'bg-white text-gray-800 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+		indigo: 'text-indigo-600 border-indigo-300 hover:border-indigo-400 hover:bg-indigo-50',
+		blue: 'text-gray-500 border-gray-500 hover:border-primary-400 hover:text-primary-500',
+		green: 'text-green-600 border-green-300 hover:border-green-400 hover:bg-green-50',
+		red: 'text-red-600 border-red-300 hover:border-red-400 hover:bg-red-50',
+		gray: 'text-gray-800 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
 	};
 
 	$: baseClasses =

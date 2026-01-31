@@ -25,6 +25,7 @@
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 	import { formatDuration } from '$lib/utils/formatDuration';
+	import { colors } from '$lib/theme';
 
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
 	let selectedScope: string | null = null;
@@ -187,19 +188,14 @@
 	}
 </script>
 
-<section class="flex flex-col gap-6 px-6 md:px-8 pb-6 h-full" aria-label="Scout Talents">
-	<h2 class="text-3xl font-bold text-gray-900">Scout Talents</h2>
+<section class="flex flex-col h-full" aria-label="Scout Talents">
+	<!-- <h2 class="text-3xl font-bold text-gray-900">Scout Talents</h2> -->
 
-	{#if error}
-		<div
-			class="px-4 py-3 bg-red-50 border border-red-200 rounded-md text-red-800 text-sm animate-in fade-in duration-200"
-		>
-			{error}
-		</div>
-	{/if}
-
-	<div class="w-full max-w-2xl">
+	<div class="w-full max-w-96 mx-auto mt-2 mb-16">
 		<Stepper
+			selectedButtonColor={colors.primary[300]}
+			selectedTextColor={colors.primary[500]}
+			buttonColor="dimgray"
 			stepLabels={['scouting parameters', 'review & start scouting']}
 			activeStepIndex={currentStep}
 			on:stepClicked={handleStepChange}
@@ -207,8 +203,13 @@
 	</div>
 
 	<div class="flex-grow">
-		<ContentPanel activeStepIndex={currentStep} transition="slide" duration={300}>
-			<ContentPanelItem class="space-y-6">
+		<ContentPanel
+			class="pt-0 p-4 max-w-xl mx-auto"
+			activeStepIndex={currentStep}
+			transition="slide"
+			duration={300}
+		>
+			<ContentPanelItem class="space-y-6  text-white">
 				<!-- Scout For -->
 				<SelectField
 					label="Scout for"
@@ -281,10 +282,14 @@
 			</ContentPanelItem>
 		</ContentPanel>
 	</div>
-
-	<div class="w-full flex">
+	{#if error}
+		<div class="px-4 py-2 bg-error-900/50 text-error-500 text-sm animate-in fade-in duration-200">
+			{error}
+		</div>
+	{/if}
+	<div class="w-full flex bg-black p-2 bt-2 border-t border-gray-700">
 		<!-- Prospector -->
-		<div class="flex gap-3 items-center flex w-64">
+		<div class="flex gap-3 items-center">
 			<label
 				class="text-xs font-semibold text-gray-600 uppercase tracking-wider inline-block align-middle"
 				for="prospector-btn">Prospector</label
@@ -298,42 +303,41 @@
 			/>
 		</div>
 		<ContentPanel activeStepIndex={currentStep}>
-			<ContentPanelItem class="flex gap-3 pt-2 justify-end">
+			<ContentPanelItem class="flex gap-3 justify-end">
 				<!-- Actions -->
 
 				<Button
-					color="gray"
+					color="blue"
 					style="hollow"
 					text="Cancel"
 					altText="Cancel scouting task"
 					on:clicked={handleCancel}
 				/>
 				<Button
-					color="gray"
-					style="hollow"
+					color="blue"
 					text="Next"
 					altText="Proceed to next step"
 					on:clicked={() => currentStep++}
 				/>
 			</ContentPanelItem>
-			<ContentPanelItem class="flex gap-3 pt-2 justify-end">
+			<ContentPanelItem class="flex gap-3 justify-end">
 				<!-- Actions -->
 				<Button
-					color="gray"
+					color="blue"
 					style="hollow"
 					text="Cancel"
 					altText="Cancel scouting task"
 					on:clicked={handleCancel}
 				/>
 				<Button
-					color="gray"
+					color="blue"
 					style="hollow"
 					text="Previous"
 					altText="Proceed to previous step"
 					on:clicked={() => currentStep--}
 				/>
 				<Button
-					color="indigo"
+					color="blue"
 					style="normal"
 					text={loading ? 'Starting...' : 'Start Scouting'}
 					altText="Start scouting for talents"

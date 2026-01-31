@@ -120,7 +120,7 @@
 		return 'in-progress'; // Default fallback
 	}
 
-	function formatTimeRemaining(endTime: string): string {
+	function formatTimeRemaining(endTime: string, _currentTime: number): string {
 		const end = new Date(endTime).getTime();
 		const diff = end - getCurrentServerTime();
 
@@ -137,7 +137,7 @@
 		return `${hours}h ${minutes}m ${seconds}s`;
 	}
 
-	function getTaskProgress(task: ScoutingTaskResponse): number {
+	function getTaskProgress(task: ScoutingTaskResponse, _currentTime: number): number {
 		const startTime = new Date(task.startTime).getTime();
 		const endTime = new Date(task.endTime).getTime();
 		const currentServerTime = getCurrentServerTime();
@@ -165,17 +165,9 @@
 			currentTime = Date.now();
 		}, 1000);
 
-		// Refresh tasks every 10 seconds (only if label is available)
-		/* 		const taskInterval = setInterval(() => {
-			if ($label?.id) {
-				loadTasks();
-			}
-		}, 10000);
-
 		return () => {
 			clearInterval(timeInterval);
-			clearInterval(taskInterval);
-		}; */
+		};
 	});
 </script>
 
@@ -211,10 +203,10 @@
 					{#each tasks as task}
 						<ScoutingTask
 							state={getTaskStatus(task)}
-							durationText={formatTimeRemaining(task.endTime)}
+							durationText={formatTimeRemaining(task.endTime, currentTime)}
 							inProgressDescription="Observing at open mic..."
 							scoutingType="Rappers"
-							taskProgress={getTaskProgress(task)}
+							taskProgress={getTaskProgress(task, currentTime)}
 						/>
 					{/each}
 				</div>
