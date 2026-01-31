@@ -25,7 +25,7 @@
 			{placeholder}
 			{required}
 			{rows}
-			class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-50 focus:bg-black"
+			class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black"
 		/>
 	{:else if inputType === 'email'}
 		<input
@@ -36,7 +36,7 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-50 focus:bg-black"
+			class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black"
 		/>
 	{:else if inputType === 'password'}
 		<input
@@ -47,7 +47,7 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-50 focus:bg-black"
+			class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black"
 		/>
 	{:else}
 		<input
@@ -58,7 +58,7 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-50 focus:bg-black"
+			class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black"
 		/>
 	{/if}
 </div>

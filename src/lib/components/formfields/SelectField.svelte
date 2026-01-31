@@ -28,17 +28,22 @@
 	}
 </script>
 
-<div class="flex flex-col gap-3 {className}">
-	<label
-		class="text-xs font-semibold text-gray-600 uppercase tracking-wider uppercase font-thin select-none"
-		for={labelFor}
+<div class="relative {className}">
+	<div
+		class="2xl:flex-row-reverse 2xl:w-24 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block flex items-center text-right"
 	>
-		{label}
-		{#if mode === 'multi'}
-			<span class="text-gray-500 normal-case">(multi-select)</span>
-		{/if}
-	</label>
-	<div class="flex flex-wrap gap-2">
+		<label
+			for={labelFor}
+			class="text-base font-medium mb-2 uppercase tracking-wider uppercase font-thin
+			select-none"
+		>
+			{label}
+			{#if mode === 'multi'}
+				<span class="text-xs text-primary-300 normal-case">(multi-select)</span>
+			{/if}
+		</label>
+	</div>
+	<div class="flex flex-wrap gap-1">
 		{#each choices as choice, index}
 			{@const selected =
 				mode === 'toggle'
@@ -46,10 +51,10 @@
 					: value instanceof Set && value.has(choice.value)}
 			<button
 				id={index === 0 && labelFor ? labelFor : undefined}
-				class="px-5 py-2.5 border rounded transition-all duration-200 font-medium text-sm uppercase font-thin select-none
+				class=" pt-1 pb-1 px-4 min-w-32 border rounded transition-all duration-200 font-medium text-sm uppercase font-thin select-none
 					{selected
-					? 'bg-primary-600 border-primary-600 text-white shadow-sm'
-					: 'border-primary-500 text-primary-500 hover:border-primary-600 hover:text-primary-600 hover:shadow-sm'}"
+					? 'border-secondary-600 text-white shadow-sm'
+					: 'border-gray-700 text-white hover:border-secondary-600 hover:shadow-sm'}"
 				on:click={() => handleToggle(choice.value)}
 				title={choice.title}
 			>

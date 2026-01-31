@@ -19,16 +19,16 @@ export default {
                     950: '#002245', // Darkest navy
                 },
                 secondary: {
-                    50: '#000000',
-                    100: '#000000',
-                    200: '#000000',
-                    300: '#000000',
-                    400: '#000000',
-                    500: '#000000',
-                    600: '#000000',
-                    700: '#000000',
-                    800: '#000000',
-                    900: '#000000'
+                    50: '#FFF4E6', // Porcelain Peach
+                    100: '#FFE1BF', // Soft Apricot
+                    200: '#FFCC94', // Light Mango
+                    300: '#FFB366', // Warm Tangerine
+                    400: '#FF9A33', // Bright Amber
+                    500: '#EB8800', // Vibrant Orange (Base)
+                    600: '#D97700', // Deep Amber
+                    700: '#B85F00', // Burnt Orange
+                    800: '#8F4A00', // Dark Copper
+                    900: '#663400'  // Smoked Bronze
                 },
                 accent: {
                     50: '#000000',

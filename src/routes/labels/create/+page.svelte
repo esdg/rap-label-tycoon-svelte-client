@@ -90,7 +90,10 @@
 	<section class="md:basis-3/5">
 		<div class="min-h-screen text-white p-8">
 			<div class="max-w-2xl mx-auto">
-				<h1 class="text-3xl font-bold mb-8 uppercase font-thin select-none">Create Your Label</h1>
+				<h1 class="flex flex-col uppercase font-thin select-none mb-16">
+					<span class="text-3xl/6 font-thin">Create</span>
+					<span class="text-6xl font-black">your label</span>
+				</h1>
 
 				{#if error}
 					<div class="mb-4 p-4 bg-red-900/50 border border-red-500 rounded text-red-200">
