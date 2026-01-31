@@ -6,6 +6,10 @@
 	import { googleSignInAndRedirect } from '$lib/services/auth';
 	import Button from '$lib/components/Button.svelte';
 	import GoogleSignInButton from '$lib/components/GoogleSignInButton.svelte';
+	import TextField from '$lib/components/formfields/TextField.svelte';
+	import gameLogo from '$lib/assets/game-logo.png';
+	import Hero from '$lib/components/Hero.svelte';
+	import heroImage from '$lib/assets/hero-register.png';
 
 	let username: string = '';
 	let email: string = '';
@@ -114,95 +118,101 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gray-900 text-white p-8">
-	<div class="max-w-md mx-auto">
-		<h1 class="text-3xl font-bold mb-8">Create Account</h1>
-
-		{#if error}
-			<div class="mb-4 p-4 bg-red-900/50 border border-red-500 rounded text-red-200">
-				{error}
-			</div>
-		{/if}
-
-		<form on:submit|preventDefault={handleCreateAccount} class="space-y-4">
-			<div>
-				<label for="username" class="block text-sm font-medium mb-2">Username</label>
-				<input
-					id="username"
-					type="text"
-					bind:value={username}
-					disabled={isLoading}
-					placeholder="Enter your username"
-					class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500 disabled:opacity-50"
-				/>
-			</div>
-
-			<div>
-				<label for="email" class="block text-sm font-medium mb-2">Email</label>
-				<input
-					id="email"
-					type="email"
-					bind:value={email}
-					disabled={isLoading}
-					placeholder="Enter your email"
-					class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500 disabled:opacity-50"
-				/>
-			</div>
-
-			<div>
-				<label for="password" class="block text-sm font-medium mb-2">Password</label>
-				<input
-					id="password"
-					type="password"
-					bind:value={password}
-					disabled={isLoading}
-					placeholder="Enter your password (min 6 characters)"
-					class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500 disabled:opacity-50"
-				/>
-			</div>
-
-			<div>
-				<label for="confirmPassword" class="block text-sm font-medium mb-2">Confirm Password</label>
-				<input
-					id="confirmPassword"
-					type="password"
-					bind:value={confirmPassword}
-					disabled={isLoading}
-					placeholder="Confirm your password"
-					class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500 disabled:opacity-50"
-				/>
-			</div>
-
-			<Button
-				color="blue"
-				style="normal"
-				text={isLoading ? 'Creating Account...' : 'Create Account'}
-				altText="Create new account"
-				fullWidth={true}
-				loading={isLoading}
-				disabled={isLoading || isGoogleLoading}
-				on:clicked={handleCreateAccount}
-			/>
-
-			<div class="relative my-6">
-				<div class="absolute inset-0 flex items-center">
-					<div class="w-full border-t border-gray-700"></div>
-				</div>
-				<div class="relative flex justify-center text-sm">
-					<span class="px-2 bg-gray-900 text-gray-400">Or continue with</span>
-				</div>
-			</div>
-
-			<GoogleSignInButton
-				loading={isGoogleLoading}
-				disabled={isLoading || isGoogleLoading}
-				on:click={handleGoogleSignIn}
-			/>
-
-			<p class="text-center text-gray-400 mt-4">
-				Already have an account?
-				<a href="/users/login" class="text-blue-400 hover:text-blue-300 underline">Sign in</a>
+<div class="flex md:flex-row flex-col-reverse h-full">
+	<Hero image={heroImage}>
+		<div class="w-112 mx-auto">
+			<h1 class="text-5xl font-black mb-4 text-center">Start your journey as a label boss</h1>
+			<p class="max-w text-lg text-center">
+				Sign artists, build your roster, and turn raw talent into legends.
 			</p>
-		</form>
-	</div>
+			<p class="max-w text-4xl font-black text-center mt-6 text-primary-500">
+				Your story starts now.
+			</p>
+		</div>
+	</Hero>
+	<section class="md:basis-3/5">
+		<div class="min-h-screen text-white p-8">
+			<div class="max-w-md mx-auto">
+				<img src={gameLogo} alt="Game Logo" class="mx-auto mb-8 select-none" />
+
+				{#if error}
+					<div class="mb-4 p-4 bg-red-900/50 border border-red-500 rounded text-red-200">
+						{error}
+					</div>
+				{/if}
+
+				<form on:submit|preventDefault={handleCreateAccount} class="space-y-4">
+					<TextField
+						label="Username"
+						id="username"
+						inputType="text"
+						bind:value={username}
+						disabled={isLoading}
+						placeholder="Enter your username"
+					/>
+
+					<TextField
+						label="Email"
+						id="email"
+						inputType="email"
+						bind:value={email}
+						disabled={isLoading}
+						placeholder="Enter your email"
+						autocomplete="email"
+					/>
+
+					<TextField
+						label="Password"
+						id="password"
+						inputType="password"
+						bind:value={password}
+						disabled={isLoading}
+						placeholder="Enter your password (min 6 characters)"
+						autocomplete="new-password"
+					/>
+
+					<TextField
+						label="Confirm Password"
+						id="confirmPassword"
+						inputType="password"
+						bind:value={confirmPassword}
+						disabled={isLoading}
+						placeholder="Confirm your password"
+						autocomplete="new-password"
+					/>
+
+					<Button
+						color="blue"
+						style="normal"
+						text={isLoading ? 'Creating Account...' : 'Create Account'}
+						altText="Create new account"
+						fullWidth={true}
+						loading={isLoading}
+						disabled={isLoading || isGoogleLoading}
+						on:clicked={handleCreateAccount}
+					/>
+
+					<div class="relative my-6">
+						<div class="absolute inset-0 flex items-center">
+							<div class="w-full border-t border-gray-700"></div>
+						</div>
+						<div class="relative flex justify-center text-sm">
+							<span class="px-2 bg-gray-900 text-gray-400">Or continue with</span>
+						</div>
+					</div>
+
+					<GoogleSignInButton
+						loading={isGoogleLoading}
+						disabled={isLoading || isGoogleLoading}
+						on:click={handleGoogleSignIn}
+					/>
+
+					<p class="text-center text-gray-400 mt-4">
+						Already have an account?
+						<a href="/users/login" class="text-blue-400 hover:text-blue-300 underline">Sign in</a>
+					</p>
+				</form>
+			</div>
+		</div>
+	</section>
 </div>

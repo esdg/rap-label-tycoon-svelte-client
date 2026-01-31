@@ -6,16 +6,17 @@ export default {
             colors: {
                 // Brand Colors
                 primary: {
-                    50: '#000000', // lightest
-                    100: '#000000',
-                    200: '#000000',
-                    300: '#000000',
-                    400: '#000000',
-                    500: '#000000', // base/default
-                    600: '#000000',
-                    700: '#000000',
-                    800: '#000000',
-                    900: '#000000' // darkest
+                    50: '#eff8ff', // Extremely light sky blue
+                    100: '#dbeafe', // Light background blue
+                    200: '#a6b6c9', // <--- Your requested color (Muted Steel Blue)
+                    300: '#7db1f4', // Soft blue
+                    400: '#3ea1f1', // Bright blue
+                    500: '#0c88ea', // Base/Default
+                    600: '#006ed3', // Hover state
+                    700: '#0057aa', // Deep blue
+                    800: '#004a8f', // Dark blue
+                    900: '#003e78', // Contrast/Text blue
+                    950: '#002245', // Darkest navy
                 },
                 secondary: {
                     50: '#000000',
@@ -89,7 +90,16 @@ export default {
                     700: '#000000',
                     800: '#000000',
                     900: '#000000'
-                }
+                },
+                app: '#090f15',
+            },
+            spacing: {
+                '112': '28rem',
+                '128': '32rem',
+            },
+            width: {
+                '112': '28rem',
+                '128': '32rem',
             }
         }
     },

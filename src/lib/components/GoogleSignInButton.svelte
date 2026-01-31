@@ -15,7 +15,7 @@
 	type="button"
 	on:click={handleClick}
 	disabled={disabled || loading}
-	class="w-full flex items-center justify-center gap-3 px-4 py-2 bg-white text-gray-900 rounded hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+	class="w-full flex items-center justify-center gap-3 px-4 py-2 bg-white text-gray-900 rounded hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed select-none"
 >
 	<svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 		<path

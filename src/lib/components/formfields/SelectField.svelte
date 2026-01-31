@@ -29,7 +29,10 @@
 </script>
 
 <div class="flex flex-col gap-3 {className}">
-	<label class="text-xs font-semibold text-gray-600 uppercase tracking-wider" for={labelFor}>
+	<label
+		class="text-xs font-semibold text-gray-600 uppercase tracking-wider uppercase font-thin select-none"
+		for={labelFor}
+	>
 		{label}
 		{#if mode === 'multi'}
 			<span class="text-gray-500 normal-case">(multi-select)</span>
@@ -43,10 +46,10 @@
 					: value instanceof Set && value.has(choice.value)}
 			<button
 				id={index === 0 && labelFor ? labelFor : undefined}
-				class="px-5 py-2.5 border rounded transition-all duration-200 font-medium text-sm
+				class="px-5 py-2.5 border rounded transition-all duration-200 font-medium text-sm uppercase font-thin select-none
 					{selected
-					? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-					: 'bg-white border-gray-300 text-gray-700 hover:border-indigo-500 hover:text-indigo-600 hover:shadow-sm'}"
+					? 'bg-primary-600 border-primary-600 text-white shadow-sm'
+					: 'border-primary-500 text-primary-500 hover:border-primary-600 hover:text-primary-600 hover:shadow-sm'}"
 				on:click={() => handleToggle(choice.value)}
 				title={choice.title}
 			>

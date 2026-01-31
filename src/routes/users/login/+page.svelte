@@ -7,6 +7,9 @@
 	import { googleSignInAndRedirect } from '$lib/services/auth';
 	import Button from '$lib/components/Button.svelte';
 	import GoogleSignInButton from '$lib/components/GoogleSignInButton.svelte';
+	import gameLogo from '$lib/assets/game-logo.png';
+	import Hero from '$lib/components/Hero.svelte';
+	import heroImage from '$lib/assets/hero-login.png';
 
 	let email: string = '';
 	let password: string = '';
@@ -104,71 +107,94 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gray-900 text-white p-8">
-	<div class="max-w-md mx-auto">
-		<h1 class="text-3xl font-bold mb-8">Sign In</h1>
+<div class="flex md:flex-row flex-col-reverse h-full">
+	<Hero image={heroImage}>
+		<div class="w-112 mx-auto">
+			<h1 class="text-5xl font-black mb-4 text-center">Welcome back</h1>
+			<p class="max-w text-lg text-center">The game never stopped.</p>
+			<p class="max-w text-4xl font-black text-center mt-6 text-primary-500">Take back control.</p>
+		</div>
+	</Hero>
+	<section class="md:basis-3/5">
+		<div class="md:min-h-screen text-white p-8">
+			<div class="max-w-md mx-auto">
+				<img src={gameLogo} alt="Game Logo" class="mx-auto mb-8 select-none" />
 
-		{#if error}
-			<div class="mb-4 p-4 bg-red-900/50 border border-red-500 rounded text-red-200">
-				{error}
+				{#if error}
+					<div
+						class="mb-4 p-4 bg-red-900/50 border border-red-500 rounded text-red-200 select-none"
+					>
+						{error}
+					</div>
+				{/if}
+
+				<form on:submit|preventDefault={handleLogin} class="space-y-4">
+					<div class="relative">
+						<label
+							for="email"
+							class="2xl:flex-row-reverse 2xl:w-24 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block text-base font-medium mb-2 flex items-center text-right uppercase font-thin select-none"
+							>Email</label
+						>
+						<input
+							id="email"
+							type="email"
+							bind:value={email}
+							disabled={isLoading}
+							placeholder="Enter your email"
+							class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-50 focus:bg-black"
+						/>
+					</div>
+
+					<div class="relative">
+						<label
+							for="password"
+							class="2xl:flex-row-reverse 2xl:w-24 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block text-base font-medium mb-2 flex items-center text-right uppercase font-thin select-none"
+							>Password</label
+						>
+						<input
+							id="password"
+							type="password"
+							bind:value={password}
+							disabled={isLoading}
+							placeholder="Enter your password"
+							class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-50 focus:bg-black"
+						/>
+					</div>
+
+					<Button
+						color="blue"
+						style="normal"
+						text={isLoading ? 'Signing In...' : 'Sign In'}
+						altText="Sign in to your account"
+						fullWidth={true}
+						loading={isLoading}
+						disabled={isLoading || isGoogleLoading}
+						on:clicked={handleLogin}
+					/>
+
+					<div class="relative my-6 select-none">
+						<div class="absolute inset-0 flex items-center">
+							<div class="w-full border-t border-primary-200"></div>
+						</div>
+						<div class="relative flex justify-center text-sm">
+							<span class="px-2 bg-app text-primary-200">Or continue with</span>
+						</div>
+					</div>
+
+					<GoogleSignInButton
+						loading={isGoogleLoading}
+						disabled={isLoading || isGoogleLoading}
+						on:click={handleGoogleSignIn}
+					/>
+
+					<p class="text-center text-primary-200 mt-4 select-none">
+						Don't have an account?
+						<a href="/users/register" class="text-primary-400 hover:text-primary-500 underline"
+							>Create one</a
+						>
+					</p>
+				</form>
 			</div>
-		{/if}
-
-		<form on:submit|preventDefault={handleLogin} class="space-y-4">
-			<div>
-				<label for="email" class="block text-sm font-medium mb-2">Email</label>
-				<input
-					id="email"
-					type="email"
-					bind:value={email}
-					disabled={isLoading}
-					placeholder="Enter your email"
-					class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500 disabled:opacity-50"
-				/>
-			</div>
-
-			<div>
-				<label for="password" class="block text-sm font-medium mb-2">Password</label>
-				<input
-					id="password"
-					type="password"
-					bind:value={password}
-					disabled={isLoading}
-					placeholder="Enter your password"
-					class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500 disabled:opacity-50"
-				/>
-			</div>
-
-			<Button
-				color="blue"
-				style="normal"
-				text={isLoading ? 'Signing In...' : 'Sign In'}
-				altText="Sign in to your account"
-				fullWidth={true}
-				loading={isLoading}
-				disabled={isLoading || isGoogleLoading}
-				on:clicked={handleLogin}
-			/>
-
-			<div class="relative my-6">
-				<div class="absolute inset-0 flex items-center">
-					<div class="w-full border-t border-gray-700"></div>
-				</div>
-				<div class="relative flex justify-center text-sm">
-					<span class="px-2 bg-gray-900 text-gray-400">Or continue with</span>
-				</div>
-			</div>
-
-			<GoogleSignInButton
-				loading={isGoogleLoading}
-				disabled={isLoading || isGoogleLoading}
-				on:click={handleGoogleSignIn}
-			/>
-
-			<p class="text-center text-gray-400 mt-4">
-				Don't have an account?
-				<a href="/users/register" class="text-blue-400 hover:text-blue-300 underline">Create one</a>
-			</p>
-		</form>
-	</div>
+		</div>
+	</section>
 </div>

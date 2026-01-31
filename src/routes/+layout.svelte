@@ -19,7 +19,7 @@
 	});
 
 	// Public routes that don't require authentication
-	const publicRoutes = ['/users/login', '/users/register'];
+	const publicRoutes = ['/users/login', '/users/register', '/template', '/labels/create'];
 
 	// Check if current route is public
 	$: isPublicRoute = publicRoutes.some((route) => $page.url.pathname.startsWith(route));
@@ -58,30 +58,43 @@
 	}
 </script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link
+	href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
+	rel="stylesheet"
+/>
 <Modal />
 
-{#if $authLoading && !isPublicRoute}
-	<div class="min-h-screen bg-gray-900 flex items-center justify-center">
-		<div class="text-white text-xl">Loading...</div>
-	</div>
-{:else}
-	{#if $isAuthenticated && !isPublicRoute && currentPlayer}
-		<nav class="bg-gray-800 text-white px-4 py-3 flex justify-between items-center">
-			<div class="flex items-center gap-4">
-				<span class="font-semibold">Rap Label Tycoon</span>
-				<a href="/labels" class="hover:text-blue-400">Labels</a>
-			</div>
-			<div class="flex items-center gap-4">
-				<span class="text-gray-400">Welcome, {currentPlayer.username}</span>
-				<Button
-					color="red"
-					style="hollow"
-					text="Logout"
-					altText="Sign out"
-					on:clicked={handleLogout}
-				/>
-			</div>
-		</nav>
+<div class="flex flex-row">
+	{#if $authLoading && !isPublicRoute}
+		<div class="min-h-screen bg-gray-900 flex items-center justify-center">
+			<div class="text-white text-xl">Loading...</div>
+		</div>
+	{:else}
+		{#if $isAuthenticated && !isPublicRoute && currentPlayer}
+			<nav class="bg-gray-800 text-white px-4 py-3 flex flex-col justify-between items-center">
+				<div class="flex items-center gap-4">
+					<span class="font-semibold">Rap Label Tycoon</span>
+					<a href="/labels" class="hover:text-blue-400">Labels</a>
+				</div>
+				<div class="flex items-center gap-4">
+					<span class="text-gray-400">Welcome, {currentPlayer.username}</span>
+					<Button
+						color="red"
+						style="hollow"
+						text="Logout"
+						altText="Sign out"
+						on:clicked={handleLogout}
+					/>
+				</div>
+			</nav>
+		{/if}
+		<main
+			class="bg-app flex-grow min-h-screen text-white"
+			style="font-family: 'Roboto', sans-serif;"
+		>
+			<slot />
+		</main>
 	{/if}
-	<slot />
-{/if}
+</div>
