@@ -123,3 +123,12 @@ export async function fetchLabelTasks(labelId: string): Promise<{ tasks: Scoutin
 
     return { tasks, serverTime };
 }
+
+export async function claimTask(taskId: string): Promise<ScoutingTaskResponse> {
+    return api<ScoutingTaskResponse>(`/api/v1/tasks/${taskId}/claim`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+}

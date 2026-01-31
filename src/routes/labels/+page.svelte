@@ -3,7 +3,7 @@
 	import { modalStore } from '$lib/stores/modal';
 	import { label } from '$lib/stores/label';
 	import Button from '$lib/components/Button.svelte';
-	import { fetchLabelTasks } from '$lib/api';
+	import { fetchLabelTasks, claimTask } from '$lib/api';
 	import type { ScoutingTaskResponse } from '$lib/types/scouting';
 	import ScoutingTask from '$lib/components/Cards/ScoutingTask.svelte';
 
@@ -50,12 +50,41 @@
 
 		try {
 			const { tasks: fetchedTasks, serverTime: serverTimeStr } = await fetchLabelTasks($label.id);
-			tasks = fetchedTasks.filter((task) => !task.claimedAt);
 
-			// Calculate offset between server time and client time
+			// Calculate offset between server time and client time first
 			const serverTime = new Date(serverTimeStr).getTime();
 			const clientTime = Date.now();
 			serverTimeOffset = serverTime - clientTime;
+
+			// Keep all tasks (including claimed ones)
+			tasks = fetchedTasks;
+
+			// Auto-claim all finished tasks that haven't been claimed yet
+			const finishedUnclaimedTasks = tasks.filter(
+				(task) => !task.claimedAt && isTaskFinished(task)
+			);
+
+			if (finishedUnclaimedTasks.length > 0) {
+				// Claim all finished tasks in parallel
+				const claimPromises = finishedUnclaimedTasks.map(async (task) => {
+					try {
+						const claimedTask = await claimTask(task.id);
+						// Update the task in the array with the claimed task data
+						const index = tasks.findIndex((t) => t.id === task.id);
+						if (index !== -1) {
+							tasks[index] = claimedTask;
+						}
+						return { success: true, taskId: task.id };
+					} catch (err) {
+						console.error(`Failed to claim task ${task.id}:`, err);
+						return { success: false, taskId: task.id, error: err };
+					}
+				});
+
+				await Promise.all(claimPromises);
+				// Trigger reactivity by reassigning tasks
+				tasks = [...tasks];
+			}
 
 			loading = false;
 		} catch (err) {
@@ -73,14 +102,21 @@
 		return endTime <= getCurrentServerTime();
 	}
 
+	function isTaskClaimed(task: ScoutingTaskResponse): boolean {
+		return !!task.claimedAt;
+	}
+
 	function getTaskStatus(task: ScoutingTaskResponse): 'in-progress' | 'failed' | 'succeeded' {
-		if (!isTaskFinished(task)) {
+		if (!isTaskClaimed(task) && !isTaskFinished(task)) {
 			return 'in-progress';
 		}
-		if (task.results?.success) {
+		if (isTaskClaimed(task) && task.results?.success) {
 			return 'succeeded';
 		}
-		return 'failed';
+		if (isTaskClaimed(task) && !task.results?.success) {
+			return 'failed';
+		}
+		return 'in-progress'; // Default fallback
 	}
 
 	function formatTimeRemaining(endTime: string): string {
@@ -98,6 +134,25 @@
 			return `${days}d ${hours}h ${minutes}m`;
 		}
 		return `${hours}h ${minutes}m ${seconds}s`;
+	}
+
+	function getTaskProgress(task: ScoutingTaskResponse): number {
+		const startTime = new Date(task.startTime).getTime();
+		const endTime = new Date(task.endTime).getTime();
+		const currentServerTime = getCurrentServerTime();
+
+		// If task is finished or claimed, return 100%
+		if (isTaskFinished(task) || isTaskClaimed(task)) {
+			return 100;
+		}
+
+		// Calculate progress as percentage of time elapsed
+		const totalDuration = endTime - startTime;
+		const elapsed = currentServerTime - startTime;
+		const progress = (elapsed / totalDuration) * 100;
+
+		// Clamp between 0 and 100
+		return Math.max(0, Math.min(100, progress));
 	}
 
 	onMount(() => {
@@ -150,67 +205,13 @@
 			{:else}
 				<div class="space-y-4">
 					{#each tasks as task}
-						<ScoutingTask state={getTaskStatus(task)} />
-						<div
-							class="bg-gray-700 rounded-lg p-4 border-l-4 {isTaskFinished(task)
-								? 'border-green-500'
-								: 'border-blue-500'}"
-						>
-							<div class="flex justify-between items-start mb-2">
-								<div class="flex-1">
-									<h3 class="text-lg font-semibold">{task.name}</h3>
-									<p class="text-gray-300 text-sm mt-1">{task.description}</p>
-								</div>
-								<div class="ml-4">
-									{#if isTaskFinished(task)}
-										<span class="px-3 py-1 bg-green-600 rounded-full text-sm font-semibold"
-											>Finished</span
-										>
-									{:else}
-										<span class="px-3 py-1 bg-blue-600 rounded-full text-sm font-semibold"
-											>In Progress</span
-										>
-									{/if}
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
-								<div>
-									<span class="text-gray-400">Budget:</span>
-									<span class="ml-2 font-semibold">${task.budgetRequired.toLocaleString()}</span>
-								</div>
-								<div>
-									<span class="text-gray-400">Stamina:</span>
-									<span class="ml-2 font-semibold">{task.staminaCost}</span>
-								</div>
-								<div>
-									<span class="text-gray-400">Started:</span>
-									<span class="ml-2 font-semibold"
-										>{new Date(task.startTime).toLocaleTimeString()}</span
-									>
-								</div>
-								<div>
-									<span class="text-gray-400">Time:</span>
-									<span class="ml-2 font-semibold">{formatTimeRemaining(task.endTime)}</span>
-								</div>
-							</div>
-
-							{#if isTaskFinished(task) && task.results}
-								<div class="mt-3 pt-3 border-t border-gray-600">
-									<div class="flex items-center">
-										<span class="text-gray-400 text-sm mr-2">Result:</span>
-										<span
-											class="text-sm {task.results.success ? 'text-green-400' : 'text-red-400'}"
-										>
-											{task.results.success ? '✓ Success' : '✗ Failed'}
-										</span>
-										{#if task.results.details}
-											<span class="text-gray-300 text-sm ml-2">- {task.results.details}</span>
-										{/if}
-									</div>
-								</div>
-							{/if}
-						</div>
+						<ScoutingTask
+							state={getTaskStatus(task)}
+							durationText={formatTimeRemaining(task.endTime)}
+							inProgressDescription="Observing at open mic..."
+							scoutingType="Rappers"
+							taskProgress={getTaskProgress(task)}
+						/>
 					{/each}
 				</div>
 			{/if}
