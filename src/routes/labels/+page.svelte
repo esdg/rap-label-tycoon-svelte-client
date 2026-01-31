@@ -6,6 +6,7 @@
 	import { fetchLabelTasks, claimTask } from '$lib/api';
 	import type { ScoutingTaskResponse } from '$lib/types/scouting';
 	import ScoutingTask from '$lib/components/Cards/ScoutingTask.svelte';
+	import bgImage from '$lib/assets/main-bg-1.png';
 
 	let tasks: ScoutingTaskResponse[] = [];
 	let serverTimeOffset = 0; // Difference between server time and client time
@@ -178,7 +179,10 @@
 	});
 </script>
 
-<div class="min-h-screen text-white p-8">
+<div
+	class="min-h-screen text-white p-8"
+	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
+>
 	<h1 class="text-3xl font-bold mb-8">Dashboard</h1>
 
 	<div class="space-y-8">
