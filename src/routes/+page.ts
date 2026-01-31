@@ -9,7 +9,7 @@ export async function load() {
         rules: [
             {
                 name: 'redirect-to-dashboard',
-                check: preventAccess('/labels/dashboard', 'Redirecting from home to dashboard')
+                check: preventAccess('/labels', 'Redirecting from home to dashboard')
             }
         ]
     });

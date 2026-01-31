@@ -10,6 +10,9 @@
 	import gameLogo from '$lib/assets/game-logo.png';
 	import Hero from '$lib/components/Hero.svelte';
 	import heroImage from '$lib/assets/hero-login.png';
+	import Separator from '$lib/components/Separator.svelte';
+	import FormError from '$lib/components/formfields/FormError.svelte';
+	import TextField from '$lib/components/formfields/TextField.svelte';
 
 	let email: string = '';
 	let password: string = '';
@@ -121,45 +124,27 @@
 				<img src={gameLogo} alt="Game Logo" class="mx-auto mb-8 select-none" />
 
 				{#if error}
-					<div
-						class="mb-4 p-4 bg-red-900/50 border border-red-500 rounded text-red-200 select-none"
-					>
-						{error}
-					</div>
+					<FormError {error} />
 				{/if}
 
 				<form on:submit|preventDefault={handleLogin} class="space-y-4">
-					<div class="relative">
-						<label
-							for="email"
-							class="2xl:flex-row-reverse 2xl:w-24 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block text-base font-medium mb-2 flex items-center text-right uppercase font-thin select-none"
-							>Email</label
-						>
-						<input
-							id="email"
-							type="email"
-							bind:value={email}
-							disabled={isLoading}
-							placeholder="Enter your email"
-							class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-50 focus:bg-black"
-						/>
-					</div>
+					<TextField
+						label="Email"
+						id="email"
+						inputType="text"
+						bind:value={email}
+						disabled={isLoading}
+						placeholder="Enter your email"
+					/>
 
-					<div class="relative">
-						<label
-							for="password"
-							class="2xl:flex-row-reverse 2xl:w-24 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block text-base font-medium mb-2 flex items-center text-right uppercase font-thin select-none"
-							>Password</label
-						>
-						<input
-							id="password"
-							type="password"
-							bind:value={password}
-							disabled={isLoading}
-							placeholder="Enter your password"
-							class="w-full px-4 py-2 bg-app border border-primary-200 rounded-md focus:outline-none focus:border-blue-500 disabled:opacity-50 focus:bg-black"
-						/>
-					</div>
+					<TextField
+						label="Password"
+						id="password"
+						inputType="password"
+						bind:value={password}
+						disabled={isLoading}
+						placeholder="Enter your password"
+					/>
 
 					<Button
 						color="blue"
@@ -172,14 +157,7 @@
 						on:clicked={handleLogin}
 					/>
 
-					<div class="relative my-6 select-none">
-						<div class="absolute inset-0 flex items-center">
-							<div class="w-full border-t border-primary-200"></div>
-						</div>
-						<div class="relative flex justify-center text-sm">
-							<span class="px-2 bg-app text-primary-200">Or continue with</span>
-						</div>
-					</div>
+					<Separator />
 
 					<GoogleSignInButton
 						loading={isGoogleLoading}

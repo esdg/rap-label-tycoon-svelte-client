@@ -10,6 +10,8 @@
 	import gameLogo from '$lib/assets/game-logo.png';
 	import Hero from '$lib/components/Hero.svelte';
 	import heroImage from '$lib/assets/hero-register.png';
+	import Separator from '$lib/components/Separator.svelte';
+	import FormError from '$lib/components/formfields/FormError.svelte';
 
 	let username: string = '';
 	let email: string = '';
@@ -136,9 +138,7 @@
 				<img src={gameLogo} alt="Game Logo" class="mx-auto mb-8 select-none" />
 
 				{#if error}
-					<div class="mb-4 p-4 bg-red-900/50 border border-red-500 rounded text-red-200">
-						{error}
-					</div>
+					<FormError {error} />
 				{/if}
 
 				<form on:submit|preventDefault={handleCreateAccount} class="space-y-4">
@@ -192,14 +192,7 @@
 						on:clicked={handleCreateAccount}
 					/>
 
-					<div class="relative my-6">
-						<div class="absolute inset-0 flex items-center">
-							<div class="w-full border-t border-gray-700"></div>
-						</div>
-						<div class="relative flex justify-center text-sm">
-							<span class="px-2 bg-gray-900 text-gray-400">Or continue with</span>
-						</div>
-					</div>
+					<Separator />
 
 					<GoogleSignInButton
 						loading={isGoogleLoading}
