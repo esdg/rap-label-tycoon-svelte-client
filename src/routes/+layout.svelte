@@ -9,6 +9,7 @@
 	import { initializeAuthState, logoutAndRedirect } from '$lib/services/auth';
 	import { player } from '$lib/stores/player';
 	import Button from '$lib/components/Button.svelte';
+	import MenuBar from '$lib/components/MenuBar.svelte';
 
 	let currentPlayer = $player;
 	let initializingPlayer = false;
@@ -52,10 +53,6 @@
 
 		return () => unsubscribe();
 	});
-
-	async function handleLogout() {
-		await logoutAndRedirect();
-	}
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -73,22 +70,7 @@
 		</div>
 	{:else}
 		{#if $isAuthenticated && !isPublicRoute && currentPlayer}
-			<nav class="bg-gray-800 text-white px-4 py-3 flex flex-col justify-between items-center">
-				<div class="flex items-center gap-4">
-					<span class="font-semibold">Rap Label Tycoon</span>
-					<a href="/labels" class="hover:text-blue-400">Labels</a>
-				</div>
-				<div class="flex items-center gap-4">
-					<span class="text-gray-400">Welcome, {currentPlayer.username}</span>
-					<Button
-						color="red"
-						style="hollow"
-						text="Logout"
-						altText="Sign out"
-						on:clicked={handleLogout}
-					/>
-				</div>
-			</nav>
+			<MenuBar username={currentPlayer.username} />
 		{/if}
 		<main
 			class="bg-app flex-grow min-h-screen text-white"

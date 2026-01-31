@@ -23,6 +23,7 @@
     },
     "type": "module",
     "dependencies": {
-        "firebase": "^12.8.0"
+        "firebase": "^12.8.0",
+        "heroicons-svelte": "^2.0.2"
     }
 }

@@ -19,16 +19,16 @@ export default {
                     950: '#002245', // Darkest navy
                 },
                 secondary: {
-                    50: '#FFF4E6', // Porcelain Peach
-                    100: '#FFE1BF', // Soft Apricot
-                    200: '#FFCC94', // Light Mango
-                    300: '#FFB366', // Warm Tangerine
-                    400: '#FF9A33', // Bright Amber
-                    500: '#EB8800', // Vibrant Orange (Base)
-                    600: '#D97700', // Deep Amber
-                    700: '#B85F00', // Burnt Orange
-                    800: '#8F4A00', // Dark Copper
-                    900: '#663400'  // Smoked Bronze
+                    50: '#FFF9E6', // Lightest cream yellow
+                    100: '#FFF0BF', // Pale lemon
+                    200: '#FFE694', // Soft buttercup
+                    300: '#FFDB66', // Light golden
+                    400: '#FFD033', // Bright sunshine
+                    500: '#EDA528', // Vibrant golden yellow (Base)
+                    600: '#D18F00', // Deep gold
+                    700: '#B87A00', // Rich amber
+                    800: '#8F6000', // Dark honey
+                    900: '#664400'  // Bronze brown
                 },
                 accent: {
                     50: '#000000',
@@ -44,52 +44,52 @@ export default {
                 },
                 // Semantic Colors
                 success: {
-                    50: '#000000',
-                    100: '#000000',
-                    200: '#000000',
-                    300: '#000000',
-                    400: '#000000',
-                    500: '#000000',
-                    600: '#000000',
-                    700: '#000000',
-                    800: '#000000',
-                    900: '#000000'
+                    50: '#E6FFF3', // Lightest mint
+                    100: '#BFFFD9', // Pale mint green
+                    200: '#94FFBF', // Soft mint
+                    300: '#66FFA6', // Light spring green
+                    400: '#33FF8C', // Bright green
+                    500: '#00FF72', // Vibrant success green (Base)
+                    600: '#00D95E', // Deep emerald
+                    700: '#00B34D', // Rich green
+                    800: '#008F3D', // Dark forest
+                    900: '#006B2D'  // Deep pine
                 },
                 warning: {
-                    50: '#000000',
-                    100: '#000000',
-                    200: '#000000',
-                    300: '#000000',
-                    400: '#000000',
-                    500: '#000000',
-                    600: '#000000',
-                    700: '#000000',
-                    800: '#000000',
-                    900: '#000000'
+                    50: '#FFF7E6', // Lightest cream
+                    100: '#FFECBF', // Pale peach
+                    200: '#FFE094', // Soft apricot
+                    300: '#FFD466', // Light orange
+                    400: '#FFC733', // Bright orange
+                    500: '#FFB800', // Vibrant warning orange (Base)
+                    600: '#D99A00', // Deep amber
+                    700: '#B37F00', // Rich orange
+                    800: '#8F6600', // Dark burnt orange
+                    900: '#6B4C00'  // Deep brown
                 },
                 error: {
-                    50: '#000000',
-                    100: '#000000',
-                    200: '#000000',
-                    300: '#000000',
-                    400: '#000000',
-                    500: '#000000',
-                    600: '#000000',
-                    700: '#000000',
-                    800: '#000000',
-                    900: '#000000'
+                    50: '#FFE6E6', // Lightest pink
+                    100: '#FFBFBF', // Pale rose
+                    200: '#FF9494', // Soft coral
+                    300: '#FF6666', // Light red
+                    400: '#FF3333', // Bright red
+                    500: '#FF0000', // Vibrant error red (Base)
+                    600: '#D90000', // Deep crimson
+                    700: '#B30000', // Rich red
+                    800: '#8F0000', // Dark maroon
+                    900: '#6B0000'  // Deep burgundy
                 },
                 info: {
-                    50: '#000000',
-                    100: '#000000',
-                    200: '#000000',
-                    300: '#000000',
-                    400: '#000000',
-                    500: '#000000',
-                    600: '#000000',
-                    700: '#000000',
-                    800: '#000000',
-                    900: '#000000'
+                    50: '#E6F7FF', // Lightest sky
+                    100: '#BFEBFF', // Pale cyan
+                    200: '#94DEFF', // Soft blue
+                    300: '#66D1FF', // Light info blue
+                    400: '#33C4FF', // Bright cyan
+                    500: '#00B8FF', // Vibrant info blue (Base)
+                    600: '#0099D9', // Deep azure
+                    700: '#007DB3', // Rich blue
+                    800: '#00638F', // Dark ocean
+                    900: '#004A6B'  // Deep navy blue
                 },
                 app: '#090f15',
             },
