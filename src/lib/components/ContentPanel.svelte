@@ -55,6 +55,12 @@
 	}
 </script>
 
-<div class="relative w-full {className}">
+<div class="content-panel relative w-full {className}">
 	<slot />
 </div>
+
+<style>
+	.content-panel {
+		display: grid;
+	}
+</style>

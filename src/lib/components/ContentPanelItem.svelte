@@ -103,7 +103,13 @@
 </script>
 
 {#if isActive}
-	<div class="w-full {className}" in:transitionIn out:transitionOut>
+	<div class="content-panel-item w-full {className}" in:transitionIn out:transitionOut>
 		<slot />
 	</div>
 {/if}
+
+<style>
+	.content-panel-item {
+		grid-area: 1 / 1;
+	}
+</style>

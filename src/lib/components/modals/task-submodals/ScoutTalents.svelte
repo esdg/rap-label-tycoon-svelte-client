@@ -240,8 +240,6 @@
 			</ContentPanelItem>
 			<ContentPanelItem>
 				<div class="space-y-6">
-					<h3 class="text-xl font-semibold text-gray-900">Cost Estimation</h3>
-
 					{#if loadingCost}
 						<div class="flex items-center justify-center py-8">
 							<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
