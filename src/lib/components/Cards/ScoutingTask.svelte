@@ -1,0 +1,107 @@
+<script lang="ts">
+	import { XMarkIcon, CheckIcon, ArrowRightIcon } from 'heroicons-svelte/24/solid';
+	import RadialProgressBar from '../progress-bars/RadialProgressBar.svelte';
+
+	export let state: 'loading' | 'in-progress' | 'failed' | 'succeeded' | 'error' = 'in-progress';
+
+	var taskProgress = 100;
+</script>
+
+<article
+	class="border border-gray-800 h-auto bg-app rounded-lg w-48 flex flex-col items-center gap-4 select-none"
+>
+	{#if state === 'in-progress'}
+		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
+			<div class="text-center mb-4">
+				<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
+				<p class="uppercase text-lg font-black leading-none">Rappers</p>
+			</div>
+
+			<RadialProgressBar
+				value={taskProgress}
+				strokeWidth={2}
+				useGradient={true}
+				gradientFrom="#8b5cf6"
+				gradientTo="#ec4899"
+				backgroundClass="stroke-gray-800"
+			>
+				<div class="flex flex-col items-center">
+					<span class="text-xl font-semibold">6h 34m 45s</span>
+					<span class="text-sm font-light text-xs italic text-primary-400"
+						>"Observing at open mic..."</span
+					>
+				</div>
+			</RadialProgressBar>
+		</div>
+	{:else if state === 'failed'}
+		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
+			<div class="text-center mb-4">
+				<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
+				<p class="uppercase text-lg font-black leading-none">Rappers</p>
+			</div>
+			<RadialProgressBar
+				value={taskProgress}
+				strokeWidth={2}
+				progressClass="stroke-error-500"
+				backgroundClass="stroke-gray-800"
+			>
+				<div class="flex flex-col items-center">
+					<div class="flex items-center">
+						<XMarkIcon class="w-4 h-4 text-error-500 inline" />
+						<span class="text-error-500 text-lg uppercase">Failed</span>
+					</div>
+				</div>
+			</RadialProgressBar>
+		</div>
+	{:else if state === 'succeeded'}
+		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
+			<div>
+				<div class="text-center mb-4">
+					<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
+					<p class="uppercase text-lg font-black leading-none">Rappers</p>
+				</div>
+				<RadialProgressBar
+					value={taskProgress}
+					strokeWidth={2}
+					progressClass="stroke-success-500"
+					backgroundClass="stroke-gray-800"
+				>
+					<div class="flex flex-col items-center">
+						<div class="flex items-center">
+							<CheckIcon class="w-4 h-4 text-success-500 inline" />
+							<span class="text-success-500 text-lg uppercase">Succeeded</span>
+						</div>
+					</div>
+				</RadialProgressBar>
+			</div>
+			<div
+				class="
+                border border-primary-500
+                rounded-lg
+                absolute inset-0
+                bg-app
+                opacity-0
+                group-hover:opacity-100
+                transition-opacity
+                flex flex-col items-center justify-center justify-between p-4"
+			>
+				<span class="text-primary-500 font-black uppercase">Results</span>
+				<svg
+					fill="text-primary-500"
+					id="Layer_1"
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 57.27 81.25"
+					class="size-16 text-primary-500"
+					><path
+						fill="#0c88ea"
+						d="M50.88,4.68h-16.18c-.72-2.68-3.19-4.68-6.07-4.68-1.66,0-3.23,.64-4.4,1.8-.82,.8-1.39,1.79-1.68,2.88H6.39C2.86,4.67,0,7.54,0,11.06v63.8c0,3.52,2.87,6.39,6.39,6.39H50.88c3.52,0,6.39-2.87,6.39-6.39V11.06c0-3.52-2.86-6.39-6.38-6.39h0Zm-27.01,3.04c.83,0,1.5-.66,1.52-1.49,.02-.86,.36-1.66,.98-2.26,.6-.6,1.41-.93,2.27-.93,1.75,0,3.21,1.43,3.24,3.18,.02,.83,.69,1.49,1.52,1.49h5.11v5.91H18.77V7.71h5.11Zm30.35,67.15c0,1.84-1.5,3.34-3.34,3.34H6.39c-1.84,0-3.34-1.5-3.34-3.34V11.06c0-1.84,1.5-3.34,3.34-3.34H15.72v7.43c0,.84,.68,1.52,1.52,1.52h22.78c.84,0,1.52-.68,1.52-1.52V7.72h9.33c1.84,0,3.34,1.5,3.34,3.34v63.8h0Zm-25.59-24.88c7.59,0,13.77-6.18,13.77-13.77s-6.18-13.77-13.77-13.77-13.77,6.18-13.77,13.77,6.18,13.77,13.77,13.77Zm0-24.49c5.91,0,10.72,4.81,10.72,10.72s-4.81,10.72-10.72,10.72-10.72-4.81-10.72-10.72,4.81-10.72,10.72-10.72Zm-6.34,10.98c-.59-.59-.59-1.56,0-2.15,.59-.59,1.55-.59,2.15,0l2.98,2.98,5.39-5.39c.59-.59,1.55-.59,2.15,0s.59,1.56,0,2.15l-6.46,6.46c-.3,.3-.69,.45-1.07,.45s-.78-.15-1.07-.45l-4.05-4.05h0Zm20.94,22.93c0,.84-.68,1.52-1.52,1.52H15.55c-.84,0-1.52-.68-1.52-1.52s.68-1.52,1.52-1.52h26.17c.84,0,1.52,.68,1.52,1.52Zm0,8.03c0,.84-.68,1.52-1.52,1.52H15.55c-.84,0-1.52-.68-1.52-1.52s.68-1.52,1.52-1.52h26.17c.84,0,1.52,.68,1.52,1.52Z"
+					/></svg
+				>
+				<span
+					class="text-primary-500 text-xs border border-primary-500 pl-2 pr-2 pt-1 pb-1 rounded-full block mt-2"
+					>View details <ArrowRightIcon class="inline w-4 h-4 text-primary-500 " /></span
+				>
+			</div>
+		</div>
+	{/if}
+</article>

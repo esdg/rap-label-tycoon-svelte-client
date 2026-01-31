@@ -5,6 +5,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import { fetchLabelTasks } from '$lib/api';
 	import type { ScoutingTaskResponse } from '$lib/types/scouting';
+	import ScoutingTask from '$lib/components/Cards/ScoutingTask.svelte';
 
 	let tasks: ScoutingTaskResponse[] = [];
 	let serverTimeOffset = 0; // Difference between server time and client time
@@ -72,6 +73,16 @@
 		return endTime <= getCurrentServerTime();
 	}
 
+	function getTaskStatus(task: ScoutingTaskResponse): 'in-progress' | 'failed' | 'succeeded' {
+		if (!isTaskFinished(task)) {
+			return 'in-progress';
+		}
+		if (task.results?.success) {
+			return 'succeeded';
+		}
+		return 'failed';
+	}
+
 	function formatTimeRemaining(endTime: string): string {
 		const end = new Date(endTime).getTime();
 		const diff = end - getCurrentServerTime();
@@ -99,7 +110,7 @@
 		}, 1000);
 
 		// Refresh tasks every 10 seconds (only if label is available)
-		const taskInterval = setInterval(() => {
+		/* 		const taskInterval = setInterval(() => {
 			if ($label?.id) {
 				loadTasks();
 			}
@@ -108,11 +119,11 @@
 		return () => {
 			clearInterval(timeInterval);
 			clearInterval(taskInterval);
-		};
+		}; */
 	});
 </script>
 
-<div class="min-h-screen bg-gray-900 text-white p-8">
+<div class="min-h-screen text-white p-8">
 	<h1 class="text-3xl font-bold mb-8">Dashboard</h1>
 
 	<div class="space-y-8">
@@ -127,7 +138,7 @@
 		</div>
 
 		<!-- Ongoing Tasks Section -->
-		<div class="bg-gray-800 rounded-lg p-6">
+		<div>
 			<h2 class="text-2xl font-bold mb-4">Ongoing Tasks</h2>
 
 			{#if loading}
@@ -139,6 +150,7 @@
 			{:else}
 				<div class="space-y-4">
 					{#each tasks as task}
+						<ScoutingTask state={getTaskStatus(task)} />
 						<div
 							class="bg-gray-700 rounded-lg p-4 border-l-4 {isTaskFinished(task)
 								? 'border-green-500'

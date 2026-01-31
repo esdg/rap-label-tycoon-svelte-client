@@ -63,7 +63,7 @@
 />
 <Modal />
 
-<div class="flex flex-row">
+<div class="flex flex-row antialiased">
 	{#if $authLoading && !isPublicRoute}
 		<div class="min-h-screen bg-gray-900 flex items-center justify-center">
 			<div class="text-white text-xl">Loading...</div>
