@@ -3,6 +3,6 @@
 		<div class="w-full border-t border-primary-200"></div>
 	</div>
 	<div class="relative flex justify-center text-sm">
-		<span class="px-2 bg-app text-primary-200">Or continue with</span>
+		<span class="px-2 bg-primary-950 text-primary-200">Or continue with</span>
 	</div>
 </div>

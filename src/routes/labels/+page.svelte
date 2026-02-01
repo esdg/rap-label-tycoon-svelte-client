@@ -187,7 +187,7 @@
 	<div class="space-y-6 sm:space-y-8">
 		<div>
 			<Button
-				color="blue"
+				color="primary"
 				style="normal"
 				text="Scout Talents"
 				altText="Open scout talents modal"

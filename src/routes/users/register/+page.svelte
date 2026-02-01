@@ -182,7 +182,7 @@
 					/>
 
 					<Button
-						color="blue"
+						color="primary"
 						style="normal"
 						text={isLoading ? 'Creating Account...' : 'Create Account'}
 						altText="Create new account"

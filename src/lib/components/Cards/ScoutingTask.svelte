@@ -14,7 +14,7 @@
 </script>
 
 <article
-	class="border border-gray-800 h-auto bg-app rounded-lg w-48 flex flex-col items-center gap-4 select-none"
+	class="border border-gray-800 h-auto bg-primary-950 rounded-lg w-48 flex flex-col items-center gap-4 select-none"
 >
 	{#if state === 'in-progress'}
 		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
@@ -85,7 +85,7 @@
                 border border-primary-500
                 rounded-lg
                 absolute inset-0
-                bg-app
+                bg-primary-950
                 opacity-0
                 group-hover:opacity-100
                 transition-opacity

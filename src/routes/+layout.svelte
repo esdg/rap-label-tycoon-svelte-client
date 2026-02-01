@@ -73,7 +73,7 @@
 			<MenuBar username={currentPlayer.username} />
 		{/if}
 		<main
-			class="bg-app flex-grow min-h-screen text-white"
+			class="bg-primary-950 flex-grow min-h-screen text-white"
 			style="font-family: 'Roboto', sans-serif;"
 		>
 			<slot />

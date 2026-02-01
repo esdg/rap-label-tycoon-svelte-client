@@ -119,7 +119,7 @@
 	<!-- Dropdown Menu -->
 	{#if isOpen}
 		<div
-			class="absolute z-50 w-full bg-app border border-gray-200 rounded-lg shadow-lg
+			class="absolute z-50 w-full bg-primary-950 border border-gray-200 rounded-lg shadow-lg
 				{direction === 'up' ? 'bottom-full mb-1 animate-in-up' : 'mt-1 animate-in-down'}"
 		>
 			<!-- Search Input -->

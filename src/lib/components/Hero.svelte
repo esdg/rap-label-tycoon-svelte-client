@@ -2,7 +2,8 @@
 	export let image: string;
 	export let id: string | undefined = undefined;
 	// Allow parent to override the gradient overlay classes
-	export let gradientClass = 'bg-gradient-to-t from-app md:via-app md:via-10% to-transparent';
+	export let gradientClass =
+		'bg-gradient-to-t from-primary-950 md:via-primary-950 md:via-10% to-transparent';
 
 	let className = '';
 	export { className as class };

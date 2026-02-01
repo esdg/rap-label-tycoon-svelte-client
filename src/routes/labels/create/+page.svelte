@@ -136,7 +136,7 @@
 						/>
 
 						<Button
-							color="blue"
+							color="primary"
 							style="normal"
 							text={isLoading ? 'Creating your Label...' : 'Create your Label'}
 							altText="Create new label"

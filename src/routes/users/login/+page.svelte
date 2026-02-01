@@ -147,7 +147,7 @@
 					/>
 
 					<Button
-						color="blue"
+						color="primary"
 						style="normal"
 						text={isLoading ? 'Signing In...' : 'Sign In'}
 						altText="Sign in to your account"

@@ -8,7 +8,7 @@ export default {
                 primary: {
                     50: '#eff8ff', // Extremely light sky blue
                     100: '#dbeafe', // Light background blue
-                    200: '#a6b6c9', // <--- Your requested color (Muted Steel Blue)
+                    200: '#a6b6c9', // Muted Steel Blue
                     300: '#7db1f4', // Soft blue
                     400: '#3ea1f1', // Bright blue
                     500: '#0c88ea', // Base/Default
@@ -16,7 +16,7 @@ export default {
                     700: '#0057aa', // Deep blue
                     800: '#004a8f', // Dark blue
                     900: '#003e78', // Contrast/Text blue
-                    950: '#002245', // Darkest navy
+                    950: '#090f15', // Darkest navy
                 },
                 secondary: {
                     50: '#FFF9E6', // Lightest cream yellow
@@ -30,18 +30,45 @@ export default {
                     800: '#8F6000', // Dark honey
                     900: '#664400'  // Bronze brown
                 },
-                accent: {
-                    50: '#000000',
-                    100: '#000000',
-                    200: '#000000',
-                    300: '#000000',
-                    400: '#000000',
-                    500: '#000000',
-                    600: '#000000',
-                    700: '#000000',
-                    800: '#000000',
-                    900: '#000000'
+                category: {
+                    1: {
+                        50: '#F3E6FF', // Lightest lavender
+                        100: '#E1BFFF', // Pale purple
+                        200: '#CE94FF', // Soft violet
+                        300: '#BB66FF', // Light purple
+                        400: '#A833FF', // Bright violet
+                        500: '#5B1979', // Deep royal purple (Base)
+                        600: '#4D1566', // Rich purple
+                        700: '#3F1154', // Dark purple
+                        800: '#320D43', // Deep plum
+                        900: '#250A33'  // Darkest purple
+                    },
+                    2: {
+                        50: '#FFE6F2', // Lightest rose
+                        100: '#FFBFE0', // Pale pink
+                        200: '#FF94CE', // Soft magenta
+                        300: '#FF66BC', // Light pink
+                        400: '#FF33AA', // Bright fuchsia
+                        500: '#C20D51', // Vibrant magenta (Base)
+                        600: '#A30B44', // Deep rose
+                        700: '#850937', // Rich crimson
+                        800: '#68072C', // Dark berry
+                        900: '#4D0521'  // Darkest burgundy
+                    },
+                    3: {
+                        50: '#FFF0E6', // Lightest peach
+                        100: '#FFDBBF', // Pale coral
+                        200: '#FFC794', // Soft salmon
+                        300: '#FFB266', // Light coral
+                        400: '#FF9D33', // Bright terracotta
+                        500: '#CD5E32', // Burnt coral orange (Base)
+                        600: '#AD4E2A', // Deep rust
+                        700: '#8E3F23', // Rich sienna
+                        800: '#70311B', // Dark clay
+                        900: '#532414'  // Deep mahogany
+                    },
                 },
+
                 // Semantic Colors
                 success: {
                     50: '#E6FFF3', // Lightest mint
@@ -91,7 +118,6 @@ export default {
                     800: '#00638F', // Dark ocean
                     900: '#004A6B'  // Deep navy blue
                 },
-                app: '#090f15',
             },
             spacing: {
                 '112': '28rem',

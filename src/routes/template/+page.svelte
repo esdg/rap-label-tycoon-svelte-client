@@ -1,13 +1,7 @@
 <script>
-	import ProgressBar from '$lib/components/progress-bars/ProgressBar.svelte';
+	import Chip from '$lib/components/Chip.svelte';
 </script>
 
 <div class="h-screen">
-	<ProgressBar
-		value={65}
-		lengthClass="w-56"
-		thicknessClass="h-1"
-		backgroundClass="bg-gray-700/50"
-		progressClass="bg-emerald-500"
-	/>
+	<Chip class="bg-secondary-500 text-black">ambient</Chip>
 </div>

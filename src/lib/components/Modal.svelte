@@ -59,7 +59,7 @@
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<div
-				class="task-modal-shell relative bg-app shadow-lg transition-all duration-300 animate-in fade-in zoom-in-95"
+				class="task-modal-shell relative bg-primary-950 shadow-lg transition-all duration-300 animate-in fade-in zoom-in-95"
 				role="dialog"
 				aria-modal="true"
 				aria-label="Task modal"

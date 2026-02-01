@@ -28,7 +28,7 @@
 </script>
 
 <div
-	class="flex flex-col lg:flex-row h-full w-full rounded-lg overflow-hidden bg-app border border-gray-700 shadow-lg"
+	class="flex flex-col lg:flex-row h-full w-full rounded-lg overflow-hidden bg-primary-950 border border-gray-700 shadow-lg"
 >
 	<!-- Hero section - hidden on mobile, visible on larger screens -->
 	<div

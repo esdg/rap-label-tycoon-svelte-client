@@ -8,6 +8,7 @@
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 	import Button from '$lib/components/Button.svelte';
+	import Chip from '$lib/components/Chip.svelte';
 
 	export let taskResult: ScoutingTaskResponse;
 
@@ -127,6 +128,25 @@
 		return taskArtists.map((artist) => artist.stageName);
 	}
 
+	const rarityLabels = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'] as const;
+	const rarityClasses = {
+		Common: 'bg-gray-500 text-black',
+		Uncommon: 'bg-primary-600 text-white',
+		Rare: 'bg-category-1-500 text-white',
+		Epic: 'bg-category-2-500 text-white',
+		Legendary: 'bg-category-3-500 text-white'
+	} as const;
+
+	function getRarityLabel(rarity: number): string {
+		const index = Number.isFinite(rarity) ? Math.trunc(rarity) : -1;
+		return rarityLabels[index] ?? 'Unknown';
+	}
+
+	function getRarityClass(rarity: number): string {
+		const label = getRarityLabel(rarity);
+		return rarityClasses[label as keyof typeof rarityClasses] ?? 'bg-gray-600 text-white';
+	}
+
 	// Event handlers
 	function handleCancel() {
 		modalStore.close();
@@ -183,11 +203,19 @@
 					{#if taskResult.results.discoveredArtists.length === 0}
 						<p class="text-center text-gray-400">No artists were discovered during scouting.</p>
 					{:else}
-						<ul class="w-full max-w-5xl mx-auto space-y-12 sm:space-y-16">
+						<div class="w-full max-w-5xl mx-auto space-y-12 sm:space-y-16">
 							{#each taskResult.results.discoveredArtists as artist}
 								<ContentPanelItem>
 									{@const sections = getArtistSkillSections(artist)}
-									<li class="list-none pb-12 border-b border-white/5 last:border-none last:pb-0">
+									<div
+										class="flex flex-col pb-12 border-b border-white/5 last:border-none last:pb-0"
+									>
+										<div class="mb-4">
+											<Chip class={getRarityClass(artist.rarity)}
+												>{getRarityLabel(artist.rarity)}</Chip
+											>
+										</div>
+
 										<!-- Artist Header -->
 										<h3
 											class="text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase leading-tight"
@@ -299,10 +327,10 @@
 												</div>
 											</div>
 										{/if}
-									</li>
+									</div>
 								</ContentPanelItem>
 							{/each}
-						</ul>
+						</div>
 					{/if}
 				{/if}
 			</div>
