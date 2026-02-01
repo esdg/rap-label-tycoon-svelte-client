@@ -8,9 +8,6 @@
 		MegaphoneIcon
 	} from 'heroicons-svelte/24/solid';
 	import { logoutAndRedirect } from '$lib/services/auth';
-	import Button from './Button.svelte';
-
-	export let username: string;
 
 	async function handleLogout() {
 		await logoutAndRedirect();
@@ -28,14 +25,3 @@
 		<PowerIcon class=" hover:text-secondary-500 w-6 h-6" />
 	</button>
 </nav>
-
-<!-- 	<div class="flex items-center gap-4">
-		<span class="font-semibold">Rap Label Tycoon</span>
-		<a href="/labels" class="hover:text-blue-400">Labels</a>
-	</div>
-	<div class="flex items-center gap-4">
-		<span class="text-gray-400">Welcome, {username}</span>
-		<Button color="red" style="hollow" altText="Sign out" on:clicked={handleLogout}>
-			Logout
-		</Button>
-	</div> -->
