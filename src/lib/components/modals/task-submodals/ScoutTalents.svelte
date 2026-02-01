@@ -304,7 +304,7 @@
 			{error}
 		</div>
 	{/if}
-
+	<!-- Actions Bar -->
 	<div class="w-full flex bg-black py-2 px-4 bt-2 border-t border-gray-700">
 		<!-- Prospector -->
 		<div class="flex gap-3 items-center">
