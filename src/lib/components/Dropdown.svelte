@@ -69,8 +69,6 @@
 	</label>
 {/if}
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div
 	class="relative w-full {className}"
 	use:clickOutside
@@ -85,18 +83,18 @@
 		type="button"
 		on:click={toggleDropdown}
 		{disabled}
-		class="w-full px-4 py-2.5 bg-white border rounded-lg text-left flex items-center justify-between
-			transition-all duration-200 text-sm font-medium
+		class="h-8 px-4 min-w-32 border rounded-lg text-left flex items-center justify-between
+			transition-all duration-200 text-sm font-medium font-thin select-none
 			{disabled
-			? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+			? 'bg-gray-900 border-gray-700 text-gray-300 cursor-not-allowed'
 			: isOpen
-				? 'border-indigo-500 ring-2 ring-indigo-200 shadow-sm'
-				: 'border-gray-300 hover:border-indigo-400 hover:shadow-sm'}"
+				? 'border-secondary-600 ring-2 ring-secondary-600 shadow-sm'
+				: 'border-gray-700 hover:border-secondary-600 hover:shadow-sm'}"
 		aria-haspopup="listbox"
 		aria-expanded={isOpen}
 	>
 		<span
-			class="block truncate {selectedOption ? 'text-gray-900' : 'text-gray-500'}"
+			class="block truncate {selectedOption && !disabled ? 'text-white' : 'text-gray-400'}"
 			title={displayText}
 		>
 			{displayText}
@@ -108,7 +106,7 @@
 					? 'rotate-0'
 					: direction === 'up'
 						? 'rotate-180'
-						: ''} {disabled ? 'text-gray-400' : 'text-gray-500'}"
+						: ''} {!disabled ? 'text-white' : 'text-gray-500'}"
 			fill="none"
 			stroke="currentColor"
 			viewBox="0 0 24 24"
@@ -120,7 +118,7 @@
 	<!-- Dropdown Menu -->
 	{#if isOpen}
 		<div
-			class="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg
+			class="absolute z-50 w-full bg-app border border-gray-200 rounded-lg shadow-lg
 				{direction === 'up' ? 'bottom-full mb-1 animate-in-up' : 'mt-1 animate-in-down'}"
 		>
 			<!-- Search Input -->
@@ -151,19 +149,19 @@
 							disabled={option.disabled}
 							on:click={() => selectOption(option)}
 							on:keydown={(e) => handleKeydown(e, option)}
-							class="w-full px-4 py-2.5 text-left text-sm flex items-center justify-between
+							class="w-full px-4 py-2.5 text-left text-sm flex items-center justify-between font-thin
 								transition-colors duration-150
 								{option.disabled
-								? 'text-gray-400 cursor-not-allowed bg-gray-50'
+								? 'text-gray-400 cursor-not-allowed'
 								: isSelected
-									? 'bg-indigo-50 text-indigo-700 font-medium'
-									: 'text-gray-900 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer'}"
+									? 'text-primary-500 font-medium'
+									: 'text-white hover:bg-primary-500 hover:text-white cursor-pointer'}"
 						>
 							<span class="block truncate" title={option.name}>
 								{option.name}
 							</span>
 							{#if isSelected}
-								<svg class="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+								<svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 20 20">
 									<path
 										fill-rule="evenodd"
 										d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"

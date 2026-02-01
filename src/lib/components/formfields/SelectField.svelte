@@ -43,7 +43,7 @@
 			{/if}
 		</label>
 	</div>
-	<div class="flex flex-wrap gap-1">
+	<div class="flex flex-wrap gap-y-2 gap-x-1">
 		{#each choices as choice, index}
 			{@const selected =
 				mode === 'toggle'
@@ -51,14 +51,14 @@
 					: value instanceof Set && value.has(choice.value)}
 			<button
 				id={index === 0 && labelFor ? labelFor : undefined}
-				class=" pt-1 pb-1 px-4 min-w-32 border rounded transition-all duration-200 font-medium text-sm uppercase font-thin select-none
+				class="h-8 px-4 min-w-32 border rounded transition-all duration-200 font-medium text-sm uppercase font-thin select-none flex items-center justify-center
 					{selected
 					? 'border-secondary-600 text-white shadow-sm'
 					: 'border-gray-700 text-white hover:border-secondary-600 hover:shadow-sm'}"
 				on:click={() => handleToggle(choice.value)}
 				title={choice.title}
 			>
-				{choice.name}
+				<span class="relative top-[1px]">{choice.name}</span>
 			</button>
 		{/each}
 	</div>

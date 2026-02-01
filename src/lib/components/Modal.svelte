@@ -51,7 +51,10 @@
 	/>
 
 	<!-- Modal container -->
-	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center p-4"
+		style="font-family: 'Roboto', sans-serif;"
+	>
 		{#if modalState.type === 'task-modal'}
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->

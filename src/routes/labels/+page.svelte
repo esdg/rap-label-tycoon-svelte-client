@@ -175,8 +175,6 @@
 	class="min-h-screen text-white p-8"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
-	<h1 class="text-3xl font-bold mb-8">Dashboard</h1>
-
 	<div class="space-y-8">
 		<div>
 			<Button

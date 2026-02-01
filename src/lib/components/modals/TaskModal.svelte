@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Hero from '../Hero.svelte';
 	import ScoutTalents from './task-submodals/ScoutTalents.svelte';
 	import SignArtist from './task-submodals/SignArtist.svelte';
 
@@ -19,10 +20,18 @@
 	class="flex flex-col lg:flex-row h-full w-full rounded-lg overflow-hidden bg-app border border-gray-700 shadow-lg"
 >
 	<div
-		class="h-128 md:h-auto md:basis-2/5 md:overflow-hidden relative select-none"
+		class="grid h-128 md:h-auto md:basis-1/3 md:overflow-hidden relative select-none"
 		aria-hidden="true"
 	>
-		<img src={imageUrl} alt="" class="absolute inset-0 h-full w-full object-cover" />
+		<Hero
+			class="absolute inset-0 h-full w-full object-cover"
+			image={imageUrl}
+			gradientClass="bg-gradient-to-t from-primary-500 to-transparent"
+		>
+			<div class="relative z-10 mx-auto flex h-full max-w-6xl items-end text-white pb-6">
+				<h2 class="text-7xl font-thin text-right uppercase">Scouting talents</h2>
+			</div>
+		</Hero>
 	</div>
 
 	<div class="flex-1 flex flex-col gap-6 min-w-0 min-h-0 relative overflow-hidden">

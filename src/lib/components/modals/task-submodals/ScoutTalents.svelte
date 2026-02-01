@@ -39,10 +39,8 @@
 	let selectedProspectorId = 1;
 
 	const options = [
-		{ name: 'you', value: 1 },
-		{ name: 'Option 2', value: 2 },
-		{ name: 'Disabled Option', value: 3, disabled: true },
-		{ name: 'Very Long Option Name That Will Be Truncated', value: 4 }
+		{ name: 'you', value: 1 }
+		//{ name: 'Disabled Option', value: 3, disabled: true }
 	];
 
 	// Prepare choices for SelectField components
@@ -67,6 +65,7 @@
 	onMount(async () => {
 		try {
 			scoutingScopes = await fetchScoutingScopes();
+			selectedScope = scoutingScopes.length > 0 ? scoutingScopes[0].id : null;
 		} catch (err) {
 			error = 'Failed to load scouting scopes';
 			console.error(err);
@@ -189,9 +188,7 @@
 </script>
 
 <section class="flex flex-col h-full" aria-label="Scout Talents">
-	<!-- <h2 class="text-3xl font-bold text-gray-900">Scout Talents</h2> -->
-
-	<div class="w-full max-w-96 mx-auto mt-2 mb-16">
+	<div class="w-full max-w-96 mx-auto mt-2 mb-24">
 		<Stepper
 			selectedButtonColor={colors.primary[300]}
 			selectedTextColor={colors.primary[500]}
@@ -209,7 +206,7 @@
 			transition="slide"
 			duration={300}
 		>
-			<ContentPanelItem class="space-y-6  text-white">
+			<ContentPanelItem class="space-y-16  text-white">
 				<!-- Scout For -->
 				<SelectField
 					label="Scout for"
@@ -285,7 +282,8 @@
 			{error}
 		</div>
 	{/if}
-	<div class="w-full flex bg-black p-2 bt-2 border-t border-gray-700">
+
+	<div class="w-full flex bg-black py-2 px-4 bt-2 border-t border-gray-700">
 		<!-- Prospector -->
 		<div class="flex gap-3 items-center">
 			<label
@@ -294,6 +292,7 @@
 			>
 			<Dropdown
 				{options}
+				disabled={options.length <= 1 ? true : false}
 				bind:value={selectedProspectorId}
 				placeholder="Choose..."
 				direction="up"
@@ -305,6 +304,7 @@
 				<!-- Actions -->
 
 				<Button
+					class="min-w-32"
 					color="blue"
 					style="hollow"
 					text="Cancel"
@@ -312,6 +312,8 @@
 					on:clicked={handleCancel}
 				/>
 				<Button
+					disabled={selectedGenres.size === 0}
+					class="min-w-32"
 					color="blue"
 					text="Next"
 					altText="Proceed to next step"
@@ -321,6 +323,7 @@
 			<ContentPanelItem class="flex gap-3 justify-end">
 				<!-- Actions -->
 				<Button
+					class="min-w-32"
 					color="blue"
 					style="hollow"
 					text="Cancel"
@@ -328,6 +331,7 @@
 					on:clicked={handleCancel}
 				/>
 				<Button
+					class="min-w-32"
 					color="blue"
 					style="hollow"
 					text="Previous"
@@ -335,6 +339,7 @@
 					on:clicked={() => currentStep--}
 				/>
 				<Button
+					class="min-w-32"
 					color="blue"
 					style="normal"
 					text={loading ? 'Starting...' : 'Start Scouting'}

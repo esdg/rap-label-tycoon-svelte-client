@@ -122,7 +122,7 @@
 
 <div class="flex md:flex-row flex-col-reverse h-full">
 	<Hero image={heroImage}>
-		<div class="w-112 mx-auto">
+		<div class="max-w-112 mx-auto pb-24">
 			<h1 class="text-5xl font-black mb-4 text-center">Start your journey as a label boss</h1>
 			<p class="max-w text-lg text-center">
 				Sign artists, build your roster, and turn raw talent into legends.

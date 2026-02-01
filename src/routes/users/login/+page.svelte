@@ -112,7 +112,7 @@
 
 <div class="flex md:flex-row flex-col-reverse h-full">
 	<Hero image={heroImage}>
-		<div class="w-112 mx-auto">
+		<div class="max-w-112 mx-auto pb-24">
 			<h1 class="text-5xl font-black mb-4 text-center">Welcome back</h1>
 			<p class="max-w text-lg text-center">The game never stopped.</p>
 			<p class="max-w text-4xl font-black text-center mt-6 text-primary-500">Take back control.</p>
