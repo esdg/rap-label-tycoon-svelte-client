@@ -242,30 +242,30 @@
 							<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
 						</div>
 					{:else if costPrediction}
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+						<div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+							<div class="bg-gray-900 rounded-md p-4">
 								<div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">
 									Budget Required
 								</div>
-								<div class="text-2xl font-bold text-gray-900">
-									${costPrediction.budgetRequired.toLocaleString()}
+								<div class="text-2xl font-bold text-white text-right">
+									$ {costPrediction.budgetRequired.toLocaleString()}
 								</div>
 							</div>
 
-							<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+							<div class="bg-gray-900 rounded-md p-4">
 								<div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">
 									Duration
 								</div>
-								<div class="text-2xl font-bold text-gray-900">
+								<div class="text-2xl font-bold text-white text-right">
 									{formatDuration(costPrediction.duration)}
 								</div>
 							</div>
 
-							<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+							<div class="bg-gray-900 rounded-md p-4">
 								<div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">
 									Stamina Cost
 								</div>
-								<div class="text-2xl font-bold text-gray-900">
+								<div class="text-2xl font-bold text-white text-right">
 									{costPrediction.staminaCost}
 								</div>
 							</div>
