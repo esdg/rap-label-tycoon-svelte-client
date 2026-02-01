@@ -11,10 +11,20 @@
 
 	const VALID_SUBMODALS = new Set(['scout', 'sign', 'scout-results']);
 
-	$: imageUrl = (data?.imageUrl as string | undefined) ?? DEFAULT_IMAGE_URL;
+	let imageOverride: string | null = null;
+
+	$: imageUrl = imageOverride ?? (data?.imageUrl as string | undefined) ?? DEFAULT_IMAGE_URL;
 	$: activeSubModal = VALID_SUBMODALS.has((data?.subModal as string | undefined) ?? '')
 		? (data?.subModal as string)
 		: 'scout';
+
+	$: if (activeSubModal !== 'scout-results' && imageOverride !== null) {
+		imageOverride = null;
+	}
+
+	function handleImageChange(event: CustomEvent<string | null>) {
+		imageOverride = event.detail;
+	}
 </script>
 
 <div
@@ -45,7 +55,10 @@
 				{#if activeSubModal === 'sign'}
 					<SignArtist />
 				{:else if activeSubModal === 'scout-results'}
-					<ScoutTalentsResults taskResult={data?.scoutingTaskResponse} />
+					<ScoutTalentsResults
+						taskResult={data?.scoutingTaskResponse}
+						on:imageChange={handleImageChange}
+					/>
 				{:else}
 					<ScoutTalents />
 				{/if}
