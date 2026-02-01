@@ -24,6 +24,15 @@
 		});
 	}
 
+	function openScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
+		modalStore.open('task-modal', {
+			subModal: 'scout-results',
+			scoutingTaskResponse: scoutingTaskResponse,
+			imageUrl:
+				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
+		});
+	}
+
 	// Watch for modal state changes
 	$: {
 		if (previousModalState && !$modalStore.isOpen) {
@@ -172,10 +181,10 @@
 </script>
 
 <div
-	class="min-h-screen text-white p-8"
+	class="min-h-screen text-white p-8 overflow-hidden h-screen"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
-	<div class="space-y-8">
+	<div class="space-y-8 h-screen overflow-none">
 		<div>
 			<Button
 				color="blue"
@@ -197,7 +206,7 @@
 			{:else if tasks.length === 0}
 				<p class="text-gray-400">No ongoing tasks</p>
 			{:else}
-				<div class="space-y-4">
+				<div class="grid justify-start grid-flow-col gap-4">
 					{#each tasks as task}
 						<ScoutingTask
 							state={getTaskStatus(task)}
@@ -205,6 +214,7 @@
 							inProgressDescription="Observing at open mic..."
 							scoutingType="Rappers"
 							taskProgress={getTaskProgress(task, currentTime)}
+							on:viewResults={() => openScoutResultsModal(task)}
 						/>
 					{/each}
 				</div>

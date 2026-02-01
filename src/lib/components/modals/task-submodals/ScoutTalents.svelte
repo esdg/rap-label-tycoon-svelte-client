@@ -35,6 +35,7 @@
 	let error: string | null = null;
 	let costPrediction: ScoutingCostPrediction | null = null;
 	let loadingCost = false;
+	let readyForPrediction = false;
 
 	let selectedProspectorId = 1;
 
@@ -42,6 +43,8 @@
 		{ name: 'you', value: 1 }
 		//{ name: 'Disabled Option', value: 3, disabled: true }
 	];
+
+	const stepLabels = ['scouting parameters', 'review & start scouting'];
 
 	// Prepare choices for SelectField components
 	$: scoutingTypeChoices = [
@@ -73,15 +76,22 @@
 	});
 
 	// Reactive statement to fetch cost prediction when parameters change
-	$: if ($label && $player && selectedScope && selectedGenres.size > 0 && currentStep === 1) {
+	$: readyForPrediction = Boolean(
+		$label && $player && selectedScope && selectedGenres.size > 0 && currentStep === 1
+	);
+
+	$: if (readyForPrediction) {
 		fetchCostPrediction();
 	}
+
+	let costPredictionRequestId = 0;
 
 	async function fetchCostPrediction() {
 		if (!$label || !$player || !selectedScope || selectedGenres.size === 0) {
 			return;
 		}
 
+		const requestId = ++costPredictionRequestId;
 		loadingCost = true;
 		costPrediction = null;
 
@@ -89,16 +99,21 @@
 			const predictionRequest = {
 				labelId: $label.id,
 				workerId: $player.id,
-				scoutingType: scoutingType,
+				scoutingType,
 				productionStyles: Array.from(selectedGenres),
 				scopeId: selectedScope
 			};
 
-			costPrediction = await predictScoutingCost(predictionRequest);
+			const prediction = await predictScoutingCost(predictionRequest);
+			if (requestId === costPredictionRequestId) {
+				costPrediction = prediction;
+			}
 		} catch (err) {
 			console.error('Failed to fetch cost prediction:', err);
 		} finally {
-			loadingCost = false;
+			if (requestId === costPredictionRequestId) {
+				loadingCost = false;
+			}
 		}
 	}
 
@@ -180,26 +195,33 @@
 	}
 
 	let currentStep = 0;
+	const lastStepIndex = stepLabels.length - 1;
+
+	function setStep(nextStep: number) {
+		currentStep = Math.max(0, Math.min(nextStep, lastStepIndex));
+	}
+
+	const handleNextStep = () => setStep(currentStep + 1);
+	const handlePreviousStep = () => setStep(currentStep - 1);
 
 	function handleStepChange(event: { detail: number }) {
-		currentStep = event.detail;
-		console.log('Step changed to:', currentStep);
+		setStep(event.detail);
 	}
 </script>
 
 <section class="flex flex-col h-full" aria-label="Scout Talents">
-	<div class="w-full max-w-96 mx-auto mt-6 mb-24">
+	<div class="w-full max-w-96 mx-auto mt-6">
 		<Stepper
 			selectedButtonColor={colors.primary[300]}
 			selectedTextColor={colors.primary[500]}
 			buttonColor="dimgray"
-			stepLabels={['scouting parameters', 'review & start scouting']}
+			{stepLabels}
 			activeStepIndex={currentStep}
 			on:stepClicked={handleStepChange}
 		/>
 	</div>
 
-	<div class="flex-grow">
+	<div class="flex-grow mt-24">
 		<ContentPanel
 			class="pt-0 p-4 max-w-xl mx-auto"
 			activeStepIndex={currentStep}
@@ -317,7 +339,7 @@
 					color="blue"
 					text="Next"
 					altText="Proceed to next step"
-					on:clicked={() => currentStep++}
+					on:clicked={handleNextStep}
 				/>
 			</ContentPanelItem>
 			<ContentPanelItem class="flex gap-3 justify-end">
@@ -336,7 +358,7 @@
 					style="hollow"
 					text="Previous"
 					altText="Proceed to previous step"
-					on:clicked={() => currentStep--}
+					on:clicked={handlePreviousStep}
 				/>
 				<Button
 					class="min-w-48"

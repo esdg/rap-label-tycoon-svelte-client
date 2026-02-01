@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import { XMarkIcon, CheckIcon, ArrowRightIcon } from 'heroicons-svelte/24/solid';
 	import RadialProgressBar from '../progress-bars/RadialProgressBar.svelte';
 
@@ -8,6 +9,8 @@
 	export let scoutingType: 'Rappers' | 'Beatmakers' = 'Rappers';
 
 	export let taskProgress = 0;
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <article
@@ -86,7 +89,8 @@
                 opacity-0
                 group-hover:opacity-100
                 transition-opacity
-                flex flex-col items-center justify-center justify-between p-4"
+				flex flex-col items-center justify-center justify-between p-4 cursor-pointer"
+				on:click={() => dispatch('viewResults')}
 			>
 				<span class="text-primary-500 font-black uppercase">Results</span>
 				<svg

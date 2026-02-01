@@ -1,4 +1,5 @@
 import { RapMusicStyle } from './musicStyles';
+import type { Artist } from './nonPlayingCharacter';
 
 // Enum for scouting types
 export enum ScoutingType {
@@ -80,8 +81,15 @@ export interface ScoutingTaskResponse {
     createdAt: string;
     updatedAt: string;
     status: TaskStatus;
-    results: {
-        success: boolean;
-        details: string;
-    };
+    results: ScoutingResults | null;
+}
+
+
+export interface ScoutingResults {
+    success: boolean;
+    details: string;
+}
+
+export interface ScoutingArtistsResults extends ScoutingResults {
+    discoveredArtists: Artist[];
 }

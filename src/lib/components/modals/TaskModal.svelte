@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Hero from '../Hero.svelte';
 	import ScoutTalents from './task-submodals/ScoutTalents.svelte';
+	import ScoutTalentsResults from './task-submodals/ScoutTalentsResults.svelte';
 	import SignArtist from './task-submodals/SignArtist.svelte';
 
 	export let data: Record<string, any> | undefined = undefined;
@@ -8,7 +9,7 @@
 	const DEFAULT_IMAGE_URL =
 		'https://res.cloudinary.com/dig430oem/image/upload/v1769554993/artists/profile_images/fpuc64oh9s5w8uoc9u5s.jpg';
 
-	const VALID_SUBMODALS = new Set(['scout', 'sign']);
+	const VALID_SUBMODALS = new Set(['scout', 'sign', 'scout-results']);
 
 	$: imageUrl = (data?.imageUrl as string | undefined) ?? DEFAULT_IMAGE_URL;
 	$: activeSubModal = VALID_SUBMODALS.has((data?.subModal as string | undefined) ?? '')
@@ -43,6 +44,8 @@
 			>
 				{#if activeSubModal === 'sign'}
 					<SignArtist />
+				{:else if activeSubModal === 'scout-results'}
+					<ScoutTalentsResults taskResult={data?.scoutingTaskResponse} />
 				{:else}
 					<ScoutTalents />
 				{/if}
