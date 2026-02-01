@@ -34,7 +34,7 @@
 	};
 
 	$: baseClasses =
-		'px-6 py-3 lg:px-8 lg:py-4 xl:px-10 xl:py-5 rounded-md font-semibold text-base lg:text-lg xl:text-xl border transition-all duration-200';
+		'px-6 py-3 lg:px-8 lg:py-4 xl:px-10 xl:py-3 rounded-md font-semibold text-base lg:text-lg xl:text-base border transition-all duration-200';
 	$: widthClass = fullWidth ? 'w-full' : '';
 	$: colorClasses =
 		style === 'normal'

@@ -3,13 +3,13 @@
 	export { className as class };
 </script>
 
-<span
-	class="inline-flex items-center
+<div
+	class="
     lowercase
     rounded
-    px-2 py-0.5
-    text-sm font-medium
+    px-2 py-0.5 min-w-12 w-fit text-center
+    text-xs
     bg-primary-500 text-black {className}"
 >
 	<slot />
-</span>
+</div>
