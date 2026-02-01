@@ -188,7 +188,7 @@
 </script>
 
 <section class="flex flex-col h-full" aria-label="Scout Talents">
-	<div class="w-full max-w-96 mx-auto mt-2 mb-24">
+	<div class="w-full max-w-96 mx-auto mt-6 mb-24">
 		<Stepper
 			selectedButtonColor={colors.primary[300]}
 			selectedTextColor={colors.primary[500]}
@@ -339,7 +339,7 @@
 					on:clicked={() => currentStep--}
 				/>
 				<Button
-					class="min-w-32"
+					class="min-w-48"
 					color="blue"
 					style="normal"
 					text={loading ? 'Starting...' : 'Start Scouting'}
