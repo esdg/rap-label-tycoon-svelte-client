@@ -138,13 +138,14 @@
 						<Button
 							color="primary"
 							style="normal"
-							text={isLoading ? 'Creating your Label...' : 'Create your Label'}
 							altText="Create new label"
 							fullWidth={true}
 							loading={isLoading}
 							disabled={isLoading}
 							on:clicked={handleCreateLabel}
-						/>
+						>
+							{isLoading ? 'Creating your Label...' : 'Create your Label'}
+						</Button>
 					</div>
 				{/if}
 			</div>

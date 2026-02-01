@@ -149,13 +149,14 @@
 					<Button
 						color="primary"
 						style="normal"
-						text={isLoading ? 'Signing In...' : 'Sign In'}
 						altText="Sign in to your account"
 						fullWidth={true}
 						loading={isLoading}
 						disabled={isLoading || isGoogleLoading}
 						on:clicked={handleLogin}
-					/>
+					>
+						{isLoading ? 'Signing In...' : 'Sign In'}
+					</Button>
 
 					<Separator />
 

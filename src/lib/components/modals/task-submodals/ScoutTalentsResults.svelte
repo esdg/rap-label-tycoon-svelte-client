@@ -346,40 +346,44 @@
 				class="w-full sm:w-auto sm:min-w-32 order-last sm:order-first"
 				color="primary"
 				style="hollow"
-				text="Cancel"
 				altText="Cancel scouting task"
 				on:clicked={handleCancel}
-			/>
+			>
+				Cancel
+			</Button>
 
 			{#if taskArtists.length > 1}
 				<div class="flex gap-2 sm:gap-3">
 					<Button
 						class="flex-1 sm:flex-none sm:min-w-32"
 						color="primary"
-						text="Previous"
 						altText="View previous artist"
 						on:clicked={handlePrevious}
 						disabled={activeArtistIndex === 0}
-					/>
+					>
+						Previous
+					</Button>
 					<Button
 						class="flex-1 sm:flex-none sm:min-w-32"
 						color="primary"
-						text="Next"
 						altText="View next artist"
 						on:clicked={handleNext}
 						disabled={!isScoutingArtistsResults(taskResult.results) ||
 							activeArtistIndex >= taskResult.results.discoveredArtists.length - 1}
-					/>
+					>
+						Next
+					</Button>
 				</div>
 			{/if}
 
 			<Button
 				class="w-full sm:w-auto sm:min-w-32"
 				color="secondary"
-				text="Sign contract"
 				altText="Sign contract with this artist"
 				on:clicked={null}
-			/>
+			>
+				Sign contract
+			</Button>
 		</div>
 	</div>
 </section>

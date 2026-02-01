@@ -35,5 +35,7 @@
 	</div>
 	<div class="flex items-center gap-4">
 		<span class="text-gray-400">Welcome, {username}</span>
-		<Button color="red" style="hollow" text="Logout" altText="Sign out" on:clicked={handleLogout} />
+		<Button color="red" style="hollow" altText="Sign out" on:clicked={handleLogout}>
+			Logout
+		</Button>
 	</div> -->

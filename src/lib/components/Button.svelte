@@ -5,7 +5,6 @@
 	export { className as class };
 	export let color: string = 'indigo'; // Background color theme
 	export let style: 'normal' | 'hollow' = 'normal'; // Button style
-	export let text: string = 'Button'; // Button text
 	export let altText: string = ''; // Alternative text for accessibility
 	export let disabled: boolean = false; // Disabled state
 	export let loading: boolean = false; // Loading state
@@ -43,14 +42,15 @@
 	$: stateClasses =
 		disabled || loading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg active:scale-95';
 	$: loadingClass = loading ? 'cursor-wait' : '';
+	$: ariaLabel = altText || undefined; // Allow native label from slot text when altText is empty
 </script>
 
 <button
 	on:click={handleClick}
 	class="{baseClasses} {colorClasses} {stateClasses} {loadingClass} {widthClass} {className} uppercase font-normal select-none"
 	{disabled}
-	aria-label={altText || text}
+	aria-label={ariaLabel}
 	type="button"
 >
-	{text}
+	<slot>Button</slot>
 </button>

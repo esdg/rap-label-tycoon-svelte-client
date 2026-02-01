@@ -184,13 +184,14 @@
 					<Button
 						color="primary"
 						style="normal"
-						text={isLoading ? 'Creating Account...' : 'Create Account'}
 						altText="Create new account"
 						fullWidth={true}
 						loading={isLoading}
 						disabled={isLoading || isGoogleLoading}
 						on:clicked={handleCreateAccount}
-					/>
+					>
+						{isLoading ? 'Creating Account...' : 'Create Account'}
+					</Button>
 
 					<Separator />
 

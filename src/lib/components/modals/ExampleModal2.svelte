@@ -24,18 +24,20 @@
 		<Button
 			color="green"
 			style="normal"
-			text="Confirm"
 			altText="Confirm action"
 			fullWidth={true}
 			on:clicked={() => {}}
-		/>
+		>
+			Confirm
+		</Button>
 		<Button
 			color="gray"
 			style="hollow"
-			text="Cancel"
 			altText="Cancel action"
 			fullWidth={true}
 			on:clicked={() => {}}
-		/>
+		>
+			Cancel
+		</Button>
 	</div>
 </div>

@@ -189,10 +189,11 @@
 			<Button
 				color="primary"
 				style="normal"
-				text="Scout Talents"
 				altText="Open scout talents modal"
 				on:clicked={openScoutModal}
-			/>
+			>
+				Scout Talents
+			</Button>
 		</div>
 
 		<!-- Ongoing Tasks Section -->

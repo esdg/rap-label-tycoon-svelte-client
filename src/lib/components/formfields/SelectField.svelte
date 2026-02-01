@@ -30,7 +30,7 @@
 
 <div class="relative {className}">
 	<div
-		class="2xl:flex-row-reverse 2xl:w-24 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block flex items-center text-right"
+		class="2xl:flex-row-reverse 2xl:w-40 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block flex items-center text-right"
 	>
 		<label
 			for={labelFor}

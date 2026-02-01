@@ -216,13 +216,15 @@
 	<!-- Main Content - Scrollable -->
 	<div class="flex-1 overflow-y-auto mt-8 sm:mt-16 lg:mt-24">
 		<ContentPanel
-			class="pt-0 p-4 max-w-xl lg:max-w-3xl xl:max-w-4xl mx-auto 2xl:pl-32"
+			class="pt-0 p-4 max-w-xl lg:max-w-3xl xl:max-w-4xl mx-auto"
 			activeStepIndex={currentStep}
 			transition="slide"
 			duration={300}
 		>
 			<!-- Step 1: Scouting Parameters -->
-			<ContentPanelItem class="space-y-8 sm:space-y-12 lg:space-y-16 xl:space-y-20 text-white pb-8">
+			<ContentPanelItem
+				class="space-y-8 sm:space-y-12 lg:space-y-16 xl:space-y-20 text-white pb-8 2xl:pl-40"
+			>
 				<SelectField
 					label="Scout for"
 					choices={scoutingTypeChoices}
@@ -342,18 +344,20 @@
 						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 						color="primary"
 						style="hollow"
-						text="Cancel"
 						altText="Cancel scouting task"
 						on:clicked={handleCancel}
-					/>
+					>
+						Cancel
+					</Button>
 					<Button
 						disabled={selectedGenres.size === 0}
 						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 						color="primary"
-						text="Next"
 						altText="Proceed to next step"
 						on:clicked={handleNextStep}
-					/>
+					>
+						Next
+					</Button>
 				</ContentPanelItem>
 
 				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
@@ -361,27 +365,30 @@
 						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 						color="primary"
 						style="hollow"
-						text="Cancel"
 						altText="Cancel scouting task"
 						on:clicked={handleCancel}
-					/>
+					>
+						Cancel
+					</Button>
 					<Button
 						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 						color="primary"
 						style="hollow"
-						text="Previous"
 						altText="Proceed to previous step"
 						on:clicked={handlePreviousStep}
-					/>
+					>
+						Previous
+					</Button>
 					<Button
 						class="w-full sm:w-auto sm:min-w-48 lg:min-w-56 xl:min-w-64"
 						color="secondary"
 						style="normal"
-						text={loading ? 'Starting...' : 'Start Scouting'}
 						altText="Start scouting for talents"
 						{loading}
 						on:clicked={handleStartScouting}
-					/>
+					>
+						{loading ? 'Starting...' : 'Start Scouting'}
+					</Button>
 				</ContentPanelItem>
 			</ContentPanel>
 		</div>
