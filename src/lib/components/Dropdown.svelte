@@ -83,8 +83,8 @@
 		type="button"
 		on:click={toggleDropdown}
 		{disabled}
-		class="h-8 px-4 min-w-32 border rounded-lg text-left flex items-center justify-between
-			transition-all duration-200 text-sm font-medium font-thin select-none
+		class="h-8 lg:h-10 xl:h-12 px-4 lg:px-5 xl:px-6 min-w-32 lg:min-w-40 xl:min-w-48 border rounded-lg text-left flex items-center justify-between
+			transition-all duration-200 text-sm lg:text-base xl:text-lg font-medium font-thin select-none
 			{disabled
 			? 'bg-gray-900 border-gray-700 text-gray-300 cursor-not-allowed'
 			: isOpen
@@ -100,7 +100,8 @@
 			{displayText}
 		</span>
 		<svg
-			class="w-5 h-5 transition-transform duration-200 {isOpen && direction === 'down'
+			class="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 transition-transform duration-200 {isOpen &&
+			direction === 'down'
 				? 'rotate-180'
 				: isOpen && direction === 'up'
 					? 'rotate-0'

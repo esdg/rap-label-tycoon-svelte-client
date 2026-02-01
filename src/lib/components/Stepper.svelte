@@ -11,6 +11,7 @@
 	export let textColor: string = '#6b7280';
 	export let selectedTextColor: string = '#1f2937';
 	export let stepLabels: string[] = [];
+	export let hideLabelsOnMobile: boolean = false;
 
 	const dispatch = createEventDispatcher<{ stepClicked: number }>();
 
@@ -38,7 +39,8 @@
 				<button
 					type="button"
 					on:click={() => handleStepClick(index)}
-					class="text-xs mb-2 w-full text-center transition-colors cursor-pointer hover:opacity-80"
+					class="text-xs lg:text-base mb-2 w-full text-center transition-colors cursor-pointer hover:opacity-80
+						{hideLabelsOnMobile ? 'hidden sm:block' : ''}"
 					style="color: {index === activeStepIndex ? selectedTextColor : textColor};"
 				>
 					{label}
@@ -48,10 +50,8 @@
 				<button
 					type="button"
 					on:click={() => handleStepClick(index)}
-					class="w-full rounded transition-all cursor-pointer hover:opacity-90"
-					style="height: 7px; background-color: {index === activeStepIndex
-						? selectedButtonColor
-						: buttonColor};"
+					class="w-full rounded transition-all cursor-pointer hover:opacity-90 h-2"
+					style="background-color: {index === activeStepIndex ? selectedButtonColor : buttonColor};"
 					aria-label="Step {index + 1}: {label}"
 					aria-current={index === activeStepIndex ? 'step' : undefined}
 				/>
@@ -59,13 +59,3 @@
 		{/each}
 	</div>
 </div>
-
-<style>
-	.stepper-container {
-		/* Container can be sized via parent/class */
-	}
-
-	.step-wrapper {
-		/* Individual step wrapper */
-	}
-</style>

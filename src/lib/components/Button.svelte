@@ -21,24 +21,20 @@
 
 	// Color mapping for normal style
 	const normalColorMap: Record<string, string> = {
-		indigo: 'bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600',
-		blue: 'bg-primary-500 text-white hover:bg-primary-600 border-primary-600',
-		green: 'bg-green-600 text-white hover:bg-green-700 border-green-600',
-		red: 'bg-red-600 text-white hover:bg-red-700 border-red-600',
+		primary: 'bg-primary-500 text-white hover:bg-primary-600 border-primary-600',
+		secondary: 'bg-secondary-500 text-white hover:bg-secondary-600 border-secondary-600',
 		gray: 'bg-gray-600 text-white hover:bg-gray-700 border-gray-600'
 	};
 
 	// Color mapping for hollow style
 	const hollowColorMap: Record<string, string> = {
-		indigo: 'text-indigo-600 border-indigo-300 hover:border-indigo-400 hover:bg-indigo-50',
-		blue: 'text-gray-500 border-gray-500 hover:border-primary-400 hover:text-primary-500',
-		green: 'text-green-600 border-green-300 hover:border-green-400 hover:bg-green-50',
-		red: 'text-red-600 border-red-300 hover:border-red-400 hover:bg-red-50',
+		primary: 'text-gray-500 border-gray-500 hover:border-primary-400 hover:text-primary-500',
+		secondary: 'text-gray-500 border-gray-500 hover:border-secondary-400 hover:text-secondary-500',
 		gray: 'text-gray-800 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
 	};
 
 	$: baseClasses =
-		'px-6 py-3 rounded-md font-semibold text-base border transition-all duration-200';
+		'px-6 py-3 lg:px-8 lg:py-4 xl:px-10 xl:py-5 rounded-md font-semibold text-base lg:text-lg xl:text-xl border transition-all duration-200';
 	$: widthClass = fullWidth ? 'w-full' : '';
 	$: colorClasses =
 		style === 'normal'

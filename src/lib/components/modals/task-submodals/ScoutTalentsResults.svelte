@@ -11,21 +11,13 @@
 
 	export let taskResult: ScoutingTaskResponse;
 
+	// State
 	let activeArtistIndex = 0;
 	let taskArtists: Artist[] = [];
 	let activeArtist: Artist | undefined;
 	let lastImageUrl: string | null = null;
 
-	function formatSkillLabel(key: string): string {
-		return key
-			.replace(/([a-z])([A-Z])/g, '$1 $2')
-			.replace(/_/g, ' ')
-			.split(' ')
-			.filter(Boolean)
-			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-			.join(' ');
-	}
-
+	// Types
 	type SkillEntry = { label: string; value: number };
 	type SkillSection = {
 		title: string;
@@ -33,14 +25,32 @@
 		skills: SkillEntry[];
 	};
 
+	// Reactive statements
+	$: taskArtists = isScoutingArtistsResults(taskResult.results)
+		? taskResult.results.discoveredArtists
+		: [];
+
+	$: {
+		const lastIndex = taskArtists.length - 1;
+		if (taskArtists.length === 0 && activeArtistIndex !== 0) {
+			activeArtistIndex = 0;
+		} else if (lastIndex >= 0 && activeArtistIndex > lastIndex) {
+			activeArtistIndex = lastIndex;
+		}
+	}
+
+	$: activeArtist = taskArtists.length > 0 ? taskArtists[activeArtistIndex] : undefined;
+
+	$: if (activeArtist?.profileImage && activeArtist.profileImage !== lastImageUrl) {
+		modalStore.updateData({ imageUrl: activeArtist.profileImage });
+		lastImageUrl = activeArtist.profileImage;
+	}
+
+	// Type guards
 	function isScoutingArtistsResults(
 		results: ScoutingTaskResponse['results']
 	): results is ScoutingArtistsResults {
 		return Boolean(results && Array.isArray((results as ScoutingArtistsResults).discoveredArtists));
-	}
-
-	function handleCancel() {
-		modalStore.close();
 	}
 
 	function isRapper(artist: Artist): artist is Rapper {
@@ -51,11 +61,19 @@
 		return Boolean((artist as Beatmaker).beatmakingSkills);
 	}
 
-	function buildSkillEntries(skillObj: Record<string, number> | undefined): SkillEntry[] {
-		if (!skillObj) {
-			return [];
-		}
+	// Utility functions
+	function formatSkillLabel(key: string): string {
+		return key
+			.replace(/([a-z])([A-Z])/g, '$1 $2')
+			.replace(/_/g, ' ')
+			.split(' ')
+			.filter(Boolean)
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ');
+	}
 
+	function buildSkillEntries(skillObj: Record<string, number> | undefined): SkillEntry[] {
+		if (!skillObj) return [];
 		return Object.entries(skillObj).map(([key, value]) => ({
 			label: formatSkillLabel(key),
 			value: Math.round(value ?? 0)
@@ -109,138 +127,170 @@
 		return taskArtists.map((artist) => artist.stageName);
 	}
 
+	// Event handlers
+	function handleCancel() {
+		modalStore.close();
+	}
+
 	function handleStepChange(event: { detail: number }) {
 		activeArtistIndex = event.detail;
 	}
 
-	$: taskArtists = isScoutingArtistsResults(taskResult.results)
-		? taskResult.results.discoveredArtists
-		: [];
-
-	$: {
-		const lastIndex = taskArtists.length - 1;
-		if (taskArtists.length === 0 && activeArtistIndex !== 0) {
-			activeArtistIndex = 0;
-		} else if (lastIndex >= 0 && activeArtistIndex > lastIndex) {
-			activeArtistIndex = lastIndex;
+	function handlePrevious() {
+		if (activeArtistIndex > 0) {
+			activeArtistIndex -= 1;
 		}
 	}
 
-	$: activeArtist = taskArtists.length > 0 ? taskArtists[activeArtistIndex] : undefined;
-
-	$: if (activeArtist?.profileImage && activeArtist.profileImage !== lastImageUrl) {
-		modalStore.updateData({ imageUrl: activeArtist.profileImage });
-		lastImageUrl = activeArtist.profileImage;
+	function handleNext() {
+		if (
+			isScoutingArtistsResults(taskResult.results) &&
+			activeArtistIndex < taskResult.results.discoveredArtists.length - 1
+		) {
+			activeArtistIndex += 1;
+		}
 	}
 </script>
 
-<section class="flex flex-col h-screen overflow-hidden" aria-label="Scout Talents">
-	<div class="w-full max-w-96 mx-auto mt-6">
-		<Stepper
-			selectedButtonColor={colors.primary[300]}
-			selectedTextColor={colors.primary[500]}
-			buttonColor="dimgray"
-			stepLabels={getAllArtistsNames()}
-			activeStepIndex={activeArtistIndex}
-			on:stepClicked={handleStepChange}
-		/>
-	</div>
+<section class="flex flex-col h-full overflow-hidden" aria-label="Scout Talents Results">
+	<!-- Stepper -->
+	{#if taskArtists.length > 1}
+		<div
+			class="flex-shrink-0 w-full max-w-96 lg:max-w-2xl mx-auto mt-4 sm:mt-6 lg:mt-8 mb-6 px-4 sm:px-0"
+		>
+			<Stepper
+				selectedButtonColor={colors.primary[300]}
+				selectedTextColor={colors.primary[500]}
+				buttonColor="dimgray"
+				stepLabels={getAllArtistsNames()}
+				activeStepIndex={activeArtistIndex}
+				hideLabelsOnMobile={true}
+				on:stepClicked={handleStepChange}
+			/>
+		</div>
+	{/if}
 
-	<div class="flex-grow h-full overflow-x-auto">
+	<!-- Main Content - Scrollable -->
+	<div class="flex-1 overflow-y-auto">
 		<ContentPanel
 			class="pt-0 p-4 mx-auto h-full"
 			activeStepIndex={activeArtistIndex}
 			transition="slide"
 			duration={300}
 		>
-			<div class="flex-grow p-12">
+			<div class="flex-grow p-4 sm:p-12">
 				{#if isScoutingArtistsResults(taskResult.results)}
 					{#if taskResult.results.discoveredArtists.length === 0}
 						<p class="text-center text-gray-400">No artists were discovered during scouting.</p>
 					{:else}
-						<ul class="w-full max-w-5xl mx-auto space-y-16">
+						<ul class="w-full max-w-5xl mx-auto space-y-12 sm:space-y-16">
 							{#each taskResult.results.discoveredArtists as artist}
 								<ContentPanelItem>
 									{@const sections = getArtistSkillSections(artist)}
 									<li class="list-none pb-12 border-b border-white/5 last:border-none last:pb-0">
-										<h3 class="text-5xl font-black text-white uppercase">{artist.stageName}</h3>
-										<p class="text-3xl font-thin text-gray-400 uppercase">
+										<!-- Artist Header -->
+										<h3
+											class="text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase leading-tight"
+										>
+											{artist.stageName}
+										</h3>
+										<p class="text-xl sm:text-3xl lg:text-4xl font-thin text-gray-400 uppercase">
 											{artist.firstName}
 											{artist.lastName}
 										</p>
-										<div class="pt-6 flex gap-6 flex-col text-sm">
-											<div class="flex gap-4">
+
+										<!-- Artist Details -->
+										<div class="pt-6 lg:pt-8 flex gap-6 lg:gap-8 flex-col text-sm">
+											<!-- Bio -->
+											<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
 												<div
-													class="text-primary-500 flex-none w-32 text-right uppercase tracking-[0.3em] text-xs"
+													class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm"
 												>
 													Bio
 												</div>
-												<p class="text-xs text-gray-300 flex-1 leading-relaxed">{artist.bio}</p>
+												<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
+													{artist.bio}
+												</p>
 											</div>
-											<div class="flex gap-4">
+
+											<!-- Background -->
+											<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
 												<div
-													class="text-primary-500 flex-none w-32 text-right uppercase tracking-[0.3em] text-xs"
+													class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm"
 												>
 													Background
 												</div>
-												<p class="text-xs text-gray-300 flex-1 leading-relaxed">
+												<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
 													{artist.backgroundStory}
 												</p>
 											</div>
-											<div class="flex gap-4">
+
+											<!-- Appearance -->
+											<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
 												<div
-													class="text-primary-500 flex-none w-32 text-right uppercase tracking-[0.3em] text-xs"
+													class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm"
 												>
 													Appearance
 												</div>
-												<p class="text-xs text-gray-300 flex-1 leading-relaxed">
+												<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
 													{artist.physicalDescription}
 												</p>
 											</div>
 										</div>
 
+										<!-- Skills Section -->
 										{#if sections.length}
 											<div
-												class="mt-10 rounded-2xl border border-white/5 bg-[#080B12] p-8 shadow-lg shadow-black/30"
+												class="mt-8 sm:mt-10 lg:mt-12 rounded-xl sm:rounded-2xl border border-white/5 bg-[#080B12] p-4 sm:p-8 lg:p-10 shadow-lg shadow-black/30"
 											>
+												<!-- Legend -->
 												<div
-													class="flex flex-wrap gap-4 text-[11px] font-semibold uppercase tracking-[0.35em] text-gray-400"
+													class="flex flex-wrap gap-3 sm:gap-4 lg:gap-5 text-[10px] sm:text-[11px] lg:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-gray-400"
 												>
 													{#each getLegendItems(sections) as legend}
-														<div class="flex items-center gap-2">
-															<span class={`inline-block h-2 w-6 rounded-full ${legend.colorClass}`}
+														<div class="flex items-center gap-1.5 sm:gap-2">
+															<span
+																class={`inline-block h-1.5 sm:h-2 w-4 sm:w-6 rounded-full ${legend.colorClass}`}
 															></span>
-															{legend.label}
+															<span class="hidden sm:inline">{legend.label}</span>
 														</div>
 													{/each}
 												</div>
-												<div class="mt-6 grid gap-8 lg:grid-cols-2">
+
+												<!-- Skills Grid -->
+												<div
+													class="mt-4 sm:mt-6 lg:mt-8 grid gap-6 sm:gap-8 lg:gap-10 lg:grid-cols-2"
+												>
 													{#each sections as section}
 														<div>
-															<p class="text-xs uppercase tracking-[0.35em] text-gray-500">
+															<p
+																class="text-xs lg:text-sm uppercase tracking-[0.35em] text-gray-500"
+															>
 																{section.title}
 															</p>
-															<div class="mt-3 space-y-3">
+															<div class="mt-2 sm:mt-3 lg:mt-4 space-y-2 sm:space-y-3 lg:space-y-4">
 																{#each section.skills as skill}
-																	<div class="flex items-center gap-4">
+																	<div class="flex items-center gap-2 sm:gap-4 lg:gap-5">
 																		<span
-																			class="w-32 text-[11px] uppercase tracking-[0.2em] text-gray-400"
-																			>{skill.label}</span
+																			class="w-24 sm:w-32 lg:w-40 text-[10px] sm:text-[11px] lg:text-xs uppercase tracking-[0.1em] sm:tracking-[0.2em] text-gray-400 truncate"
 																		>
+																			{skill.label}
+																		</span>
 																		<div class="flex-1">
 																			<ProgressBar
 																				value={skill.value}
 																				lengthClass="w-full"
-																				thicknessClass="h-1.5"
+																				thicknessClass="h-1.5 lg:h-2"
 																				progressClass={section.colorClass}
 																				backgroundClass="bg-white/10"
 																				ariaLabel={`${section.title} ${skill.label}`}
 																			/>
 																		</div>
 																		<span
-																			class="w-10 text-right text-[11px] font-semibold text-gray-300"
-																			>{skill.value}</span
+																			class="w-10 lg:w-12 text-right text-[11px] lg:text-xs font-semibold text-gray-300"
 																		>
+																			{skill.value}
+																		</span>
 																	</div>
 																{/each}
 															</div>
@@ -258,43 +308,48 @@
 			</div>
 		</ContentPanel>
 	</div>
-	<!-- Actions Bar -->
-	<div class="w-full bg-black py-2 px-4 bt-2 border-t border-gray-700">
-		<div class="flex gap-3 justify-end">
-			<!-- Actions -->
+
+	<!-- Sticky Actions Bar -->
+	<div
+		class="flex-shrink-0 w-full bg-black py-2 sm:py-3 px-3 sm:px-4 border-t border-gray-700 sticky bottom-0"
+	>
+		<div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
 			<Button
-				class="min-w-32"
-				color="blue"
+				class="w-full sm:w-auto sm:min-w-32 order-last sm:order-first"
+				color="primary"
 				style="hollow"
 				text="Cancel"
 				altText="Cancel scouting task"
 				on:clicked={handleCancel}
 			/>
+
+			{#if taskArtists.length > 1}
+				<div class="flex gap-2 sm:gap-3">
+					<Button
+						class="flex-1 sm:flex-none sm:min-w-32"
+						color="primary"
+						text="Previous"
+						altText="View previous artist"
+						on:clicked={handlePrevious}
+						disabled={activeArtistIndex === 0}
+					/>
+					<Button
+						class="flex-1 sm:flex-none sm:min-w-32"
+						color="primary"
+						text="Next"
+						altText="View next artist"
+						on:clicked={handleNext}
+						disabled={!isScoutingArtistsResults(taskResult.results) ||
+							activeArtistIndex >= taskResult.results.discoveredArtists.length - 1}
+					/>
+				</div>
+			{/if}
+
 			<Button
-				class="min-w-32"
-				color="blue"
-				text="Previous"
-				altText="Proceed to next step"
-				on:clicked={activeArtistIndex > 0 ? () => (activeArtistIndex -= 1) : null}
-				disabled={activeArtistIndex === 0}
-			/>
-			<Button
-				class="min-w-32"
-				color="blue"
-				text="Next"
-				altText="Proceed to next step"
-				on:clicked={isScoutingArtistsResults(taskResult.results) &&
-				activeArtistIndex < taskResult.results.discoveredArtists.length - 1
-					? () => (activeArtistIndex += 1)
-					: null}
-				disabled={!isScoutingArtistsResults(taskResult.results) ||
-					activeArtistIndex >= taskResult.results.discoveredArtists.length - 1}
-			/>
-			<Button
-				class="min-w-32"
-				color="blue"
+				class="w-full sm:w-auto sm:min-w-32"
+				color="secondary"
 				text="Sign contract"
-				altText="Proceed to next step"
+				altText="Sign contract with this artist"
 				on:clicked={null}
 			/>
 		</div>

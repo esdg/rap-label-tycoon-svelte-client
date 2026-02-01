@@ -52,14 +52,14 @@
 
 	<!-- Modal container -->
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center p-4"
+		class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4"
 		style="font-family: 'Roboto', sans-serif;"
 	>
 		{#if modalState.type === 'task-modal'}
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<div
-				class="task-modal-shell relative w-full bg-white shadow-lg transition-all duration-300 animate-in fade-in zoom-in-95"
+				class="task-modal-shell relative bg-app shadow-lg transition-all duration-300 animate-in fade-in zoom-in-95"
 				role="dialog"
 				aria-modal="true"
 				aria-label="Task modal"
@@ -138,11 +138,31 @@
 	}
 
 	.task-modal-shell {
-		--task-scale: min(calc(100vw / 1920), calc(100vh / 1080));
-		width: min(1408px, calc(100vw - 2rem));
-		height: min(704px, calc(100vh - 2rem));
+		width: calc(100vw - 4rem);
+		height: calc(100vh - 4rem);
+		max-width: 1920px;
+		max-height: 1080px;
 		overflow: hidden;
 		border-radius: 9px;
+	}
+
+	/* On mobile and tablet, allow modal to take full available space */
+	@media (max-width: 1024px) {
+		.task-modal-shell {
+			width: calc(100vw - 1rem);
+			height: calc(100vh - 1rem);
+			border-radius: 8px;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.task-modal-shell {
+			width: 100vw;
+			height: 100vh;
+			max-width: none;
+			max-height: none;
+			border-radius: 0;
+		}
 	}
 
 	@keyframes fadeIn {

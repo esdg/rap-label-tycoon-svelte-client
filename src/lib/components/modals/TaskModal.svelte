@@ -30,8 +30,9 @@
 <div
 	class="flex flex-col lg:flex-row h-full w-full rounded-lg overflow-hidden bg-app border border-gray-700 shadow-lg"
 >
+	<!-- Hero section - hidden on mobile, visible on larger screens -->
 	<div
-		class="grid h-128 md:h-auto md:basis-1/3 md:overflow-hidden relative select-none"
+		class="hidden md:grid md:h-auto md:basis-1/3 md:overflow-hidden relative select-none"
 		aria-hidden="true"
 	>
 		<Hero
@@ -45,24 +46,16 @@
 		</Hero>
 	</div>
 
-	<div class="flex-1 flex flex-col gap-6 min-w-0 min-h-0 relative overflow-hidden">
-		<div class="h-full">
-			<div
-				class="flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto h-full"
-				role="region"
-				aria-live="polite"
-			>
-				{#if activeSubModal === 'sign'}
-					<SignArtist />
-				{:else if activeSubModal === 'scout-results'}
-					<ScoutTalentsResults
-						taskResult={data?.scoutingTaskResponse}
-						on:imageChange={handleImageChange}
-					/>
-				{:else}
-					<ScoutTalents />
-				{/if}
-			</div>
-		</div>
+	<div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+		{#if activeSubModal === 'sign'}
+			<SignArtist />
+		{:else if activeSubModal === 'scout-results'}
+			<ScoutTalentsResults
+				taskResult={data?.scoutingTaskResponse}
+				on:imageChange={handleImageChange}
+			/>
+		{:else}
+			<ScoutTalents />
+		{/if}
 	</div>
 </div>

@@ -34,16 +34,18 @@
 	>
 		<label
 			for={labelFor}
-			class="text-base font-medium mb-2 uppercase tracking-wider uppercase font-thin
+			class="text-base lg:text-lg xl:text-xl font-medium mb-2 uppercase tracking-wider uppercase font-thin
 			select-none"
 		>
 			{label}
 			{#if mode === 'multi'}
-				<span class="text-xs text-primary-300 normal-case">(multi-select)</span>
+				<span class="text-xs lg:text-sm xl:text-base text-primary-300 normal-case"
+					>(multi-select)</span
+				>
 			{/if}
 		</label>
 	</div>
-	<div class="flex flex-wrap gap-y-2 gap-x-1">
+	<div class="flex flex-wrap gap-y-2 lg:gap-y-3 xl:gap-y-4 gap-x-1 lg:gap-x-2 xl:gap-x-3">
 		{#each choices as choice, index}
 			{@const selected =
 				mode === 'toggle'
@@ -51,7 +53,7 @@
 					: value instanceof Set && value.has(choice.value)}
 			<button
 				id={index === 0 && labelFor ? labelFor : undefined}
-				class="h-8 px-4 min-w-32 border rounded transition-all duration-200 font-medium text-sm uppercase font-thin select-none flex items-center justify-center
+				class="h-8 lg:h-10 xl:h-12 px-4 lg:px-6 xl:px-8 min-w-32 lg:min-w-36 xl:min-w-44 border rounded transition-all duration-200 font-medium text-sm lg:text-base xl:text-lg uppercase font-thin select-none flex items-center justify-center
 					{selected
 					? 'border-secondary-600 text-white shadow-sm'
 					: 'border-gray-700 text-white hover:border-secondary-600 hover:shadow-sm'}"

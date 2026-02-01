@@ -181,10 +181,10 @@
 </script>
 
 <div
-	class="min-h-screen text-white p-8 overflow-hidden h-screen"
+	class="min-h-screen text-white p-4 sm:p-8 overflow-x-hidden"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
-	<div class="space-y-8 h-screen overflow-none">
+	<div class="space-y-6 sm:space-y-8">
 		<div>
 			<Button
 				color="blue"
@@ -206,7 +206,7 @@
 			{:else if tasks.length === 0}
 				<p class="text-gray-400">No ongoing tasks</p>
 			{:else}
-				<div class="grid justify-start grid-flow-col gap-4">
+				<div class="flex flex-wrap gap-4">
 					{#each tasks as task}
 						<ScoutingTask
 							state={getTaskStatus(task)}
