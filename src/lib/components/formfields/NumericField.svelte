@@ -36,7 +36,7 @@
 	};
 </script>
 
-<div class="relative min-w-16 {className}">
+<div class="relative min-w-24 {className}">
 	{#if label}<FormLabel {id}>{label}</FormLabel>{/if}
 
 	<div class="relative">

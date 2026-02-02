@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { colors } from '$lib/theme';
 	import { modalStore } from '$lib/stores/modal';
+	import { label } from '$lib/stores/label';
+	import { player } from '$lib/stores/player';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
@@ -12,12 +14,69 @@
 	import Button from '$lib/components/Button.svelte';
 	import type { ScoutingCostPrediction } from '$lib/types/scouting';
 	import CostEstimation from './CostEstimation.svelte';
+	import { predictSignArtistContractCost, createSignArtistContractTask } from '$lib/api';
+	import type { SignArtistContractCostRequest } from '$lib/types/contracts';
+	import type { Artist } from '$lib/types/nonPlayingCharacter';
 
 	// State
 	let activeStepIndex = 0;
-	let totalSteps = 3;
+	const totalSteps = 3;
 	let loading = false;
 	let loadingCost = false;
+	let costPrediction: ScoutingCostPrediction | null = null;
+	let costPredictionRequestId = 0;
+
+	const modalData = modalStore.getData();
+	const artist = (modalData?.artist as Artist | undefined) ?? null;
+
+	let contractType: SelectGroupChoice = 0;
+	let contractLengthYears: number | null = 1;
+	let contractAlbums: number | null = 0;
+	let contractEps: number | null = 0;
+	let contractMixtapes: number | null = 0;
+	let contractSingles: number | null = 0;
+	let signingBonus = 0;
+	let advance = 0;
+	let royaltyPercentage = 0;
+	let submitError: string | null = null;
+
+	$: totalReleases =
+		(contractAlbums ?? 0) + (contractEps ?? 0) + (contractMixtapes ?? 0) + (contractSingles ?? 0);
+	$: usesDuration = contractType === 0;
+	$: readyForCostPrediction =
+		Boolean($label && $player && artist?.id) &&
+		activeStepIndex >= 1 &&
+		((usesDuration && contractLengthYears !== null && contractLengthYears > 0) ||
+			(!usesDuration && totalReleases > 0));
+
+	$: if (!readyForCostPrediction) {
+		costPrediction = null;
+	}
+
+	$: if (readyForCostPrediction) {
+		fetchCostPrediction();
+	}
+
+	async function handleMakeOffer() {
+		const payload = buildCostPredictionRequest();
+		if (!payload) {
+			submitError = 'Missing contract details. Please fill out the form.';
+			return;
+		}
+
+		loading = true;
+		submitError = null;
+
+		try {
+			await createSignArtistContractTask(payload);
+			modalStore.close();
+		} catch (error) {
+			submitError = 'Failed to make an offer. Please try again.';
+			console.error('Failed to create sign-artist contract task', error);
+		} finally {
+			loading = false;
+		}
+	}
 
 	// Event handlers
 	function handleCancel() {
@@ -40,13 +99,62 @@
 		}
 	}
 
-	const artist = modalStore.getData().artist;
+	function formatYearsToTimeSpan(years: number): string {
+		// Convert years to an approximate TimeSpan string understood by the API (d.hh:mm:ss)
+		const days = Math.max(0, years) * 365;
+		return `${days}.00:00:00`;
+	}
 
-	let value: number | null = null;
+	function buildCostPredictionRequest(): SignArtistContractCostRequest | null {
+		if (!$label || !$player || !artist?.id) return null;
 
-	let choice: SelectGroupChoice = 0;
+		const sanitize = (value: number | null) => Math.max(0, value ?? 0);
 
-	let costPrediction: ScoutingCostPrediction | null = null;
+		const duration =
+			usesDuration && contractLengthYears !== null && contractLengthYears > 0
+				? formatYearsToTimeSpan(sanitize(contractLengthYears))
+				: null;
+
+		return {
+			labelId: $label.id,
+			artistId: artist.id,
+			workerId: $player.id,
+			numberOfReleases: {
+				albums: sanitize(contractAlbums),
+				eps: sanitize(contractEps),
+				mixtapes: sanitize(contractMixtapes),
+				singles: sanitize(contractSingles)
+			},
+			duration,
+			signingBonus: sanitize(signingBonus),
+			royaltyPercentage: sanitize(royaltyPercentage),
+			advance: sanitize(advance)
+		};
+	}
+
+	async function fetchCostPrediction() {
+		const payload = buildCostPredictionRequest();
+		if (!payload) return;
+
+		const requestId = ++costPredictionRequestId;
+		loadingCost = true;
+
+		try {
+			const prediction = await predictSignArtistContractCost(payload);
+			if (requestId === costPredictionRequestId) {
+				costPrediction = prediction;
+			}
+		} catch (error) {
+			if (requestId === costPredictionRequestId) {
+				costPrediction = null;
+			}
+			console.error('Failed to fetch contract cost prediction', error);
+		} finally {
+			if (requestId === costPredictionRequestId) {
+				loadingCost = false;
+			}
+		}
+	}
 </script>
 
 <section class="flex flex-col h-full overflow-hidden" aria-label="Sign contract">
@@ -75,124 +183,158 @@
 			><div class="flex-grow p-4 sm:p-12">
 				<ContentPanelItem>
 					<!-- Step 1: Artist Info -->
-					<!-- svelte-ignore missing-declaration -->
-					<ArtistDetails {artist} />
+					{#if artist}
+						<!-- svelte-ignore missing-declaration -->
+						<ArtistDetails {artist} />
+					{:else}
+						<div class="text-center text-gray-400">No artist selected.</div>
+					{/if}
 				</ContentPanelItem>
 				<ContentPanelItem>
 					<!-- Step 2: Contract Terms -->
-					<SelectGroupField class="h-xl" bind:selected={choice}>
-						<div slot="left">
-							<!-- left content -->
-							<div class="mb-8">
-								<span class="block text-center">Sign for a fixed time period.</span>
-								<span class="block text-center text-xs font-light leading-snug"
-									>The artist stays under contract for the full duration, releasing music freely
-									during that time. When the contract ends, they’re free to leave — no matter how
-									many projects were released.</span
+					<div class="space-y-8 max-w-5xl mx-auto w-full">
+						<SelectGroupField class="h-xl w-full" bind:selected={contractType}>
+							<div slot="left">
+								<!-- left content -->
+								<div class="mb-8">
+									<span class="block text-center">Sign for a fixed time period.</span>
+									<span class="block text-center text-xs font-light leading-snug"
+										>The artist stays under contract for the full duration, releasing music freely
+										during that time. When the contract ends, they’re free to leave — no matter how
+										many projects were released.</span
+									>
+								</div>
+								<div class="flex flex-col items-center gap-3">
+									<label
+										class="block w-18 text-center uppercase font-thin select-none"
+										for="contract-length">Contract Length</label
+									>
+									<NumericField
+										class="w-40"
+										id="contract-length"
+										bind:value={contractLengthYears}
+										step={1}
+										suffix="years"
+										min={0}
+										max={4}
+									/>
+								</div>
+							</div>
+							<div slot="right">
+								<!-- right content -->
+								<div class="mb-8">
+									<span class="block text-center">Sign for a set number of projects.</span>
+									<span class="block text-center text-xs font-light leading-snug"
+										>The contract ends once the artist delivers the agreed number of releases
+										(albums, EPs, mixtapes, or singles), regardless of how long it takes.</span
+									>
+								</div>
+								<div
+									class="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-4 sm:gap-6 justify-items-center w-full"
 								>
+									<div class="flex flex-col items-center gap-2">
+										<label
+											class="block w-18 text-center uppercase font-thin select-none"
+											for="contract-albums">Albums</label
+										>
+										<NumericField
+											id="contract-albums"
+											bind:value={contractAlbums}
+											step={1}
+											min={0}
+											max={5}
+										/>
+									</div>
+									<div class="flex flex-col items-center gap-2">
+										<label
+											class="block w-18 text-center uppercase font-thin select-none"
+											for="contract-ep">EP</label
+										>
+										<NumericField
+											id="contract-ep"
+											bind:value={contractEps}
+											step={1}
+											min={0}
+											max={10}
+										/>
+									</div>
+									<div class="flex flex-col items-center gap-2">
+										<label
+											class="block w-18 text-center uppercase font-thin select-none"
+											for="contract-mixtapes">Mixtapes</label
+										>
+										<NumericField
+											id="contract-mixtapes"
+											bind:value={contractMixtapes}
+											step={1}
+											min={0}
+											max={5}
+										/>
+									</div>
+									<div class="flex flex-col items-center gap-2">
+										<label
+											class="block w-18 text-center uppercase font-thin select-none"
+											for="contract-singles">Singles</label
+										>
+										<NumericField
+											id="contract-singles"
+											bind:value={contractSingles}
+											step={1}
+											min={0}
+											max={30}
+										/>
+									</div>
+								</div>
+							</div>
+						</SelectGroupField>
+						<div
+							class="grid w-full gap-4 grid-cols-1 sm:grid-cols-2 text-white max-w-2xl mx-auto items-stretch"
+						>
+							<div class="grow flex flex-wrap gap-2 justify-center items-center">
+								<label
+									class="block w-20 text-center uppercase font-thin select-none"
+									for="contract-bonus">Bonus</label
+								>
+								<NumericField
+									class="w-full max-w-44"
+									id="contract-bonus"
+									bind:value={signingBonus}
+									step={100}
+									suffix="$"
+									min={0}
+									max={10000}
+								/>
 							</div>
 							<div class="flex flex-wrap gap-2 justify-center items-center">
 								<label
-									class="block w-18 text-center uppercase font-thin select-none"
-									for="contract-length">Contract Length</label
+									class="block w-20 text-center uppercase font-thin select-none"
+									for="contract-advance">Advance</label
 								>
 								<NumericField
-									class="w-40"
-									id="contract-length"
-									bind:value
-									step={1}
-									suffix="years"
+									class="w-full max-w-44"
+									id="contract-advance"
+									bind:value={advance}
+									step={100}
+									suffix="$"
 									min={0}
-									max={4}
+									max={10000}
 								/>
 							</div>
-						</div>
-						<div slot="right">
-							<!-- right content -->
-							<div class="mb-8">
-								<span class="block text-center">Sign for a set number of projects.</span>
-								<span class="block text-center text-xs font-light leading-snug"
-									>The contract ends once the artist delivers the agreed number of releases (albums,
-									EPs, mixtapes, or singles), regardless of how long it takes.</span
+							<div class="flex flex-wrap gap-2 justify-center items-center">
+								<label
+									class="block w-20 text-center uppercase font-thin select-none"
+									for="contract-royalties">Royalties</label
 								>
+								<NumericField
+									class="w-full max-w-44"
+									id="contract-royalties"
+									bind:value={royaltyPercentage}
+									step={1}
+									suffix="%"
+									min={0}
+									max={80}
+								/>
 							</div>
-							<div class="grid grid-cols-2 gap-4 justify-center">
-								<div class="flex flex-wrap gap-2 justify-center items-center">
-									<label
-										class="block w-18 text-center uppercase font-thin select-none"
-										for="contract-albums">Albums</label
-									>
-									<NumericField id="contract-albums" bind:value step={1} min={0} max={5} />
-								</div>
-								<div class="flex flex-wrap gap-2 justify-center items-center">
-									<label
-										class="block w-18 text-center uppercase font-thin select-none"
-										for="contract-ep">EP</label
-									>
-									<NumericField id="contract-ep" bind:value step={1} min={0} max={10} />
-								</div>
-								<div class="flex flex-wrap gap-2 justify-center items-center">
-									<label
-										class="block w-18 text-center uppercase font-thin select-none"
-										for="contract-mixtapes">Mixtapes</label
-									>
-									<NumericField id="contract-mixtapes" bind:value step={1} min={0} max={5} />
-								</div>
-								<div class="flex flex-wrap gap-2 justify-center items-center">
-									<label
-										class="block w-18 text-center uppercase font-thin select-none"
-										for="contract-singles">Singles</label
-									>
-									<NumericField id="contract-singles" bind:value step={1} min={0} max={30} />
-								</div>
-							</div>
-						</div>
-					</SelectGroupField>
-					<div class="grid gap-4 grid-cols-2 text-white mt-8">
-						<div class="flex flex-wrap gap-2 justify-center items-center">
-							<label
-								class="block w-18 text-center uppercase font-thin select-none"
-								for="contract-bonus">Bonus</label
-							>
-							<NumericField
-								class="w-40"
-								id="contract-bonus"
-								bind:value
-								step={100}
-								suffix="$"
-								min={0}
-								max={10000}
-							/>
-						</div>
-						<div class="flex flex-wrap gap-2 justify-center items-center">
-							<label
-								class="block w-18 text-center uppercase font-thin select-none"
-								for="contract-advance">Advance</label
-							>
-							<NumericField
-								class="w-40"
-								id="contract-advance"
-								bind:value
-								step={100}
-								suffix="$"
-								min={0}
-								max={10000}
-							/>
-						</div>
-						<div class="flex flex-wrap gap-2 justify-center items-center">
-							<label
-								class="block w-18 text-center uppercase font-thin select-none"
-								for="contract-royalties">Royalties</label
-							>
-							<NumericField
-								class="w-40"
-								id="contract-royalties"
-								bind:value
-								step={1}
-								suffix="%"
-								min={0}
-								max={80}
-							/>
 						</div>
 					</div>
 				</ContentPanelItem>
@@ -204,6 +346,14 @@
 								<div
 									class="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-b-2 border-indigo-600"
 								></div>
+
+								{#if submitError}
+									<div
+										class="flex-shrink-0 px-4 lg:px-6 py-2 bg-error-900/50 text-error-500 text-sm"
+									>
+										{submitError}
+									</div>
+								{/if}
 							</div>
 						{:else if costPrediction}
 							<CostEstimation {costPrediction} />
@@ -293,7 +443,8 @@
 					style="normal"
 					altText="Start scouting for talents"
 					{loading}
-					on:clicked={null}
+					disabled={!readyForCostPrediction || loading}
+					on:clicked={handleMakeOffer}
 				>
 					{loading ? 'Starting...' : 'Make an offer'}
 				</Button>

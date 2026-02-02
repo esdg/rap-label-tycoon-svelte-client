@@ -1,4 +1,5 @@
 import type { ScoutingScope, ScoutingTaskRequest, ScoutingTaskResponse, TaskCreationErrorResponse, ScoutingCostPrediction } from './types/scouting';
+import type { SignArtistContractCostRequest } from './types/contracts';
 import type { Player, CreatePlayerRequest } from './types/player';
 import type { Label } from './types/label';
 
@@ -107,6 +108,46 @@ export async function predictScoutingCost(data: ScoutingTaskRequest): Promise<Sc
     }
 
     return response.json();
+}
+
+export async function predictSignArtistContractCost(
+    data: SignArtistContractCostRequest
+): Promise<ScoutingCostPrediction> {
+    const fullUrl = `${API_BASE_URL}/api/v1/tasks/sign-artist-contract/predict-cost`;
+    const response = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to predict sign-artist contract cost: ${response.statusText}`);
+    }
+
+    return response.json();
+}
+
+export async function createSignArtistContractTask(
+    data: SignArtistContractCostRequest
+): Promise<ScoutingTaskResponse> {
+    const fullUrl = `${API_BASE_URL}/api/v1/tasks/sign-artist-contract`;
+    const response = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(`Failed to create sign-artist contract task: ${response.statusText}`);
+    }
+
+    return result as ScoutingTaskResponse;
 }
 
 // Task API functions
