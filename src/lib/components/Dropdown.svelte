@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { clickOutside } from '$lib/utils/clickOutside';
+	import FormLabel from './formfields/FormLabel.svelte';
 
 	// Props
 	let className = '';
@@ -61,12 +62,7 @@
 </script>
 
 {#if label}
-	<label
-		for={dropdownId}
-		class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2"
-	>
-		{label}
-	</label>
+	<FormLabel id={dropdownId}>{label}</FormLabel>
 {/if}
 
 <div

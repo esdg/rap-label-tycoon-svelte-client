@@ -19,6 +19,7 @@
 	function openScoutModal() {
 		modalStore.open('task-modal', {
 			subModal: 'scout',
+			title: 'Scouting talents',
 			imageUrl:
 				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
 		});
@@ -28,6 +29,7 @@
 		modalStore.open('task-modal', {
 			subModal: 'scout-results',
 			scoutingTaskResponse: scoutingTaskResponse,
+			title: 'Scouting talents',
 			imageUrl:
 				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
 		});

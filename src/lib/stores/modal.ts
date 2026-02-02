@@ -19,6 +19,11 @@ const initialState: ModalState = {
 const createModalStore = () => {
     const { subscribe, set, update } = writable<ModalState>(initialState);
 
+    let currentState = initialState;
+    subscribe((state) => {
+        currentState = state;
+    });
+
     return {
         subscribe,
 
@@ -44,6 +49,23 @@ const createModalStore = () => {
         },
 
         /**
+         * Transition from current modal to a new one with animation
+         * @param type - The type of modal to open
+         * @param data - Optional data to pass to the modal
+         * @param delay - Delay in ms before opening new modal (default: 300ms to match animation)
+         */
+        transition: async (type: ModalType, data?: Record<string, any>, delay: number = 300) => {
+            set(initialState);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            update((state) => ({
+                ...state,
+                type,
+                isOpen: true,
+                data
+            }));
+        },
+
+        /**
          * Update modal data
          */
         updateData: (data: Record<string, any>) => {
@@ -51,6 +73,14 @@ const createModalStore = () => {
                 ...state,
                 data: { ...state.data, ...data }
             }));
+        },
+
+        /**
+         * Get the current modal data
+         * @returns The current modal data or an empty object if none exists
+         */
+        getData: () => {
+            return currentState.data ?? {};
         }
     };
 };

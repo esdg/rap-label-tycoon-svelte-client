@@ -2,14 +2,14 @@
 	import Hero from '../Hero.svelte';
 	import ScoutTalents from './task-submodals/ScoutTalents.svelte';
 	import ScoutTalentsResults from './task-submodals/ScoutTalentsResults.svelte';
-	import SignArtist from './task-submodals/SignArtist.svelte';
+	import SignContract from './task-submodals/SignContract.svelte';
 
 	export let data: Record<string, any> | undefined = undefined;
 
 	const DEFAULT_IMAGE_URL =
 		'https://res.cloudinary.com/dig430oem/image/upload/v1769554993/artists/profile_images/fpuc64oh9s5w8uoc9u5s.jpg';
 
-	const VALID_SUBMODALS = new Set(['scout', 'sign', 'scout-results']);
+	const VALID_SUBMODALS = new Set(['scout', 'sign-contract', 'scout-results']);
 
 	let imageOverride: string | null = null;
 
@@ -41,14 +41,14 @@
 			gradientClass="bg-gradient-to-t from-primary-500 to-transparent"
 		>
 			<div class="relative z-10 mx-auto flex h-full max-w-6xl items-end text-white pb-6">
-				<h2 class="text-7xl font-thin text-right uppercase">Scouting talents</h2>
+				<h2 class="text-7xl font-thin text-right uppercase">{data?.title}</h2>
 			</div>
 		</Hero>
 	</div>
 
 	<div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-		{#if activeSubModal === 'sign'}
-			<SignArtist />
+		{#if activeSubModal === 'sign-contract'}
+			<SignContract />
 		{:else if activeSubModal === 'scout-results'}
 			<ScoutTalentsResults
 				taskResult={data?.scoutingTaskResponse}

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import FormLabel from './FormLabel.svelte';
+
 	let className = '';
 	export { className as class };
 	export let label: string;
@@ -6,7 +8,7 @@
 	export let mode: 'toggle' | 'multi' = 'toggle';
 	export let value: any;
 	export let defaultValue: any = undefined;
-	export let labelFor: string | undefined = undefined;
+	export let labelFor: string = '';
 
 	// Initialize default value only if value is undefined
 	if (defaultValue !== undefined && (value === undefined || value === null)) {
@@ -29,22 +31,15 @@
 </script>
 
 <div class="relative {className}">
-	<div
-		class="2xl:flex-row-reverse 2xl:w-40 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block flex items-center text-right"
-	>
-		<label
-			for={labelFor}
-			class="text-base lg:text-lg xl:text-xl font-medium mb-2 uppercase tracking-wider uppercase font-thin
-			select-none"
-		>
-			{label}
-			{#if mode === 'multi'}
-				<span class="text-xs lg:text-sm xl:text-base text-primary-300 normal-case"
-					>(multi-select)</span
-				>
-			{/if}
-		</label>
-	</div>
+	<FormLabel id={labelFor}>
+		{label}
+		{#if mode === 'multi'}
+			<span class="text-xs lg:text-sm xl:text-base text-primary-300 normal-case"
+				>(multi-select)</span
+			>
+		{/if}
+	</FormLabel>
+
 	<div class="flex flex-wrap gap-y-2 lg:gap-y-3 xl:gap-y-4 gap-x-1 lg:gap-x-2 xl:gap-x-3">
 		{#each choices as choice, index}
 			{@const selected =

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import FormLabel from './FormLabel.svelte';
+
 	export let label: string;
 	export let id: string;
 	export let inputType: 'text' | 'email' | 'password' | 'textarea' = 'text';
@@ -11,12 +13,7 @@
 </script>
 
 <div class="relative">
-	<label
-		for={id}
-		class="2xl:flex-row-reverse 2xl:w-24 2xl:h-10 mr-4 2xl:absolute 2xl:right-full block text-base font-medium mb-2 flex items-center text-right uppercase font-thin select-none"
-	>
-		{label}
-	</label>
+	<FormLabel {id}>{label}</FormLabel>
 	{#if inputType === 'textarea'}
 		<textarea
 			{id}
