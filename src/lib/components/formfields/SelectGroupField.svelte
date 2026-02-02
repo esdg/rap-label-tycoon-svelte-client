@@ -10,6 +10,9 @@
 	export let selected: SelectGroupChoice = 0;
 	export let disabled = false;
 
+	let className = '';
+	export { className as class };
+
 	const dispatch = createEventDispatcher<{ change: { selected: SelectGroupChoice } }>();
 
 	const select = (choice: SelectGroupChoice) => {
@@ -30,12 +33,12 @@
 </script>
 
 <div
-	class="flex flex-col md:flex-row items-center gap-4 md:gap-6"
+	class="flex flex-col md:flex-row items-center gap-4 md:gap-6 {className}"
 	role="radiogroup"
 	aria-disabled={disabled}
 >
 	<div
-		class="choice flex-1 bg-primary-950 border border-primary-200 rounded-xl px-6 py-5 min-h-[12rem] cursor-pointer transition duration-150 ease-out text-primary-100 outline-none focus-visible:outline focus-visible:outline-[2px] focus-visible:outline-secondary-300 focus-visible:outline-offset-2"
+		class="choice flex-1 self-stretch bg-primary-950 border border-primary-200 rounded-md px-6 py-5 min-h-[12rem] cursor-pointer transition duration-150 ease-out text-primary-100 outline-none focus-visible:outline focus-visible:outline-[2px] focus-visible:outline-secondary-300 focus-visible:outline-offset-2"
 		class:border-secondary-400={selected === 0}
 		class:selected={selected === 0}
 		class:inactive={selected !== 0}
@@ -62,7 +65,7 @@
 	</div>
 
 	<div
-		class="choice flex-1 bg-primary-950 border border-primary-200 rounded-xl px-6 py-5 min-h-[12rem] cursor-pointer transition duration-150 ease-out text-primary-100 outline-none focus-visible:outline focus-visible:outline-[2px] focus-visible:outline-secondary-300 focus-visible:outline-offset-2"
+		class="choice flex-1 self-stretch bg-primary-950 border border-primary-200 rounded-md px-6 py-5 min-h-[12rem] cursor-pointer transition duration-150 ease-out text-primary-100 outline-none focus-visible:outline focus-visible:outline-[2px] focus-visible:outline-secondary-300 focus-visible:outline-offset-2"
 		class:border-secondary-400={selected === 1}
 		class:selected={selected === 1}
 		class:inactive={selected !== 1}

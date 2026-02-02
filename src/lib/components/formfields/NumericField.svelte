@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FormLabel from './FormLabel.svelte';
 
-	export let label: string;
+	export let label: string | null = null;
 	export let id: string;
 	export let value: number | null = null;
 	export let placeholder = '';
@@ -11,6 +11,9 @@
 	export let max: number | undefined = undefined;
 	export let step = 1;
 	export let suffix: string | null = null;
+
+	let className = '';
+	export { className as class };
 
 	const formatValue = (val: number | null) => (val === null ? '' : val);
 
@@ -33,8 +36,8 @@
 	};
 </script>
 
-<div class="relative">
-	<FormLabel {id}>{label}</FormLabel>
+<div class="relative min-w-16 {className}">
+	{#if label}<FormLabel {id}>{label}</FormLabel>{/if}
 
 	<div class="relative">
 		<input
@@ -60,7 +63,7 @@
 			</span>
 		{/if}
 
-		<div class="absolute inset-y-0 right-0 w-11 border-l border-primary-200 flex flex-col">
+		<div class="absolute inset-y-0 right-0 w-8 border-l border-primary-200 flex flex-col">
 			<button
 				type="button"
 				class="flex-1 flex items-center justify-center text-primary-100 hover:text-secondary-500 disabled:text-primary-500 disabled:cursor-not-allowed"
@@ -102,10 +105,12 @@
 	}
 
 	.triangle-up {
+		margin-top: 4px;
 		border-bottom: 8px solid currentColor;
 	}
 
 	.triangle-down {
+		margin-bottom: 4px;
 		border-top: 8px solid currentColor;
 	}
 </style>
