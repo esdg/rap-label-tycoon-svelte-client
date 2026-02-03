@@ -9,6 +9,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import ArtistDetails from '$lib/components/ArtistDetails.svelte';
 	import type { TaskResponse } from '$lib/types/task';
+	import { discoveredArtists } from '$lib/stores/artists';
 
 	export let taskResult: TaskResponse;
 
@@ -28,7 +29,16 @@
 
 	// Reactive statements
 	$: taskArtists = isScoutingArtistsResults(taskResult.results)
-		? taskResult.results.discoveredArtists
+		? $discoveredArtists
+				.filter(
+					(item) =>
+						taskResult.results &&
+						'discoveredArtistsIds' in taskResult.results &&
+						(taskResult.results as ScoutingArtistsResults).discoveredArtistsIds.includes(
+							item.artist.id
+						)
+				)
+				.map((item) => item.artist)
 		: [];
 
 	$: {
@@ -51,7 +61,9 @@
 	function isScoutingArtistsResults(
 		results: TaskResponse['results']
 	): results is ScoutingArtistsResults {
-		return Boolean(results && Array.isArray((results as ScoutingArtistsResults).discoveredArtists));
+		return Boolean(
+			results && Array.isArray((results as ScoutingArtistsResults).discoveredArtistsIds)
+		);
 	}
 
 	function isRapper(artist: Artist): artist is Rapper {
@@ -148,10 +160,7 @@
 	}
 
 	function handleNext() {
-		if (
-			isScoutingArtistsResults(taskResult.results) &&
-			activeArtistIndex < taskResult.results.discoveredArtists.length - 1
-		) {
+		if (activeArtistIndex < taskArtists.length - 1) {
 			activeArtistIndex += 1;
 		}
 	}
@@ -196,11 +205,11 @@
 		>
 			<div class="flex-grow p-4 sm:p-12">
 				{#if isScoutingArtistsResults(taskResult.results)}
-					{#if taskResult.results.discoveredArtists.length === 0}
+					{#if taskArtists.length === 0}
 						<p class="text-center text-gray-400">No artists were discovered during scouting.</p>
 					{:else}
 						<div class="w-full max-w-5xl mx-auto space-y-12 sm:space-y-16">
-							{#each taskResult.results.discoveredArtists as artist}
+							{#each taskArtists as artist}
 								<ContentPanelItem>
 									{@const sections = getArtistSkillSections(artist)}
 									<ArtistDetails {artist} />
@@ -244,8 +253,7 @@
 						color="primary"
 						altText="View next artist"
 						on:clicked={handleNext}
-						disabled={!isScoutingArtistsResults(taskResult.results) ||
-							activeArtistIndex >= taskResult.results.discoveredArtists.length - 1}
+						disabled={activeArtistIndex >= taskArtists.length - 1}
 					>
 						Next
 					</Button>

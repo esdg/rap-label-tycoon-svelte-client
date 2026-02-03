@@ -174,3 +174,10 @@ export async function claimTask(taskId: string): Promise<TaskResponse> {
         }
     });
 }
+
+// Artist API functions
+export async function getArtistsByIds(ids: string[]): Promise<(import('./types/nonPlayingCharacter').Artist | import('./types/nonPlayingCharacter').Rapper | import('./types/nonPlayingCharacter').Beatmaker)[]> {
+    if (ids.length === 0) return [];
+    const idsParam = ids.join(',');
+    return api(`/api/v1/artists/by-ids?ids=${idsParam}`);
+}

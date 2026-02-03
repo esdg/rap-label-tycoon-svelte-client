@@ -13,10 +13,9 @@
 	let currentPlayer = $player;
 	let name: string = '';
 	let description: string = '';
-	let productionStyles: number[] = [];
+	let productionStyles: Set<RapMusicStyle> = new Set();
 	let isLoading: boolean = false;
 	let error: string = '';
-	let selectedGenres: Set<RapMusicStyle> = new Set();
 
 	// Subscribe to player store
 	player.subscribe((value) => {
@@ -40,7 +39,7 @@
 			error = 'Description is required';
 			return;
 		}
-		if (productionStyles.length === 0) {
+		if (productionStyles.size === 0) {
 			error = 'Select at least one production style';
 			return;
 		}
@@ -52,7 +51,7 @@
 				ownerPlayerId: currentPlayer.id,
 				name: name.trim(),
 				description: description.trim(),
-				productionStyles
+				productionStyles: Array.from(productionStyles)
 			});
 
 			// Store label data in global store
@@ -131,7 +130,7 @@
 							label="Genre(s)"
 							choices={genreChoices}
 							mode="multi"
-							bind:value={selectedGenres}
+							bind:value={productionStyles}
 							labelFor="genre-btn"
 						/>
 

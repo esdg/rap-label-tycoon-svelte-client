@@ -134,3 +134,10 @@ export function addMultipleDiscoveredArtists(
 export function clearDiscoveredArtists() {
     discoveredArtists.set([]);
 }
+
+// Derived store factory - get artists by IDs
+export function getArtistsByIdsStore(artistIds: string[]) {
+    return derived(discoveredArtists, ($artists) =>
+        $artists.filter((item) => artistIds.includes(item.artist.id))
+    );
+}

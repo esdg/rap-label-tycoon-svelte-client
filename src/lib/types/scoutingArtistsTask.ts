@@ -36,5 +36,5 @@ export interface ScoutingTaskRequest {
 
 export interface ScoutingArtistsResults extends TaskResults {
     $type: ScoutingType;
-    discoveredArtistsId: string[];
+    discoveredArtistsIds: string[];
 }

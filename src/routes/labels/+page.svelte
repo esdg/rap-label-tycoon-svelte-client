@@ -3,15 +3,17 @@
 	import { modalStore } from '$lib/stores/modal';
 	import { label } from '$lib/stores/label';
 	import Button from '$lib/components/Button.svelte';
-	import { fetchLabelTasks, claimTask } from '$lib/api';
+	import { fetchLabelTasks, claimTask, getArtistsByIds } from '$lib/api';
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import ScoutingTaskCard from '$lib/components/Cards/ScoutingTaskCard.svelte';
 	import { TaskType, type TaskResponse } from '$lib/types/task';
 	import { ScoutingType, type ScoutingArtistsResults } from '$lib/types/scoutingArtistsTask';
 	import ContractsCard from '$lib/components/Cards/ContractsCard.svelte';
+	import { scoutingTasks, contractTasks, updateScoutingTask } from '$lib/stores/tasks';
+	import { setContracts } from '$lib/stores/contracts';
+	import { addMultipleDiscoveredArtists } from '$lib/stores/artists';
+	import type { Contract } from '$lib/types/contracts';
 
-	let scoutingTasks: TaskResponse[] = [];
-	let contractTasks: TaskResponse[] = [];
 	let serverTimeOffset = 0; // Difference between server time and client time
 	let loading = true;
 	let error: string | null = null;
@@ -71,12 +73,29 @@
 			const clientTime = Date.now();
 			serverTimeOffset = serverTime - clientTime;
 
-			// Only keep scouting tasks (including claimed ones)
-			scoutingTasks = fetchedTasks.filter((task) => task.taskType === TaskType.Scouting);
-			contractTasks = fetchedTasks.filter((task) => task.taskType === TaskType.SigningContract);
+			// Separate tasks by type
+			const fetchedScoutingTasks = fetchedTasks.filter(
+				(task) => task.taskType === TaskType.Scouting
+			);
+			const fetchedContractTasks = fetchedTasks.filter(
+				(task) => task.taskType === TaskType.SigningContract
+			);
+
+			// Update stores
+			scoutingTasks.set(fetchedScoutingTasks);
+			contractTasks.set(fetchedContractTasks);
+
+			// Extract contracts from contract tasks and populate contracts store
+			const extractedContracts = fetchedContractTasks
+				.map((task) => {
+					const results = task.results as any;
+					return results?.contract;
+				})
+				.filter((contract): contract is Contract => contract != null);
+			setContracts(extractedContracts);
 
 			// Auto-claim all finished tasks that haven't been claimed yet
-			const finishedUnclaimedScoutingTasks = scoutingTasks.filter(
+			const finishedUnclaimedScoutingTasks = fetchedScoutingTasks.filter(
 				(task) => !task.claimedAt && isTaskFinished(task)
 			);
 
@@ -85,11 +104,18 @@
 				const claimPromises = finishedUnclaimedScoutingTasks.map(async (task) => {
 					try {
 						const claimedTask = await claimTask(task.id);
-						// Update the task in the array with the claimed task data
-						const index = scoutingTasks.findIndex((t) => t.id === task.id);
-						if (index !== -1) {
-							scoutingTasks[index] = claimedTask;
+						// Update the task in the store
+						updateScoutingTask(task.id, claimedTask);
+
+						// Fetch and store discovered artists if available
+						if (claimedTask.results && 'discoveredArtistsIds' in claimedTask.results) {
+							const scoutingResults = claimedTask.results as ScoutingArtistsResults;
+							if (scoutingResults.discoveredArtistsIds?.length > 0) {
+								const artists = await getArtistsByIds(scoutingResults.discoveredArtistsIds);
+								addMultipleDiscoveredArtists(artists, false);
+							}
 						}
+
 						return { success: true, taskId: task.id };
 					} catch (err) {
 						console.error(`Failed to claim task ${task.id}:`, err);
@@ -98,8 +124,6 @@
 				});
 
 				await Promise.all(claimPromises);
-				// Trigger reactivity by reassigning tasks
-				scoutingTasks = [...scoutingTasks];
 			}
 
 			loading = false;
@@ -213,10 +237,10 @@
 				<p class="text-gray-400">Loading tasks...</p>
 			{:else if error}
 				<p class="text-red-400">Error: {error}</p>
-			{:else if scoutingTasks.length === 0}
-				<p class="text-gray-400">No ongoing tasks</p>
+			{:else if $contractTasks.length === 0}
+				<p class="text-gray-400">No contracts</p>
 			{:else}
-				<ContractsCard contractsTaskResponse={contractTasks} />
+				<ContractsCard contractsTaskResponse={$contractTasks} />
 			{/if}
 		</div>
 		<!-- Ongoing Tasks Section -->
@@ -227,11 +251,11 @@
 				<p class="text-gray-400">Loading tasks...</p>
 			{:else if error}
 				<p class="text-red-400">Error: {error}</p>
-			{:else if scoutingTasks.length === 0}
+			{:else if $scoutingTasks.length === 0}
 				<p class="text-gray-400">No ongoing tasks</p>
 			{:else}
 				<div class="flex flex-wrap gap-4">
-					{#each scoutingTasks as task}
+					{#each $scoutingTasks as task}
 						<ScoutingTaskCard
 							state={getTaskStatus(task)}
 							durationText={formatTimeRemaining(task.endTime, currentTime)}

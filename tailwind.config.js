@@ -32,16 +32,16 @@ export default {
                 },
                 category: {
                     1: {
-                        50: '#F3E6FF', // Lightest lavender
-                        100: '#E1BFFF', // Pale purple
-                        200: '#CE94FF', // Soft violet
-                        300: '#BB66FF', // Light purple
-                        400: '#A833FF', // Bright violet
-                        500: '#5B1979', // Deep royal purple (Base)
-                        600: '#4D1566', // Rich purple
-                        700: '#3F1154', // Dark purple
-                        800: '#320D43', // Deep plum
-                        900: '#250A33'  // Darkest purple
+                        50: '#FCE6FF', // Lightest lavender
+                        100: '#F7BFFF', // Pale orchid
+                        200: '#F194FF', // Soft lilac
+                        300: '#EB66FF', // Light magenta
+                        400: '#E533FF', // Bright violet
+                        500: '#AC26DE', // Vibrant purple (Base)
+                        600: '#8F20B8', // Rich purple
+                        700: '#731A93', // Deep violet
+                        800: '#58146F', // Dark plum
+                        900: '#3D0E4C'  // Darkest purple
                     },
                     2: {
                         50: '#FFE6F2', // Lightest rose

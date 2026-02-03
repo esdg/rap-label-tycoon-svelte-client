@@ -72,6 +72,7 @@
 	}
 
 	// Lifecycle
+	// TODO: create a store for scouting scopes to avoid refetching every time
 	onMount(async () => {
 		try {
 			scoutingScopes = await fetchScoutingScopes();
