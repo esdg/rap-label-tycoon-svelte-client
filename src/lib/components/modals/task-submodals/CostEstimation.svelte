@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Chip from '$lib/components/Chip.svelte';
-	import type { ScoutingCostPrediction } from '$lib/types/scouting';
+	import type { TaskCostPrediction } from '$lib/types/task';
 	import { formatDuration } from '$lib/utils/formatDuration';
 
-	export let costPrediction: ScoutingCostPrediction;
+	export let costPrediction: TaskCostPrediction;
 </script>
 
 {#if costPrediction}

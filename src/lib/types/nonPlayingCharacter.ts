@@ -1,5 +1,3 @@
-import { exp } from "firebase/firestore/pipelines";
-
 // Request type for creating a new player
 export interface NonPlayableCharacter {
     id: string;

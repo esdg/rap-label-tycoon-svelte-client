@@ -14,20 +14,17 @@
 	import {
 		ScoutingType,
 		ScoutingTypeNames,
-		TaskCreationErrorType,
-		type ScoutingScope,
-		type ScoutingCostPrediction
-	} from '$lib/types/scouting';
+		type ScoutingScope
+	} from '$lib/types/scoutingArtistsTask';
 	import SelectField from '$lib/components/formfields/SelectField.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
-	import Chip from '$lib/components/Chip.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
-	import { formatDuration } from '$lib/utils/formatDuration';
 	import { colors } from '$lib/theme';
 	import CostEstimation from './CostEstimation.svelte';
+	import { TaskCreationErrorType, type TaskCostPrediction } from '$lib/types/task';
 
 	// State
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
@@ -36,7 +33,7 @@
 	let scoutingScopes: ScoutingScope[] = [];
 	let loading = false;
 	let error: string | null = null;
-	let costPrediction: ScoutingCostPrediction | null = null;
+	let costPrediction: TaskCostPrediction | null = null;
 	let loadingCost = false;
 	let readyForPrediction = false;
 	let selectedProspectorId = 1;
@@ -285,7 +282,7 @@
 
 	<!-- Sticky Actions Bar -->
 	<div
-		class="flex-shrink-0 w-full bg-black py-3 lg:py-4 xl:py-5 px-3 sm:px-4 lg:px-6 xl:px-8 border-t border-gray-700 sticky bottom-0"
+		class="flex-shrink-0 w-full bg-black py-2 sm:py-3 px-3 sm:px-4 border-t border-gray-700 sticky bottom-0"
 	>
 		<div class="flex flex-col sm:flex-row gap-3 lg:gap-4 sm:items-center">
 			<!-- Prospector -->

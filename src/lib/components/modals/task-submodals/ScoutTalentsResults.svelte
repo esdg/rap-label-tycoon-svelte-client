@@ -2,14 +2,15 @@
 	import { colors } from '$lib/theme';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import { modalStore } from '$lib/stores/modal';
-	import type { ScoutingArtistsResults, ScoutingTaskResponse } from '$lib/types/scouting';
+	import type { ScoutingArtistsResults } from '$lib/types/scoutingArtistsTask';
 	import type { Artist, Beatmaker, Rapper } from '$lib/types/nonPlayingCharacter';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ArtistDetails from '$lib/components/ArtistDetails.svelte';
+	import type { TaskResponse } from '$lib/types/task';
 
-	export let taskResult: ScoutingTaskResponse;
+	export let taskResult: TaskResponse;
 
 	// State
 	let activeArtistIndex = 0;
@@ -48,7 +49,7 @@
 
 	// Type guards
 	function isScoutingArtistsResults(
-		results: ScoutingTaskResponse['results']
+		results: TaskResponse['results']
 	): results is ScoutingArtistsResults {
 		return Boolean(results && Array.isArray((results as ScoutingArtistsResults).discoveredArtists));
 	}

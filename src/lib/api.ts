@@ -1,7 +1,8 @@
-import type { ScoutingScope, ScoutingTaskRequest, ScoutingTaskResponse, TaskCreationErrorResponse, ScoutingCostPrediction } from './types/scouting';
-import type { SignArtistContractCostRequest } from './types/contracts';
+import type { ScoutingScope, ScoutingTaskRequest } from './types/scoutingArtistsTask';
 import type { Player, CreatePlayerRequest } from './types/player';
 import type { Label } from './types/label';
+import type { TaskResponse, TaskCostPrediction, TaskCreationErrorResponse } from './types/task';
+import type { SignArtistContractRequest } from './types/SigningContractTask';
 
 const API_BASE_URL = 'http://localhost:5122';
 
@@ -73,7 +74,7 @@ export async function fetchScoutingScopes(): Promise<ScoutingScope[]> {
     return api<ScoutingScope[]>('/api/v1/scouting-scopes');
 }
 
-export async function createScoutingTask(data: ScoutingTaskRequest): Promise<ScoutingTaskResponse> {
+export async function createScoutingTask(data: ScoutingTaskRequest): Promise<TaskResponse> {
     const fullUrl = `${API_BASE_URL}/api/v1/tasks/scouting`;
     const response = await fetch(fullUrl, {
         method: 'POST',
@@ -90,10 +91,10 @@ export async function createScoutingTask(data: ScoutingTaskRequest): Promise<Sco
         throw new TaskCreationError(result as TaskCreationErrorResponse);
     }
 
-    return result as ScoutingTaskResponse;
+    return result as TaskResponse;
 }
 
-export async function predictScoutingCost(data: ScoutingTaskRequest): Promise<ScoutingCostPrediction> {
+export async function predictScoutingCost(data: ScoutingTaskRequest): Promise<TaskCostPrediction> {
     const fullUrl = `${API_BASE_URL}/api/v1/tasks/scouting/predict-cost`;
     const response = await fetch(fullUrl, {
         method: 'POST',
@@ -111,8 +112,8 @@ export async function predictScoutingCost(data: ScoutingTaskRequest): Promise<Sc
 }
 
 export async function predictSignArtistContractCost(
-    data: SignArtistContractCostRequest
-): Promise<ScoutingCostPrediction> {
+    data: SignArtistContractRequest
+): Promise<TaskCostPrediction> {
     const fullUrl = `${API_BASE_URL}/api/v1/tasks/sign-artist-contract/predict-cost`;
     const response = await fetch(fullUrl, {
         method: 'POST',
@@ -130,8 +131,8 @@ export async function predictSignArtistContractCost(
 }
 
 export async function createSignArtistContractTask(
-    data: SignArtistContractCostRequest
-): Promise<ScoutingTaskResponse> {
+    data: SignArtistContractRequest
+): Promise<TaskResponse> {
     const fullUrl = `${API_BASE_URL}/api/v1/tasks/sign-artist-contract`;
     const response = await fetch(fullUrl, {
         method: 'POST',
@@ -147,11 +148,11 @@ export async function createSignArtistContractTask(
         throw new Error(`Failed to create sign-artist contract task: ${response.statusText}`);
     }
 
-    return result as ScoutingTaskResponse;
+    return result as TaskResponse;
 }
 
 // Task API functions
-export async function fetchLabelTasks(labelId: string): Promise<{ tasks: ScoutingTaskResponse[], serverTime: string }> {
+export async function fetchLabelTasks(labelId: string): Promise<{ tasks: TaskResponse[], serverTime: string }> {
     const fullUrl = `${API_BASE_URL}/api/v1/rap-labels/${labelId}/tasks`;
     const response = await fetch(fullUrl);
 
@@ -165,8 +166,8 @@ export async function fetchLabelTasks(labelId: string): Promise<{ tasks: Scoutin
     return { tasks, serverTime };
 }
 
-export async function claimTask(taskId: string): Promise<ScoutingTaskResponse> {
-    return api<ScoutingTaskResponse>(`/api/v1/tasks/${taskId}/claim`, {
+export async function claimTask(taskId: string): Promise<TaskResponse> {
+    return api<TaskResponse>(`/api/v1/tasks/${taskId}/claim`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'

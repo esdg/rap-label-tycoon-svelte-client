@@ -12,22 +12,25 @@
 	} from '$lib/components/formfields/SelectGroupField.svelte';
 	import NumericField from '$lib/components/formfields/NumericField.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import type { ScoutingCostPrediction } from '$lib/types/scouting';
 	import CostEstimation from './CostEstimation.svelte';
 	import { predictSignArtistContractCost, createSignArtistContractTask } from '$lib/api';
-	import type { SignArtistContractCostRequest } from '$lib/types/contracts';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
+	import Dropdown from '$lib/components/Dropdown.svelte';
+	import type { TaskCostPrediction } from '$lib/types/task';
+	import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
 
 	// State
 	let activeStepIndex = 0;
 	const totalSteps = 3;
 	let loading = false;
 	let loadingCost = false;
-	let costPrediction: ScoutingCostPrediction | null = null;
+	let costPrediction: TaskCostPrediction | null = null;
 	let costPredictionRequestId = 0;
 
 	const modalData = modalStore.getData();
 	const artist = (modalData?.artist as Artist | undefined) ?? null;
+
+	const prospectorOptions = [{ name: 'you', value: 1 }];
 
 	let contractType: SelectGroupChoice = 0;
 	let contractLengthYears: number | null = 1;
@@ -38,6 +41,7 @@
 	let signingBonus = 0;
 	let advance = 0;
 	let royaltyPercentage = 0;
+	let selectedProspectorId = 1;
 	let submitError: string | null = null;
 
 	$: totalReleases =
@@ -105,7 +109,7 @@
 		return `${days}.00:00:00`;
 	}
 
-	function buildCostPredictionRequest(): SignArtistContractCostRequest | null {
+	function buildCostPredictionRequest(): SignArtistContractRequest | null {
 		if (!$label || !$player || !artist?.id) return null;
 
 		const sanitize = (value: number | null) => Math.max(0, value ?? 0);
@@ -113,7 +117,7 @@
 		const duration =
 			usesDuration && contractLengthYears !== null && contractLengthYears > 0
 				? formatYearsToTimeSpan(sanitize(contractLengthYears))
-				: null;
+				: '';
 
 		return {
 			labelId: $label.id,
@@ -371,84 +375,104 @@
 	<div
 		class="flex-shrink-0 w-full bg-black py-2 sm:py-3 px-3 sm:px-4 border-t border-gray-700 sticky bottom-0"
 	>
-		<ContentPanel {activeStepIndex} class="w-full sm:w-auto">
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
-				<Button
-					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-					color="primary"
-					style="hollow"
-					altText="Cancel signing contract"
-					on:clicked={handleCancel}
+		<!-- Prospector -->
+		<div class="flex flex-col sm:flex-row gap-3 lg:gap-4 sm:items-center">
+			<!-- Prospector -->
+			<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
+				<label
+					class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
+					for="prospector-btn"
 				>
-					Cancel
-				</Button>
-				<Button
-					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-					color="primary"
-					altText="Proceed to next step"
-					on:clicked={handleNextStep}
-				>
-					Next
-				</Button>
-			</ContentPanelItem>
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
-				<Button
-					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-					color="primary"
-					style="hollow"
-					altText="Cancel signing contract"
-					on:clicked={handleCancel}
-				>
-					Cancel
-				</Button>
-				<Button
-					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-					color="primary"
-					altText="Proceed to previous step"
-					on:clicked={handlePreviousStep}
-				>
-					Previous
-				</Button>
-				<Button
-					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-					color="primary"
-					altText="Proceed to next step"
-					on:clicked={handleNextStep}
-				>
-					Next
-				</Button>
-			</ContentPanelItem>
+					Prospector
+				</label>
+				<Dropdown
+					options={prospectorOptions}
+					disabled={prospectorOptions.length <= 1}
+					bind:value={selectedProspectorId}
+					placeholder="Choose..."
+					direction="up"
+					on:change={(e) => console.log('Selected:', e.detail)}
+				/>
+			</div>
+			<ContentPanel {activeStepIndex} class="w-full sm:w-auto">
+				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+					<Button
+						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+						color="primary"
+						style="hollow"
+						altText="Cancel signing contract"
+						on:clicked={handleCancel}
+					>
+						Cancel
+					</Button>
+					<Button
+						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+						color="primary"
+						altText="Proceed to next step"
+						on:clicked={handleNextStep}
+					>
+						Next
+					</Button>
+				</ContentPanelItem>
+				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+					<Button
+						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+						color="primary"
+						style="hollow"
+						altText="Cancel signing contract"
+						on:clicked={handleCancel}
+					>
+						Cancel
+					</Button>
+					<Button
+						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+						color="primary"
+						altText="Proceed to previous step"
+						on:clicked={handlePreviousStep}
+					>
+						Previous
+					</Button>
+					<Button
+						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+						color="primary"
+						altText="Proceed to next step"
+						on:clicked={handleNextStep}
+					>
+						Next
+					</Button>
+				</ContentPanelItem>
 
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
-				<Button
-					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-					color="primary"
-					style="hollow"
-					altText="Cancel signing contract"
-					on:clicked={handleCancel}
-				>
-					Cancel
-				</Button>
-				<Button
-					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-					color="primary"
-					altText="Proceed to previous step"
-					on:clicked={handlePreviousStep}
-				>
-					Previous
-				</Button>
-				<Button
-					class="w-full sm:w-auto sm:min-w-48 lg:min-w-56 xl:min-w-64"
-					color="secondary"
-					style="normal"
-					altText="Start scouting for talents"
-					{loading}
-					disabled={!readyForCostPrediction || loading}
-					on:clicked={handleMakeOffer}
-				>
-					{loading ? 'Starting...' : 'Make an offer'}
-				</Button>
-			</ContentPanelItem>
-		</ContentPanel>
+				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+					<Button
+						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+						color="primary"
+						style="hollow"
+						altText="Cancel signing contract"
+						on:clicked={handleCancel}
+					>
+						Cancel
+					</Button>
+					<Button
+						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+						color="primary"
+						altText="Proceed to previous step"
+						on:clicked={handlePreviousStep}
+					>
+						Previous
+					</Button>
+					<Button
+						class="w-full sm:w-auto sm:min-w-48 lg:min-w-56 xl:min-w-64"
+						color="secondary"
+						style="normal"
+						altText="Start scouting for talents"
+						{loading}
+						disabled={!readyForCostPrediction || loading}
+						on:clicked={handleMakeOffer}
+					>
+						{loading ? 'Starting...' : 'Make an offer'}
+					</Button>
+				</ContentPanelItem>
+			</ContentPanel>
+		</div>
 	</div>
 </section>

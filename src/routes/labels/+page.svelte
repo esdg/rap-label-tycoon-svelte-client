@@ -4,11 +4,14 @@
 	import { label } from '$lib/stores/label';
 	import Button from '$lib/components/Button.svelte';
 	import { fetchLabelTasks, claimTask } from '$lib/api';
-	import type { ScoutingTaskResponse } from '$lib/types/scouting';
-	import ScoutingTask from '$lib/components/Cards/ScoutingTask.svelte';
 	import bgImage from '$lib/assets/main-bg-1.png';
+	import ScoutingTaskCard from '$lib/components/Cards/ScoutingTaskCard.svelte';
+	import { TaskType, type TaskResponse } from '$lib/types/task';
+	import { ScoutingType, type ScoutingArtistsResults } from '$lib/types/scoutingArtistsTask';
+	import ContractsCard from '$lib/components/Cards/ContractsCard.svelte';
 
-	let tasks: ScoutingTaskResponse[] = [];
+	let scoutingTasks: TaskResponse[] = [];
+	let contractTasks: TaskResponse[] = [];
 	let serverTimeOffset = 0; // Difference between server time and client time
 	let loading = true;
 	let error: string | null = null;
@@ -25,7 +28,7 @@
 		});
 	}
 
-	function openScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
+	function openScoutResultsModal(scoutingTaskResponse: TaskResponse) {
 		modalStore.open('task-modal', {
 			subModal: 'scout-results',
 			scoutingTaskResponse: scoutingTaskResponse,
@@ -68,23 +71,24 @@
 			const clientTime = Date.now();
 			serverTimeOffset = serverTime - clientTime;
 
-			// Keep all tasks (including claimed ones)
-			tasks = fetchedTasks;
+			// Only keep scouting tasks (including claimed ones)
+			scoutingTasks = fetchedTasks.filter((task) => task.taskType === TaskType.Scouting);
+			contractTasks = fetchedTasks.filter((task) => task.taskType === TaskType.SigningContract);
 
 			// Auto-claim all finished tasks that haven't been claimed yet
-			const finishedUnclaimedTasks = tasks.filter(
+			const finishedUnclaimedScoutingTasks = scoutingTasks.filter(
 				(task) => !task.claimedAt && isTaskFinished(task)
 			);
 
-			if (finishedUnclaimedTasks.length > 0) {
+			if (finishedUnclaimedScoutingTasks.length > 0) {
 				// Claim all finished tasks in parallel
-				const claimPromises = finishedUnclaimedTasks.map(async (task) => {
+				const claimPromises = finishedUnclaimedScoutingTasks.map(async (task) => {
 					try {
 						const claimedTask = await claimTask(task.id);
 						// Update the task in the array with the claimed task data
-						const index = tasks.findIndex((t) => t.id === task.id);
+						const index = scoutingTasks.findIndex((t) => t.id === task.id);
 						if (index !== -1) {
-							tasks[index] = claimedTask;
+							scoutingTasks[index] = claimedTask;
 						}
 						return { success: true, taskId: task.id };
 					} catch (err) {
@@ -95,7 +99,7 @@
 
 				await Promise.all(claimPromises);
 				// Trigger reactivity by reassigning tasks
-				tasks = [...tasks];
+				scoutingTasks = [...scoutingTasks];
 			}
 
 			loading = false;
@@ -109,16 +113,16 @@
 		return currentTime + serverTimeOffset;
 	}
 
-	function isTaskFinished(task: ScoutingTaskResponse): boolean {
+	function isTaskFinished(task: TaskResponse): boolean {
 		const endTime = new Date(task.endTime).getTime();
 		return endTime <= getCurrentServerTime();
 	}
 
-	function isTaskClaimed(task: ScoutingTaskResponse): boolean {
+	function isTaskClaimed(task: TaskResponse): boolean {
 		return !!task.claimedAt;
 	}
 
-	function getTaskStatus(task: ScoutingTaskResponse): 'in-progress' | 'failed' | 'succeeded' {
+	function getTaskStatus(task: TaskResponse): 'in-progress' | 'failed' | 'succeeded' {
 		if (!isTaskClaimed(task) && !isTaskFinished(task)) {
 			return 'in-progress';
 		}
@@ -148,7 +152,7 @@
 		return `${hours}h ${minutes}m ${seconds}s`;
 	}
 
-	function getTaskProgress(task: ScoutingTaskResponse, _currentTime: number): number {
+	function getTaskProgress(task: TaskResponse, _currentTime: number): number {
 		const startTime = new Date(task.startTime).getTime();
 		const endTime = new Date(task.endTime).getTime();
 		const currentServerTime = getCurrentServerTime();
@@ -165,6 +169,11 @@
 
 		// Clamp between 0 and 100
 		return Math.max(0, Math.min(100, progress));
+	}
+
+	function getScoutingType(task: TaskResponse): ScoutingType {
+		const results = task.results as ScoutingArtistsResults | null;
+		return typeof results?.$type === 'number' ? results.$type : ScoutingType.Rappers;
 	}
 
 	onMount(() => {
@@ -198,6 +207,18 @@
 			</Button>
 		</div>
 
+		<div>
+			<h1 class="text-2xl font-bold mb-4">Label Roster</h1>
+			{#if loading}
+				<p class="text-gray-400">Loading tasks...</p>
+			{:else if error}
+				<p class="text-red-400">Error: {error}</p>
+			{:else if scoutingTasks.length === 0}
+				<p class="text-gray-400">No ongoing tasks</p>
+			{:else}
+				<ContractsCard contractsTaskResponse={contractTasks} />
+			{/if}
+		</div>
 		<!-- Ongoing Tasks Section -->
 		<div>
 			<h2 class="text-2xl font-bold mb-4">Ongoing Tasks</h2>
@@ -206,16 +227,16 @@
 				<p class="text-gray-400">Loading tasks...</p>
 			{:else if error}
 				<p class="text-red-400">Error: {error}</p>
-			{:else if tasks.length === 0}
+			{:else if scoutingTasks.length === 0}
 				<p class="text-gray-400">No ongoing tasks</p>
 			{:else}
 				<div class="flex flex-wrap gap-4">
-					{#each tasks as task}
-						<ScoutingTask
+					{#each scoutingTasks as task}
+						<ScoutingTaskCard
 							state={getTaskStatus(task)}
 							durationText={formatTimeRemaining(task.endTime, currentTime)}
 							inProgressDescription="Observing at open mic..."
-							scoutingType="Rappers"
+							scoutingType={getScoutingType(task)}
 							taskProgress={getTaskProgress(task, currentTime)}
 							on:viewResults={() => openScoutResultsModal(task)}
 						/>

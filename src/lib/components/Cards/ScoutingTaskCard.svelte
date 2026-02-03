@@ -2,11 +2,12 @@
 	import { createEventDispatcher } from 'svelte';
 	import { XMarkIcon, CheckIcon, ArrowRightIcon } from 'heroicons-svelte/24/solid';
 	import RadialProgressBar from '../progress-bars/RadialProgressBar.svelte';
+	import { ScoutingType, ScoutingTypeNames } from '$lib/types/scoutingArtistsTask';
 
 	export let state: 'loading' | 'in-progress' | 'failed' | 'succeeded' | 'error' = 'succeeded';
 	export let durationText: string = '6h 34m 45s';
 	export let inProgressDescription: string = 'Observing at open mic...';
-	export let scoutingType: 'Rappers' | 'Beatmakers' = 'Rappers';
+	export let scoutingType: ScoutingType = ScoutingType.Rappers;
 
 	export let taskProgress = 0;
 
@@ -20,7 +21,7 @@
 		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
 			<div class="text-center mb-4">
 				<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
-				<p class="uppercase text-lg font-black leading-none">{scoutingType}</p>
+				<p class="uppercase text-lg font-black leading-none">{ScoutingTypeNames[scoutingType]}</p>
 			</div>
 
 			<RadialProgressBar
@@ -43,7 +44,7 @@
 		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
 			<div class="text-center mb-4">
 				<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
-				<p class="uppercase text-lg font-black leading-none">{scoutingType}</p>
+				<p class="uppercase text-lg font-black leading-none">{ScoutingTypeNames[scoutingType]}</p>
 			</div>
 			<RadialProgressBar
 				value={taskProgress}
@@ -63,7 +64,7 @@
 		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
 			<div class="text-center mb-4">
 				<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
-				<p class="uppercase text-lg font-black leading-none">{scoutingType}</p>
+				<p class="uppercase text-lg font-black leading-none">{ScoutingTypeNames[scoutingType]}</p>
 			</div>
 
 			<RadialProgressBar
@@ -80,15 +81,16 @@
 				</div>
 			</RadialProgressBar>
 
-			<div
+			<button
+				type="button"
 				class="
-                border border-primary-500
-                rounded-lg
-                absolute inset-0
-                bg-primary-950
-                opacity-0
-                group-hover:opacity-100
-                transition-opacity
+				border border-primary-500
+				rounded-lg
+				absolute inset-0
+				bg-primary-950
+				opacity-0
+				group-hover:opacity-100
+				transition-opacity
 				flex flex-col items-center justify-center justify-between p-4 cursor-pointer"
 				on:click={() => dispatch('viewResults')}
 			>
@@ -108,7 +110,7 @@
 					class="text-primary-500 text-xs border border-primary-500 pl-2 pr-2 pt-1 pb-1 rounded-full block mt-2"
 					>View details <ArrowRightIcon class="inline w-4 h-4 text-primary-500 " /></span
 				>
-			</div>
+			</button>
 		</div>
 	{/if}
 </article>
