@@ -5,6 +5,7 @@ import { writable, derived, get } from 'svelte/store';
 import type { User } from '$lib/firebase';
 import type { Player } from '$lib/types/player';
 import type { Label } from '$lib/types/label';
+import type { AppConfig } from '$lib/types/config';
 import { clearAllQueries } from '$lib/queries/queryClient';
 import { clearDiscoveredArtists } from '$lib/queries/artistQueries';
 
@@ -22,6 +23,8 @@ interface AppState {
     currentLabel: Label | null;
     // All labels owned by player
     labels: Label[];
+    // Client configuration payload
+    clientConfig: AppConfig | null;
     // Loading states
     authLoading: boolean;
     authInitialized: boolean;
@@ -33,6 +36,7 @@ function createAppState() {
         player: null,
         currentLabel: null,
         labels: [],
+        clientConfig: null,
         authLoading: true,
         authInitialized: false,
     };
@@ -68,6 +72,11 @@ function createAppState() {
 
         setLabels: (labels: Label[]) => {
             update(state => ({ ...state, labels }));
+        },
+
+        // Client config methods
+        setClientConfig: (config: AppConfig | null) => {
+            update(state => ({ ...state, clientConfig: config }));
         },
 
         updateCurrentLabelBankroll: (amount: number) => {
@@ -148,6 +157,7 @@ export const playerLabels = derived(appState, $state => $state.labels);
 export const isAuthenticated = derived(appState, $state => $state.firebaseUser !== null);
 export const isAuthLoading = derived(appState, $state => $state.authLoading || !$state.authInitialized);
 export const currentLabelId = derived(appState, $state => $state.currentLabel?.id ?? null);
+export const clientConfig = derived(appState, $state => $state.clientConfig);
 
 // Helper to get current label ID synchronously (for queries)
 export function getCurrentLabelId(): string | null {
@@ -157,4 +167,9 @@ export function getCurrentLabelId(): string | null {
 // Helper to get current player ID synchronously
 export function getCurrentPlayerId(): string | null {
     return get(appState).player?.id ?? null;
+}
+
+// Helper to access client config synchronously
+export function getClientConfig(): AppConfig | null {
+    return get(appState).clientConfig;
 }

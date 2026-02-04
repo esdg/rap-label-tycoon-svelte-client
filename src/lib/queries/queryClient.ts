@@ -24,6 +24,9 @@ export const queryClient = new QueryClient({
 
 // Query key factory for consistent key management
 export const queryKeys = {
+    // Client configuration
+    clientConfig: ['client-config'] as const,
+
     // Auth & Player
     player: {
         all: ['player'] as const,

@@ -2,12 +2,8 @@
 	import { onMount } from 'svelte';
 	import { modalStore } from '$lib/stores/modal';
 	import { appState, currentLabel, currentPlayer } from '$lib/stores/appState';
-	import {
-		fetchScoutingScopes,
-		createScoutingTask,
-		predictScoutingCost,
-		TaskCreationError
-	} from '$lib/api';
+	import { createScoutingTask, predictScoutingCost, TaskCreationError } from '$lib/api';
+	import { loadClientConfig } from '$lib/services/config';
 	import { queryKeys, queryClient } from '$lib/queries/queryClient';
 	import { RapMusicStyle, RapMusicStyleNames } from '$lib/types/musicStyles';
 	import {
@@ -71,10 +67,10 @@
 	}
 
 	// Lifecycle
-	// TODO: create a store for scouting scopes to avoid refetching every time
 	onMount(async () => {
 		try {
-			scoutingScopes = await fetchScoutingScopes();
+			const config = await loadClientConfig();
+			scoutingScopes = config.scoutingScopes;
 			selectedScope = scoutingScopes.length > 0 ? scoutingScopes[0].id : null;
 		} catch (err) {
 			error = 'Failed to load scouting scopes';

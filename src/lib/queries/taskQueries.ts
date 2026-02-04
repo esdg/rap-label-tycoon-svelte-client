@@ -5,12 +5,12 @@ import { queryKeys } from './queryClient';
 import {
     fetchLabelTasks,
     claimTask,
-    fetchScoutingScopes,
     createScoutingTask,
     predictScoutingCost,
     createSignArtistContractTask,
     predictSignArtistContractCost,
 } from '$lib/api/tasks';
+import { loadClientConfig } from '$lib/services/config';
 import { getServerAdjustedTime } from '$lib/utils/timeUtils';
 import type {
     TaskResponse,
@@ -62,7 +62,10 @@ export function createTasksByType(tasks: AnyTaskResponse[]) {
 export function createScoutingScopesQuery() {
     return createQuery<ScoutingScope[], Error>({
         queryKey: queryKeys.scoutingScopes,
-        queryFn: fetchScoutingScopes,
+        queryFn: async () => {
+            const config = await loadClientConfig();
+            return config.scoutingScopes;
+        },
         // Reference data - cache for a long time
         staleTime: 10 * 60 * 1000,
         gcTime: 30 * 60 * 1000,

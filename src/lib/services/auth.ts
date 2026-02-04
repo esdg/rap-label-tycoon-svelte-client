@@ -10,6 +10,7 @@ import {
 } from '$lib/firebase';
 import { fetchPlayerByFirebaseId, createPlayer } from '$lib/api/players';
 import { fetchLabelsByIds } from '$lib/api/labels';
+import { loadClientConfig } from '$lib/services/config';
 import { appState } from '$lib/stores/appState';
 import { getFirebaseErrorCode, getFirebaseErrorMessage } from '$lib/utils/errorUtils';
 import type { CreatePlayerRequest, Player } from '$lib/types/player';
@@ -40,6 +41,9 @@ export async function loginAndRedirect(email: string, password: string): Promise
         if (playerData.labelIds && playerData.labelIds.length > 0) {
             labels = await fetchLabelsByIds(playerData.labelIds);
         }
+
+        // Load client configuration (includes scouting scopes, archetypes, etc.)
+        await loadClientConfig();
 
         // Update centralized app state
         appState.initialize({ player: playerData, labels });
@@ -94,6 +98,9 @@ export async function googleSignInAndRedirect(): Promise<AuthResult> {
             labels = await fetchLabelsByIds(playerData.labelIds);
         }
 
+        // Load client configuration
+        await loadClientConfig();
+
         // Update centralized app state
         appState.initialize({ player: playerData, labels });
 
@@ -138,6 +145,9 @@ export async function registerAndRedirect(
         // Update centralized app state (no labels for new users)
         appState.initialize({ player: playerData, labels: [] });
 
+        // Load client configuration for immediate availability
+        await loadClientConfig();
+
         await goto('/labels/create');
         return { success: true, player: playerData, labels: [] };
     } catch (error) {
@@ -176,6 +186,9 @@ export async function initializeAuthState(firebaseUserId: string): Promise<AuthR
         if (playerData.labelIds && playerData.labelIds.length > 0) {
             labels = await fetchLabelsByIds(playerData.labelIds);
         }
+
+        // Load client configuration
+        await loadClientConfig();
 
         // Update centralized app state
         appState.initialize({ player: playerData, labels });
