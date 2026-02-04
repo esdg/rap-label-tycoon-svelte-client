@@ -123,10 +123,11 @@ export function formatCountdown(ms: number, includeSeconds: boolean = true): str
  */
 export function getTimeRemaining(
     targetDate: Date | string,
-    serverOffset: number = 0
+    serverOffset: number = 0,
+    currentTime?: number
 ): number {
     const target = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
-    const now = getServerAdjustedTime(serverOffset);
+    const now = (currentTime ?? Date.now()) + serverOffset;
     return Math.max(0, target.getTime() - now);
 }
 
@@ -137,7 +138,8 @@ export function getTimeRemaining(
 export function getProgressPercent(
     startDate: Date | string,
     endDate: Date | string,
-    serverOffset: number = 0
+    serverOffset: number = 0,
+    currentTime?: number
 ): number {
     const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
     const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
@@ -145,7 +147,7 @@ export function getProgressPercent(
     const total = end.getTime() - start.getTime();
     if (total <= 0) return 100;
 
-    const remaining = getTimeRemaining(end, serverOffset);
+    const remaining = getTimeRemaining(end, serverOffset, currentTime);
     const elapsed = total - remaining;
     const percent = (elapsed / total) * 100;
 

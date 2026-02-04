@@ -96,6 +96,13 @@
 				!task.claimedAt && isTaskFinished(task, $serverTimeOffset) && !claimingTaskIds.has(task.id)
 		);
 
+		const contractIdsToRefresh = new Set<string>();
+		finishedUnclaimed.forEach((task) => {
+			if ('contractId' in task && typeof task.contractId === 'string' && task.contractId) {
+				contractIdsToRefresh.add(task.contractId);
+			}
+		});
+
 		if (finishedUnclaimed.length === 0) return;
 
 		// Mark tasks as being claimed
@@ -127,6 +134,13 @@
 
 		// Refetch tasks to get updated state
 		queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(currentLabelId) });
+		queryClient.invalidateQueries({ queryKey: queryKeys.contracts.byLabel(currentLabelId) });
+
+		if (contractIdsToRefresh.size > 0) {
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.contracts.byIds([...contractIdsToRefresh])
+			});
+		}
 	}
 
 	function openScoutModal() {
@@ -197,7 +211,7 @@
 			{:else if contractTasks.length === 0}
 				<p class="text-gray-400">No contracts</p>
 			{:else}
-				<ContractsCard contractsTaskResponse={contractTasks} />
+				<ContractsCard contractsTaskResponse={contractTasks} {currentTime} />
 			{/if}
 		</div>
 		<!-- Ongoing Tasks Section -->

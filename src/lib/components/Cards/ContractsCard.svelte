@@ -13,6 +13,7 @@
 	import EllipsedTextWithQuote from '../EllipsedTextWithQuote.svelte';
 
 	export let contractsTaskResponse: SigningContractTaskResponse[] = [];
+	export let currentTime: number = Date.now();
 
 	let artistsLoading = false;
 
@@ -97,7 +98,6 @@
 	<div>
 		{#each contractTaskGroups as { contractId, contract, task }}
 			{@const artist = contract ? getArtistById(contract.artistId) : undefined}
-			{@const lastIteration = contract?.iterations?.[contract.iterations.length - 2]}
 			<div
 				class="bg-black grid grid-cols-[60px,190px,1fr,1fr,5fr] border-t border-gray-700 px-4 py-1 text-sm gap-4 items-center"
 			>
@@ -105,7 +105,12 @@
 					<div class="font-stretch-condensed text-right">{artist.stageName}</div>
 					<div class="">
 						<ProgressBar
-							value={getProgressPercent(task.startTime, task.endTime)}
+							value={getProgressPercent(
+								task.startTime,
+								task.endTime,
+								$serverTimeOffset,
+								currentTime
+							)}
 							lengthClass="w-full"
 							thicknessClass="h-[3px]"
 							useGradient={true}
@@ -116,7 +121,7 @@
 						/>
 					</div>
 					<div class="font-thin">
-						{formatTimeRemaining(task.endTime, Date.now(), $serverTimeOffset)}
+						{formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)}
 					</div>
 					<div class="flex">
 						{#each contract.iterations ?? [] as contractIteration}
