@@ -120,14 +120,17 @@ export function addMultipleDiscoveredArtists(
     isBookmarked: boolean = false
 ) {
     const discoveredAt = new Date().toISOString();
-    discoveredArtists.update((currentArtists) => [
-        ...currentArtists,
-        ...artists.map((artist) => ({
-            artist,
-            isBookmarked,
-            discoveredAt
-        }))
-    ]);
+    discoveredArtists.update((currentArtists) => {
+        const existingIds = new Set(currentArtists.map((item) => item.artist.id));
+        const newArtists = artists
+            .filter((artist) => !existingIds.has(artist.id))
+            .map((artist) => ({
+                artist,
+                isBookmarked,
+                discoveredAt
+            }));
+        return [...currentArtists, ...newArtists];
+    });
 }
 
 // Helper function to clear all discovered artists

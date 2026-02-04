@@ -30,7 +30,20 @@
 		});
 	}
 
-	function openScoutResultsModal(scoutingTaskResponse: TaskResponse) {
+	async function openScoutResultsModal(scoutingTaskResponse: TaskResponse) {
+		// Fetch and add discovered artists to store if they exist
+		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
+			const scoutingResults = scoutingTaskResponse.results as ScoutingArtistsResults;
+			if (scoutingResults.discoveredArtistsIds?.length > 0) {
+				try {
+					const artists = await getArtistsByIds(scoutingResults.discoveredArtistsIds);
+					addMultipleDiscoveredArtists(artists, false);
+				} catch (err) {
+					console.error('Failed to fetch discovered artists:', err);
+				}
+			}
+		}
+
 		modalStore.open('task-modal', {
 			subModal: 'scout-results',
 			scoutingTaskResponse: scoutingTaskResponse,
