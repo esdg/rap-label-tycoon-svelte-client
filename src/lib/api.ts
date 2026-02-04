@@ -181,3 +181,10 @@ export async function getArtistsByIds(ids: string[]): Promise<(import('./types/n
     const idsParam = ids.join(',');
     return api(`/api/v1/artists/by-ids?ids=${idsParam}`);
 }
+
+// Contract API functions
+export async function getContractsByIds(ids: string[]): Promise<import('./types/contracts').Contract[]> {
+    if (ids.length === 0) return [];
+    const idsParam = ids.join(',');
+    return api(`/api/v1/contracts/by-ids?ids=${idsParam}`);
+}

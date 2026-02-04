@@ -27,7 +27,11 @@ export const expiredContracts = derived(contracts, ($contracts) =>
 
 // Helper function to add a contract
 export function addContract(contract: Contract) {
-    contracts.update((currentContracts) => [...currentContracts, contract]);
+    contracts.update((currentContracts) => {
+        const exists = currentContracts.some((c) => c.id === contract.id);
+        if (exists) return currentContracts;
+        return [...currentContracts, contract];
+    });
 }
 
 // Helper function to remove a contract by ID
@@ -59,4 +63,13 @@ export function setContracts(newContracts: Contract[]) {
 // Helper function to clear all contracts
 export function clearContracts() {
     contracts.set([]);
+}
+
+// Helper function to add multiple contracts at once
+export function addMultipleContracts(newContracts: Contract[]) {
+    contracts.update((currentContracts) => {
+        const existingIds = new Set(currentContracts.map((c) => c.id));
+        const uniqueContracts = newContracts.filter((contract) => !existingIds.has(contract.id));
+        return [...currentContracts, ...uniqueContracts];
+    });
 }

@@ -3,16 +3,15 @@
 	import { modalStore } from '$lib/stores/modal';
 	import { label } from '$lib/stores/label';
 	import Button from '$lib/components/Button.svelte';
-	import { fetchLabelTasks, claimTask, getArtistsByIds } from '$lib/api';
+	import { fetchLabelTasks, claimTask, getArtistsByIds, getContractsByIds } from '$lib/api';
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import ScoutingTaskCard from '$lib/components/Cards/ScoutingTaskCard.svelte';
 	import { TaskType, type TaskResponse } from '$lib/types/task';
 	import { ScoutingType, type ScoutingArtistsResults } from '$lib/types/scoutingArtistsTask';
 	import ContractsCard from '$lib/components/Cards/ContractsCard.svelte';
 	import { scoutingTasks, contractTasks, updateScoutingTask } from '$lib/stores/tasks';
-	import { setContracts } from '$lib/stores/contracts';
+	import { setContracts, addMultipleContracts } from '$lib/stores/contracts';
 	import { addMultipleDiscoveredArtists } from '$lib/stores/artists';
-	import type { Contract } from '$lib/types/contracts';
 
 	let serverTimeOffset = 0; // Difference between server time and client time
 	let loading = true;
@@ -98,23 +97,34 @@
 			scoutingTasks.set(fetchedScoutingTasks);
 			contractTasks.set(fetchedContractTasks);
 
-			// Extract contracts from contract tasks and populate contracts store
-			const extractedContracts = fetchedContractTasks
+			// Extract contract IDs from contract tasks and fetch them
+			const contractIds = fetchedContractTasks
 				.map((task) => {
 					const results = task.results as any;
-					return results?.contract;
+					return results?.contractId;
 				})
-				.filter((contract): contract is Contract => contract != null);
-			setContracts(extractedContracts);
+				.filter((id): id is string => typeof id === 'string');
+
+			if (contractIds.length > 0) {
+				try {
+					const fetchedContracts = await getContractsByIds(contractIds);
+					setContracts(fetchedContracts);
+				} catch (err) {
+					console.error('Failed to fetch contracts:', err);
+				}
+			}
 
 			// Auto-claim all finished tasks that haven't been claimed yet
 			const finishedUnclaimedScoutingTasks = fetchedScoutingTasks.filter(
 				(task) => !task.claimedAt && isTaskFinished(task)
 			);
+			const finishedUnclaimedContractTasks = fetchedContractTasks.filter(
+				(task) => !task.claimedAt && isTaskFinished(task)
+			);
 
 			if (finishedUnclaimedScoutingTasks.length > 0) {
-				// Claim all finished tasks in parallel
-				const claimPromises = finishedUnclaimedScoutingTasks.map(async (task) => {
+				// Claim all finished scouting tasks in parallel
+				const scoutingClaimPromises = finishedUnclaimedScoutingTasks.map(async (task) => {
 					try {
 						const claimedTask = await claimTask(task.id);
 						// Update the task in the store
@@ -131,12 +141,41 @@
 
 						return { success: true, taskId: task.id };
 					} catch (err) {
-						console.error(`Failed to claim task ${task.id}:`, err);
+						console.error(`Failed to claim scouting task ${task.id}:`, err);
 						return { success: false, taskId: task.id, error: err };
 					}
 				});
 
-				await Promise.all(claimPromises);
+				await Promise.all(scoutingClaimPromises);
+			}
+
+			if (finishedUnclaimedContractTasks.length > 0) {
+				// Claim all finished contract tasks in parallel
+				const contractClaimPromises = finishedUnclaimedContractTasks.map(async (task) => {
+					try {
+						const claimedTask = await claimTask(task.id);
+						// Update the task in the store
+						// Note: updateContractTask would need to be created if needed
+
+						// Fetch and store contract if available
+						if (claimedTask.results && 'contractId' in claimedTask.results) {
+							const contractResults = claimedTask.results as any;
+							if (contractResults.contractId) {
+								const fetchedContracts = await getContractsByIds([contractResults.contractId]);
+								if (fetchedContracts.length > 0) {
+									addMultipleContracts(fetchedContracts);
+								}
+							}
+						}
+
+						return { success: true, taskId: task.id };
+					} catch (err) {
+						console.error(`Failed to claim contract task ${task.id}:`, err);
+						return { success: false, taskId: task.id, error: err };
+					}
+				});
+
+				await Promise.all(contractClaimPromises);
 			}
 
 			loading = false;
