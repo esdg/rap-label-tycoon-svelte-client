@@ -20,6 +20,7 @@
 	import { colors } from '$lib/theme';
 	import CostEstimation from './CostEstimation.svelte';
 	import { TaskCreationErrorType, type TaskCostPrediction } from '$lib/types/task';
+	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 
 	// State
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
@@ -197,11 +198,8 @@
 	}
 </script>
 
-<section class="flex flex-col h-full overflow-hidden" aria-label="Scout Talents">
-	<!-- Stepper -->
-	<div
-		class="flex-shrink-0 w-full max-w-96 lg:max-w-2xl xl:max-w-3xl mx-auto mt-4 sm:mt-6 lg:mt-8 px-4 sm:px-0"
-	>
+<ScrollableContainer {error}>
+	<svelte:fragment slot="header">
 		<Stepper
 			selectedButtonColor={colors.primary[300]}
 			selectedTextColor={colors.primary[500]}
@@ -211,10 +209,8 @@
 			hideLabelsOnMobile={true}
 			on:stepClicked={handleStepChange}
 		/>
-	</div>
-
-	<!-- Main Content - Scrollable -->
-	<div class="flex-1 overflow-y-auto mt-8 sm:mt-16 lg:mt-24">
+	</svelte:fragment>
+	<svelte:fragment>
 		<ContentPanel
 			class="pt-0 p-4 max-w-xl lg:max-w-3xl xl:max-w-4xl mx-auto"
 			activeStepIndex={currentStep}
@@ -270,93 +266,78 @@
 				</div>
 			</ContentPanelItem>
 		</ContentPanel>
-	</div>
-
-	<!-- Error Message -->
-	{#if error}
-		<div
-			class="flex-shrink-0 px-4 lg:px-6 xl:px-8 py-2 lg:py-3 xl:py-4 bg-error-900/50 text-error-500 text-sm lg:text-base xl:text-lg animate-in fade-in duration-200"
-		>
-			{error}
+	</svelte:fragment>
+	<svelte:fragment slot="footer">
+		<!-- Prospector -->
+		<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
+			<label
+				class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
+				for="prospector-btn"
+			>
+				Prospector
+			</label>
+			<Dropdown
+				options={prospectorOptions}
+				disabled={prospectorOptions.length <= 1}
+				bind:value={selectedProspectorId}
+				placeholder="Choose..."
+				direction="up"
+				on:change={(e) => console.log('Selected:', e.detail)}
+			/>
 		</div>
-	{/if}
 
-	<!-- Sticky Actions Bar -->
-	<div
-		class="flex-shrink-0 w-full bg-black py-2 sm:py-3 px-3 sm:px-4 border-t border-gray-700 sticky bottom-0"
-	>
-		<div class="flex flex-col sm:flex-row gap-3 lg:gap-4 sm:items-center">
-			<!-- Prospector -->
-			<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
-				<label
-					class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
-					for="prospector-btn"
+		<!-- Action Buttons -->
+		<ContentPanel activeStepIndex={currentStep} class="w-full sm:w-auto">
+			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					style="hollow"
+					altText="Cancel scouting task"
+					on:clicked={handleCancel}
 				>
-					Prospector
-				</label>
-				<Dropdown
-					options={prospectorOptions}
-					disabled={prospectorOptions.length <= 1}
-					bind:value={selectedProspectorId}
-					placeholder="Choose..."
-					direction="up"
-					on:change={(e) => console.log('Selected:', e.detail)}
-				/>
-			</div>
+					Cancel
+				</Button>
+				<Button
+					disabled={selectedGenres.size === 0}
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					altText="Proceed to next step"
+					on:clicked={handleNextStep}
+				>
+					Next
+				</Button>
+			</ContentPanelItem>
 
-			<!-- Action Buttons -->
-			<ContentPanel activeStepIndex={currentStep} class="w-full sm:w-auto">
-				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						style="hollow"
-						altText="Cancel scouting task"
-						on:clicked={handleCancel}
-					>
-						Cancel
-					</Button>
-					<Button
-						disabled={selectedGenres.size === 0}
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						altText="Proceed to next step"
-						on:clicked={handleNextStep}
-					>
-						Next
-					</Button>
-				</ContentPanelItem>
-
-				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						style="hollow"
-						altText="Cancel scouting task"
-						on:clicked={handleCancel}
-					>
-						Cancel
-					</Button>
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						altText="Proceed to previous step"
-						on:clicked={handlePreviousStep}
-					>
-						Previous
-					</Button>
-					<Button
-						class="w-full sm:w-auto sm:min-w-48 lg:min-w-56 xl:min-w-64"
-						color="secondary"
-						style="normal"
-						altText="Start scouting for talents"
-						{loading}
-						on:clicked={handleStartScouting}
-					>
-						{loading ? 'Starting...' : 'Start Scouting'}
-					</Button>
-				</ContentPanelItem>
-			</ContentPanel>
-		</div>
-	</div>
-</section>
+			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					style="hollow"
+					altText="Cancel scouting task"
+					on:clicked={handleCancel}
+				>
+					Cancel
+				</Button>
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					altText="Proceed to previous step"
+					on:clicked={handlePreviousStep}
+				>
+					Previous
+				</Button>
+				<Button
+					class="w-full sm:w-auto sm:min-w-48 lg:min-w-56 xl:min-w-64"
+					color="secondary"
+					style="normal"
+					altText="Start scouting for talents"
+					{loading}
+					on:clicked={handleStartScouting}
+				>
+					{loading ? 'Starting...' : 'Start Scouting'}
+				</Button>
+			</ContentPanelItem>
+		</ContentPanel></svelte:fragment
+	>
+</ScrollableContainer>

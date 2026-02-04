@@ -19,6 +19,7 @@
 	import type { TaskCostPrediction } from '$lib/types/task';
 	import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
 	import { yearsToTimeSpan } from '$lib/utils';
+	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 
 	// State
 	let activeStepIndex = 0;
@@ -165,11 +166,8 @@
 	}
 </script>
 
-<section class="flex flex-col h-full overflow-hidden" aria-label="Sign contract">
-	<!-- Stepper -->
-	<div
-		class="flex-shrink-0 w-full max-w-96 lg:max-w-2xl mx-auto mt-4 sm:mt-6 lg:mt-8 mb-6 px-4 sm:px-0"
-	>
+<ScrollableContainer error={submitError}>
+	<svelte:fragment slot="header">
 		<Stepper
 			selectedButtonColor={colors.primary[300]}
 			selectedTextColor={colors.primary[500]}
@@ -179,10 +177,8 @@
 			hideLabelsOnMobile={true}
 			on:stepClicked={handleStepChange}
 		/>
-	</div>
-
-	<!-- Main Content - Scrollable -->
-	<div class="flex-1 overflow-y-auto">
+	</svelte:fragment>
+	<svelte:fragment>
 		<ContentPanel
 			class="pt-0 px-16 mx-auto h-full"
 			{activeStepIndex}
@@ -354,14 +350,6 @@
 								<div
 									class="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-b-2 border-indigo-600"
 								></div>
-
-								{#if submitError}
-									<div
-										class="flex-shrink-0 px-4 lg:px-6 py-2 bg-error-900/50 text-error-500 text-sm"
-									>
-										{submitError}
-									</div>
-								{/if}
 							</div>
 						{:else if costPrediction}
 							<CostEstimation {costPrediction} />
@@ -374,109 +362,103 @@
 				</ContentPanelItem>
 			</div>
 		</ContentPanel>
-	</div>
-	<!-- Sticky Actions Bar -->
-	<div
-		class="flex-shrink-0 w-full bg-black py-2 sm:py-3 px-3 sm:px-4 border-t border-gray-700 sticky bottom-0"
-	>
+	</svelte:fragment>
+	<svelte:fragment slot="footer">
 		<!-- Prospector -->
-		<div class="flex flex-col sm:flex-row gap-3 lg:gap-4 sm:items-center">
-			<!-- Prospector -->
-			<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
-				<label
-					class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
-					for="prospector-btn"
-				>
-					Prospector
-				</label>
-				<Dropdown
-					options={prospectorOptions}
-					disabled={prospectorOptions.length <= 1}
-					bind:value={selectedProspectorId}
-					placeholder="Choose..."
-					direction="up"
-					on:change={(e) => console.log('Selected:', e.detail)}
-				/>
-			</div>
-			<ContentPanel {activeStepIndex} class="w-full sm:w-auto">
-				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						style="hollow"
-						altText="Cancel signing contract"
-						on:clicked={handleCancel}
-					>
-						Cancel
-					</Button>
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						altText="Proceed to next step"
-						on:clicked={handleNextStep}
-					>
-						Next
-					</Button>
-				</ContentPanelItem>
-				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						style="hollow"
-						altText="Cancel signing contract"
-						on:clicked={handleCancel}
-					>
-						Cancel
-					</Button>
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						altText="Proceed to previous step"
-						on:clicked={handlePreviousStep}
-					>
-						Previous
-					</Button>
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						altText="Proceed to next step"
-						on:clicked={handleNextStep}
-					>
-						Next
-					</Button>
-				</ContentPanelItem>
-
-				<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						style="hollow"
-						altText="Cancel signing contract"
-						on:clicked={handleCancel}
-					>
-						Cancel
-					</Button>
-					<Button
-						class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
-						color="primary"
-						altText="Proceed to previous step"
-						on:clicked={handlePreviousStep}
-					>
-						Previous
-					</Button>
-					<Button
-						class="w-full sm:w-auto sm:min-w-48 lg:min-w-56 xl:min-w-64"
-						color="secondary"
-						style="normal"
-						altText="Start scouting for talents"
-						{loading}
-						disabled={!readyForCostPrediction || loading}
-						on:clicked={handleMakeOffer}
-					>
-						{loading ? 'Starting...' : 'Make an offer'}
-					</Button>
-				</ContentPanelItem>
-			</ContentPanel>
+		<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
+			<label
+				class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
+				for="prospector-btn"
+			>
+				Prospector
+			</label>
+			<Dropdown
+				options={prospectorOptions}
+				disabled={prospectorOptions.length <= 1}
+				bind:value={selectedProspectorId}
+				placeholder="Choose..."
+				direction="up"
+				on:change={(e) => console.log('Selected:', e.detail)}
+			/>
 		</div>
-	</div>
-</section>
+		<ContentPanel {activeStepIndex} class="w-full sm:w-auto">
+			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					style="hollow"
+					altText="Cancel signing contract"
+					on:clicked={handleCancel}
+				>
+					Cancel
+				</Button>
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					altText="Proceed to next step"
+					on:clicked={handleNextStep}
+				>
+					Next
+				</Button>
+			</ContentPanelItem>
+			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					style="hollow"
+					altText="Cancel signing contract"
+					on:clicked={handleCancel}
+				>
+					Cancel
+				</Button>
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					altText="Proceed to previous step"
+					on:clicked={handlePreviousStep}
+				>
+					Previous
+				</Button>
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					altText="Proceed to next step"
+					on:clicked={handleNextStep}
+				>
+					Next
+				</Button>
+			</ContentPanelItem>
+
+			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					style="hollow"
+					altText="Cancel signing contract"
+					on:clicked={handleCancel}
+				>
+					Cancel
+				</Button>
+				<Button
+					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
+					color="primary"
+					altText="Proceed to previous step"
+					on:clicked={handlePreviousStep}
+				>
+					Previous
+				</Button>
+				<Button
+					class="w-full sm:w-auto sm:min-w-48 lg:min-w-56 xl:min-w-64"
+					color="secondary"
+					style="normal"
+					altText="Start scouting for talents"
+					{loading}
+					disabled={!readyForCostPrediction || loading}
+					on:clicked={handleMakeOffer}
+				>
+					{loading ? 'Starting...' : 'Make an offer'}
+				</Button>
+			</ContentPanelItem>
+		</ContentPanel>
+	</svelte:fragment>
+</ScrollableContainer>

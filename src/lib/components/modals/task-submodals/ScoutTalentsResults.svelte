@@ -10,6 +10,7 @@
 	import ArtistDetails from '$lib/components/ArtistDetails.svelte';
 	import type { TaskResponse } from '$lib/types/task';
 	import { discoveredArtists } from '$lib/stores/artists';
+	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 
 	export let taskResult: TaskResponse;
 
@@ -95,12 +96,9 @@
 	}
 </script>
 
-<section class="flex flex-col h-full overflow-hidden" aria-label="Scout Talents Results">
-	<!-- Stepper -->
-	{#if taskArtists.length > 1}
-		<div
-			class="flex-shrink-0 w-full max-w-96 lg:max-w-2xl mx-auto mt-4 sm:mt-6 lg:mt-8 mb-6 px-4 sm:px-0"
-		>
+<ScrollableContainer>
+	<svelte:fragment slot="header">
+		{#if taskArtists.length > 1}
 			<Stepper
 				selectedButtonColor={colors.primary[300]}
 				selectedTextColor={colors.primary[500]}
@@ -110,11 +108,10 @@
 				hideLabelsOnMobile={true}
 				on:stepClicked={handleStepChange}
 			/>
-		</div>
-	{/if}
+		{/if}
+	</svelte:fragment>
 
-	<!-- Main Content - Scrollable -->
-	<div class="flex-1 overflow-y-auto">
+	<svelte:fragment>
 		<ContentPanel
 			class="pt-0 p-4 mx-auto h-full"
 			activeStepIndex={activeArtistIndex}
@@ -137,54 +134,48 @@
 				{/if}
 			</div>
 		</ContentPanel>
-	</div>
+	</svelte:fragment>
+	<svelte:fragment slot="footer">
+		<Button
+			class="w-full sm:w-auto sm:min-w-32 order-last sm:order-first sm:ml-auto"
+			color="primary"
+			style="hollow"
+			altText="Cancel scouting task"
+			on:clicked={handleCancel}
+		>
+			Cancel
+		</Button>
 
-	<!-- Sticky Actions Bar -->
-	<div
-		class="flex-shrink-0 w-full bg-black py-2 sm:py-3 px-3 sm:px-4 border-t border-gray-700 sticky bottom-0"
-	>
-		<div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
-			<Button
-				class="w-full sm:w-auto sm:min-w-32 order-last sm:order-first"
-				color="primary"
-				style="hollow"
-				altText="Cancel scouting task"
-				on:clicked={handleCancel}
-			>
-				Cancel
-			</Button>
+		{#if taskArtists.length > 1}
+			<div class="flex gap-2 sm:gap-3">
+				<Button
+					class="flex-1 sm:flex-none sm:min-w-32"
+					color="primary"
+					altText="View previous artist"
+					on:clicked={handlePrevious}
+					disabled={activeArtistIndex === 0}
+				>
+					Previous
+				</Button>
+				<Button
+					class="flex-1 sm:flex-none sm:min-w-32"
+					color="primary"
+					altText="View next artist"
+					on:clicked={handleNext}
+					disabled={activeArtistIndex >= taskArtists.length - 1}
+				>
+					Next
+				</Button>
+			</div>
+		{/if}
 
-			{#if taskArtists.length > 1}
-				<div class="flex gap-2 sm:gap-3">
-					<Button
-						class="flex-1 sm:flex-none sm:min-w-32"
-						color="primary"
-						altText="View previous artist"
-						on:clicked={handlePrevious}
-						disabled={activeArtistIndex === 0}
-					>
-						Previous
-					</Button>
-					<Button
-						class="flex-1 sm:flex-none sm:min-w-32"
-						color="primary"
-						altText="View next artist"
-						on:clicked={handleNext}
-						disabled={activeArtistIndex >= taskArtists.length - 1}
-					>
-						Next
-					</Button>
-				</div>
-			{/if}
-
-			<Button
-				class="w-full sm:w-auto sm:min-w-32"
-				color="secondary"
-				altText="Sign contract with this artist"
-				on:clicked={() => openSignContractModal(taskArtists[activeArtistIndex])}
-			>
-				Sign contract
-			</Button>
-		</div>
-	</div>
-</section>
+		<Button
+			class="w-full sm:w-auto sm:min-w-32"
+			color="secondary"
+			altText="Sign contract with this artist"
+			on:clicked={() => openSignContractModal(taskArtists[activeArtistIndex])}
+		>
+			Sign contract
+		</Button>
+	</svelte:fragment>
+</ScrollableContainer>
