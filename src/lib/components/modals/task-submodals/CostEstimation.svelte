@@ -3,10 +3,18 @@
 	import type { TaskCostPrediction } from '$lib/types/task';
 	import { formatDuration } from '$lib/utils/timeUtils';
 
-	export let costPrediction: TaskCostPrediction;
+	export let costPrediction: TaskCostPrediction | null = null;
+	export let loading = false;
+	export let emptyMessage = 'No cost estimation available.';
 </script>
 
-{#if costPrediction}
+{#if loading}
+	<div class="flex items-center justify-center py-8 lg:py-12">
+		<div
+			class="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-b-2 border-indigo-600"
+		></div>
+	</div>
+{:else if costPrediction}
 	<div
 		class="bg-primary-950/70 border border-primary-800/70 rounded-lg p-4 sm:p-5 lg:p-6 space-y-4"
 	>
@@ -73,4 +81,6 @@
 			</div>
 		</div>
 	</div>
+{:else}
+	<div class="text-center py-8 lg:py-12 text-gray-500 lg:text-lg">{emptyMessage}</div>
 {/if}

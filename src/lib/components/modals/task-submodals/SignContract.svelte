@@ -345,19 +345,7 @@
 				<ContentPanelItem>
 					<!-- Step 3: Sign Contract -->
 					<div class="space-y-4 sm:space-y-6 lg:space-y-8">
-						{#if loadingCost}
-							<div class="flex items-center justify-center py-8 lg:py-12">
-								<div
-									class="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-b-2 border-indigo-600"
-								></div>
-							</div>
-						{:else if costPrediction}
-							<CostEstimation {costPrediction} />
-						{:else}
-							<div class="text-center py-8 lg:py-12 text-gray-500 lg:text-lg">
-								No cost estimation available.
-							</div>
-						{/if}
+						<CostEstimation {costPrediction} loading={loadingCost} />
 					</div>
 				</ContentPanelItem>
 			</div>
