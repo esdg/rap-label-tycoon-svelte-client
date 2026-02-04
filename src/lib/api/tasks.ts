@@ -1,5 +1,5 @@
 // Tasks API functions
-import { apiFetch, apiFetchWithTime, TaskCreationError, type TimestampedResponse } from './client';
+import { apiFetch, apiFetchWithTime, apiPostTask, TaskCreationError, type TimestampedResponse } from './client';
 import type { TaskResponse, TaskCostPrediction } from '$lib/types/task';
 import type { ScoutingTaskRequest, ScoutingScope } from '$lib/types/scoutingArtistsTask';
 import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
@@ -32,20 +32,7 @@ export async function predictScoutingCost(data: ScoutingTaskRequest): Promise<Ta
 }
 
 export async function createScoutingTask(data: ScoutingTaskRequest): Promise<TaskResponse> {
-    const response = await fetch('http://localhost:5122/api/v1/tasks/scouting', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-
-    // Check for task creation error response
-    if (!response.ok || ('code' in result && 'message' in result)) {
-        throw new TaskCreationError(result.message, result.code, response.status);
-    }
-
-    return result as TaskResponse;
+    return apiPostTask<ScoutingTaskRequest, TaskResponse>('/api/v1/tasks/scouting', data);
 }
 
 // Contract tasks
@@ -57,17 +44,5 @@ export async function predictSignArtistContractCost(data: SignArtistContractRequ
 }
 
 export async function createSignArtistContractTask(data: SignArtistContractRequest): Promise<TaskResponse> {
-    const response = await fetch('http://localhost:5122/api/v1/tasks/sign-artist-contract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || ('code' in result && 'message' in result)) {
-        throw new TaskCreationError(result.message, result.code, response.status);
-    }
-
-    return result as TaskResponse;
+    return apiPostTask<SignArtistContractRequest, TaskResponse>('/api/v1/tasks/sign-artist-contract', data);
 }

@@ -6,6 +6,9 @@
 	import { contracts } from '$lib/stores/contracts';
 	import { discoveredArtists, addMultipleDiscoveredArtists } from '$lib/stores/artists';
 	import { getArtistsByIds } from '$lib/api';
+	import { serverTimeOffset } from '$lib/queries/taskQueries';
+	import ProgressBar from '../progress-bars/ProgressBar.svelte';
+	import { getProgressPercent, formatTimeRemaining } from '$lib/utils';
 
 	export let contractsTaskResponse: SigningContractTaskResponse[] = [];
 
@@ -65,6 +68,19 @@
 				{#if contract}
 					{#if artist}
 						<div>{artist.stageName}</div>
+						<div>
+							<ProgressBar
+								value={getProgressPercent(contractTask.startTime, contractTask.endTime)}
+								lengthClass="w-full"
+								thicknessClass="h-1.5 lg:h-2"
+								useGradient={true}
+								gradientFromClass="from-indigo-500"
+								gradientToClass="to-pink-500"
+								backgroundClass="bg-black"
+								ariaLabel={`Contract negotiation with ${artist.stageName} progress`}
+							/>
+						</div>
+						<div>{formatTimeRemaining(contractTask.endTime, Date.now(), $serverTimeOffset)}</div>
 					{:else if artistsLoading}
 						<div>Loading artist...</div>
 					{:else}

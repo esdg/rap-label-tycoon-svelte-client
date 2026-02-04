@@ -18,6 +18,7 @@
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import type { TaskCostPrediction } from '$lib/types/task';
 	import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
+	import { yearsToTimeSpan } from '$lib/utils';
 
 	// State
 	let activeStepIndex = 0;
@@ -112,12 +113,6 @@
 		}
 	}
 
-	function formatYearsToTimeSpan(years: number): string {
-		// Convert years to an approximate TimeSpan string understood by the API (d.hh:mm:ss)
-		const days = Math.max(0, years) * 365;
-		return `${days}.00:00:00`;
-	}
-
 	function buildCostPredictionRequest(): SignArtistContractRequest | null {
 		if (!$currentLabel || !$currentPlayer || !artist?.id) return null;
 
@@ -125,7 +120,7 @@
 
 		const duration =
 			usesDuration && contractLengthYears !== null && contractLengthYears > 0
-				? formatYearsToTimeSpan(sanitize(contractLengthYears))
+				? yearsToTimeSpan(sanitize(contractLengthYears))
 				: '';
 
 		return {

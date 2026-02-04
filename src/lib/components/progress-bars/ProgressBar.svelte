@@ -8,6 +8,10 @@
 
 	export let progressClass: string = 'bg-blue-500';
 	export let backgroundClass: string = 'bg-gray-800/40';
+	export let useGradient: boolean = false;
+	export let gradientFromClass: string = 'from-indigo-500';
+	export let gradientToClass: string = 'to-pink-500';
+	export let gradientViaClass: string = ''; // optional middle stop
 	export let rounded: boolean = true;
 	export let ariaLabel: string = 'Progress';
 
@@ -20,6 +24,10 @@
 		? `${lengthClass} ${thicknessClass}`
 		: `${thicknessClass} ${lengthClass}`; // swap for vertical
 	$: fillPositionClass = isHorizontal ? 'left-0 inset-y-0' : 'bottom-0 inset-x-0';
+	$: gradientDirectionClass = isHorizontal ? 'bg-gradient-to-r' : 'bg-gradient-to-t';
+	$: fillColorClass = useGradient
+		? `${gradientDirectionClass} ${gradientFromClass} ${gradientViaClass} ${gradientToClass}`
+		: progressClass;
 </script>
 
 <div
@@ -32,7 +40,7 @@
 >
 	<div class={`absolute inset-0 ${backgroundClass}`}></div>
 	<div
-		class={`absolute ${fillPositionClass} ${progressClass} ${cornerClass}`}
+		class={`absolute ${fillPositionClass} ${fillColorClass} ${cornerClass}`}
 		style={fillStyle}
 	></div>
 </div>

@@ -11,6 +11,7 @@ import {
     createSignArtistContractTask,
     predictSignArtistContractCost,
 } from '$lib/api/tasks';
+import { getServerAdjustedTime } from '$lib/utils/timeUtils';
 import type {
     TaskResponse,
     TaskCostPrediction,
@@ -25,10 +26,7 @@ import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
 // Store for server time offset (shared across the app)
 export const serverTimeOffset = writable<number>(0);
 
-// Helper to get current server-adjusted time
-export function getServerTime(offset: number): number {
-    return Date.now() + offset;
-}
+
 
 // Query: Get all tasks for a label
 export function createLabelTasksQuery(labelId: string | null) {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Chip from '$lib/components/Chip.svelte';
 	import type { TaskCostPrediction } from '$lib/types/task';
-	import { formatDuration } from '$lib/utils/formatDuration';
+	import { formatDuration } from '$lib/utils/timeUtils';
 
 	export let costPrediction: TaskCostPrediction;
 </script>

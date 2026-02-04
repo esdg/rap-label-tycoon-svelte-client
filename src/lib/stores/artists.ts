@@ -1,5 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import type { Artist, Rapper, Beatmaker } from '$lib/types/nonPlayingCharacter';
+import { nowISO } from '$lib/utils/timeUtils';
 
 // Extended types to track discovery and bookmark status
 export interface DiscoveredArtist {
@@ -51,7 +52,7 @@ export function addDiscoveredArtist(
         {
             artist,
             isBookmarked,
-            discoveredAt: new Date().toISOString()
+            discoveredAt: nowISO()
         }
     ]);
 }
@@ -119,7 +120,7 @@ export function addMultipleDiscoveredArtists(
     artists: (Artist | Rapper | Beatmaker)[],
     isBookmarked: boolean = false
 ) {
-    const discoveredAt = new Date().toISOString();
+    const discoveredAt = nowISO();
     discoveredArtists.update((currentArtists) => {
         const existingIds = new Set(currentArtists.map((item) => item.artist.id));
         const newArtists = artists

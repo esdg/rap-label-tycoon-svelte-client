@@ -3,6 +3,7 @@ import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { writable, derived, get } from 'svelte/store';
 import { queryKeys } from './queryClient';
 import { fetchArtistsByIds, type AnyArtist } from '$lib/api/artists';
+import { nowISO } from '$lib/utils/timeUtils';
 // Import legacy store for backward compatibility sync
 import { addMultipleDiscoveredArtists as legacyAddArtists } from '$lib/stores/artists';
 
@@ -30,7 +31,7 @@ export function createArtistsByIdsQuery(ids: string[]) {
 
 // Add discovered artists to the local store
 export function addDiscoveredArtists(artists: AnyArtist[], isBookmarked: boolean = false) {
-    const discoveredAt = new Date().toISOString();
+    const discoveredAt = nowISO();
 
     discoveredArtistsStore.update(map => {
         const newMap = new Map(map);

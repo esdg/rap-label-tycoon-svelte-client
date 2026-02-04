@@ -99,5 +99,32 @@ export async function apiFetchWithTime<T>(
     return { data, serverTime };
 }
 
+/**
+ * Specialized POST request for task creation endpoints
+ * Handles the special error response format used by task endpoints
+ * (returns { code, message } on error instead of standard error format)
+ */
+export async function apiPostTask<T, R>(
+    endpoint: string,
+    data: T
+): Promise<R> {
+    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    // Task endpoints return { code, message } on error
+    if (!response.ok || ('code' in result && 'message' in result)) {
+        throw new TaskCreationError(result.message, result.code, response.status);
+    }
+
+    return result as R;
+}
+
 // Re-export API_BASE_URL for backward compatibility
 export { API_BASE_URL };

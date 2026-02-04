@@ -33,3 +33,6 @@
 - **Styling**: Tailwind configured via tailwind.config.js/postcss.
 - **Error handling**: Queries expose error state via $query.error. TaskCreationError for task-specific errors.
 - **Testing status**: No automated tests configured; manually verify flows.
+
+## Utilities
+- Prefer adding reusable helpers (e.g., time-based progress calculations) to src/lib/utils and import from the index barrel instead of redefining them inside components.
