@@ -96,7 +96,7 @@
 	}
 </script>
 
-<ScrollableContainer>
+<ScrollableContainer showHeader={taskArtists.length > 1}>
 	<svelte:fragment slot="header">
 		{#if taskArtists.length > 1}
 			<Stepper

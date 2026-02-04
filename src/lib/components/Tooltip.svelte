@@ -12,8 +12,9 @@
 	let triggerEl: HTMLElement;
 	let tooltipEl: HTMLElement;
 	let visible = false;
+	let positioned = false;
 	let computedPosition = position;
-	let tooltipStyle = '';
+	let tooltipStyle = 'top: 0; left: 0;';
 	let arrowStyle = '';
 	let arrowClass = '';
 
@@ -22,11 +23,15 @@
 
 	function showTooltip() {
 		visible = true;
-		// Use requestAnimationFrame to ensure DOM is updated before positioning
+		positioned = false;
+		// Use double requestAnimationFrame to ensure DOM is fully updated
 		requestAnimationFrame(() => {
-			if (tooltipEl && triggerEl) {
-				calculatePosition();
-			}
+			requestAnimationFrame(() => {
+				if (tooltipEl && triggerEl) {
+					calculatePosition();
+					positioned = true;
+				}
+			});
 		});
 	}
 
@@ -125,7 +130,7 @@
 			top = viewportHeight - tooltipRect.height - padding;
 		}
 
-		tooltipStyle = `top: ${top}px; left: ${left}px; max-width: ${maxWidth}px;`;
+		tooltipStyle = `top: ${top}px; left: ${left}px;`;
 		arrowStyle = `top: ${arrowTop}; left: ${arrowLeft};`;
 		arrowClass = arrowClasses;
 	}
@@ -171,7 +176,9 @@
 	<div
 		bind:this={tooltipEl}
 		class="fixed z-[9999] px-3 py-2 text-xs text-gray-400 border border-gray-700 rounded-md shadow-lg bg-primary-950 {className}"
-		style={tooltipStyle}
+		class:invisible={!positioned}
+		class:visible={positioned}
+		style="{tooltipStyle} max-width: {maxWidth}px;"
 		role="tooltip"
 	>
 		<!-- Arrow -->

@@ -9,6 +9,8 @@
 	import { serverTimeOffset } from '$lib/queries/taskQueries';
 	import ProgressBar from '../progress-bars/ProgressBar.svelte';
 	import { getProgressPercent, formatTimeRemaining } from '$lib/utils';
+	import Tooltip from '../Tooltip.svelte';
+	import EllipsedTextWithQuote from '../EllipsedTextWithQuote.svelte';
 
 	export let contractsTaskResponse: SigningContractTaskResponse[] = [];
 
@@ -31,6 +33,13 @@
 	function getArtistById(artistId: string | null): Artist | undefined {
 		if (!artistId) return undefined;
 		return $discoveredArtists.find((item) => item.artist.id === artistId)?.artist;
+	}
+
+	function formatReleases(numberOfReleases?: Record<string, number | null> | null): string {
+		if (!numberOfReleases) return '—';
+		const entries = Object.entries(numberOfReleases).filter(([, value]) => value !== null);
+		if (entries.length === 0) return '—';
+		return entries.map(([key, value]) => `${key}: ${value ?? 0}`).join(', ');
 	}
 
 	async function fetchArtistsForContracts() {
@@ -88,8 +97,7 @@
 	<div>
 		{#each contractTaskGroups as { contractId, contract, task }}
 			{@const artist = contract ? getArtistById(contract.artistId) : undefined}
-			{@const lastResponseMessage =
-				contract?.iterations?.[contract.iterations.length - 2]?.response?.message}
+			{@const lastIteration = contract?.iterations?.[contract.iterations.length - 2]}
 			<div
 				class="bg-black grid grid-cols-[60px,190px,1fr,1fr,5fr] border-t border-gray-700 px-4 py-1 text-sm gap-4 items-center"
 			>
@@ -103,37 +111,83 @@
 							useGradient={true}
 							gradientFromClass="from-indigo-500"
 							gradientToClass="to-pink-500"
-							backgroundClass="bg-black"
+							backgroundClass="bg-gray-700"
 							ariaLabel={`Contract negotiation with ${artist.stageName} progress`}
 						/>
 					</div>
 					<div class="font-thin">
 						{formatTimeRemaining(task.endTime, Date.now(), $serverTimeOffset)}
 					</div>
-					<div class="flex gap-1">
+					<div class="flex">
 						{#each contract.iterations ?? [] as contractIteration}
-							<span
-								class="w-2 h-2 rounded-full"
-								class:bg-green-500={contractIteration.response?.accepted}
-								class:bg-red-500={contractIteration.response?.accepted === false}
-								class:bg-gray-600={!contractIteration.response}
-								title={contractIteration.iterationNumber
-									? `Iteration ${contractIteration.iterationNumber}`
-									: 'Pending'}
-							/>
+							<Tooltip position="bottom">
+								<div slot="trigger" class="size-4 flex items-center justify-center">
+									<span
+										class="w-2 h-2 block rounded-full"
+										class:bg-green-500={contractIteration.response?.accepted}
+										class:bg-red-500={contractIteration.response?.accepted === false}
+										class:bg-gray-600={!contractIteration.response}
+										title={contractIteration.iterationNumber
+											? `Iteration ${contractIteration.iterationNumber}`
+											: 'Pending'}
+									/>
+								</div>
+								<div
+									class="text-xs text-gray-400 italic flex flex-col items-stretch gap-1 min-w-0 w-full max-w-[240px]"
+								>
+									<div class="flex text-white justify-between gap-2 w-full mb-1">
+										<span class="font-semibold"
+											>Iteration {contractIteration.iterationNumber ?? '—'}</span
+										>
+										{#if contractIteration.response}
+											<span
+												class="text-green-400"
+												class:text-red-400={!contractIteration.response.accepted}
+												>{contractIteration.response.accepted ? 'Accepted' : 'Rejected'}</span
+											>
+										{:else}
+											<span class="text-gray-400">Awaiting response</span>
+										{/if}
+									</div>
+
+									{#if contractIteration.offert}
+										<div class="flex flex-col gap-0.5 w-full min-w-0">
+											<div class="flex justify-between gap-2">
+												<span>Signing bonus</span><span
+													>{contractIteration.offert.signingBonus}</span
+												>
+											</div>
+											<div class="flex justify-between gap-2">
+												<span>Royalty</span><span
+													>{contractIteration.offert.royaltyPercentage}%</span
+												>
+											</div>
+											<div class="flex justify-between gap-2">
+												<span>Advance</span><span>{contractIteration.offert.advance}</span>
+											</div>
+											{#if contractIteration.offert.numberOfReleases}
+												<div class="flex justify-between gap-2 w-full min-w-0">
+													<span>Releases</span>
+													<span class="text-right truncate min-w-0"
+														>{formatReleases(contractIteration.offert.numberOfReleases)}</span
+													>
+												</div>
+											{/if}
+										</div>
+									{:else}
+										<div class="text-gray-400">No offer terms</div>
+									{/if}
+
+									{#if contractIteration.response?.message}
+										<div class="w-full min-w-0">
+											<EllipsedTextWithQuote
+												>{contractIteration.response.message}</EllipsedTextWithQuote
+											>
+										</div>
+									{/if}
+								</div>
+							</Tooltip>
 						{/each}
-					</div>
-					<div
-						class="text-xs text-primary-600 italic flex items-center gap-1 min-w-0"
-						title={lastResponseMessage}
-					>
-						{#if lastResponseMessage}
-							<span aria-hidden="true">"</span>
-							<span class="truncate min-w-0">{lastResponseMessage}</span>
-							<span aria-hidden="true">"</span>
-						{:else}
-							—
-						{/if}
 					</div>
 				{:else if contract && artistsLoading}
 					<div>Loading artist...</div>

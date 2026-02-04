@@ -1,11 +1,12 @@
 <script lang="ts">
 	export let error: string | null = null;
+	export let showHeader = true;
 </script>
 
 <section class="flex flex-col h-full overflow-hidden">
 	<!-- Header -->
-	{#if $$slots.header}
-		<header class="w-full max-w-96 lg:max-w-2xl mx-auto mt-4 sm:mt-6 lg:mt-8 mb-6 px-4 sm:px-0">
+	{#if $$slots.header && showHeader}
+		<header class="w-full max-w-96 lg:max-w-2xl mx-auto mt-4 sm:mt-6 lg:mt-8 mb-2 px-4 sm:px-0">
 			<slot name="header" />
 		</header>
 	{/if}
