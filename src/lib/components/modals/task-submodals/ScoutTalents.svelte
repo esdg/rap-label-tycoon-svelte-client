@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { modalStore } from '$lib/stores/modal';
-	import { label, updateLabelBankroll } from '$lib/stores/label';
-	import { player } from '$lib/stores/player';
-	import { addScoutingTask } from '$lib/stores/tasks';
+	import { appState, currentLabel, currentPlayer } from '$lib/stores/appState';
 	import {
 		fetchScoutingScopes,
 		createScoutingTask,
 		predictScoutingCost,
 		TaskCreationError
 	} from '$lib/api';
+	import { queryKeys, queryClient } from '$lib/queries/queryClient';
 	import { RapMusicStyle, RapMusicStyleNames } from '$lib/types/musicStyles';
 	import {
 		ScoutingType,
@@ -64,7 +63,7 @@
 		}));
 
 	$: readyForPrediction = Boolean(
-		$label && $player && selectedScope && selectedGenres.size > 0 && currentStep === 1
+		$currentLabel && $currentPlayer && selectedScope && selectedGenres.size > 0 && currentStep === 1
 	);
 
 	$: if (readyForPrediction) {
@@ -85,7 +84,7 @@
 
 	// Functions
 	async function fetchCostPrediction() {
-		if (!$label || !$player || !selectedScope || selectedGenres.size === 0) return;
+		if (!$currentLabel || !$currentPlayer || !selectedScope || selectedGenres.size === 0) return;
 
 		const requestId = ++costPredictionRequestId;
 		loadingCost = true;
@@ -93,8 +92,8 @@
 
 		try {
 			const predictionRequest = {
-				labelId: $label.id,
-				workerId: $player.id,
+				labelId: $currentLabel.id,
+				workerId: $currentPlayer.id,
 				scoutingType,
 				productionStyles: Array.from(selectedGenres),
 				scopeId: selectedScope
@@ -131,11 +130,11 @@
 	}
 
 	async function handleStartScouting() {
-		if (!$label) {
+		if (!$currentLabel) {
 			error = 'No label found';
 			return;
 		}
-		if (!$player) {
+		if (!$currentPlayer) {
 			error = 'No player found';
 			return;
 		}
@@ -153,16 +152,21 @@
 
 		try {
 			const taskRequest = {
-				labelId: $label.id,
-				workerId: $player.id,
+				labelId: $currentLabel.id,
+				workerId: $currentPlayer.id,
 				scoutingType: scoutingType,
 				productionStyles: Array.from(selectedGenres),
 				scopeId: selectedScope
 			};
 
 			const response = await createScoutingTask(taskRequest);
-			addScoutingTask(response);
-			updateLabelBankroll(-response.budgetRequired);
+
+			// Update bankroll in appState
+			appState.updateCurrentLabelBankroll(-response.budgetRequired);
+
+			// Invalidate tasks query to refetch
+			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel($currentLabel.id) });
+
 			modalStore.close();
 		} catch (err) {
 			if (err instanceof TaskCreationError) {

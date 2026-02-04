@@ -23,6 +23,7 @@
     },
     "type": "module",
     "dependencies": {
+        "@tanstack/svelte-query": "^5.90.2",
         "firebase": "^12.8.0",
         "heroicons-svelte": "^2.0.2"
     }

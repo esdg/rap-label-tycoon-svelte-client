@@ -1,24 +1,126 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { modalStore } from '$lib/stores/modal';
-	import { label } from '$lib/stores/label';
+	import { currentLabel } from '$lib/stores/appState';
 	import Button from '$lib/components/Button.svelte';
-	import { fetchLabelTasks, claimTask, getArtistsByIds, getContractsByIds } from '$lib/api';
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import ScoutingTaskCard from '$lib/components/Cards/ScoutingTaskCard.svelte';
-	import { TaskType, type TaskResponse } from '$lib/types/task';
-	import { ScoutingType, type ScoutingArtistsResults } from '$lib/types/scoutingArtistsTask';
+	import {
+		TaskType,
+		type TaskResponse,
+		type ScoutingTaskResponse,
+		type SigningContractTaskResponse,
+		type ScoutingTaskResults
+	} from '$lib/types/task';
+	import { ScoutingType } from '$lib/types/scoutingArtistsTask';
 	import ContractsCard from '$lib/components/Cards/ContractsCard.svelte';
-	import { scoutingTasks, contractTasks, updateScoutingTask } from '$lib/stores/tasks';
-	import { setContracts, addMultipleContracts } from '$lib/stores/contracts';
-	import { addMultipleDiscoveredArtists } from '$lib/stores/artists';
+	import {
+		createLabelTasksQuery,
+		createTasksByType,
+		createClaimTaskMutation,
+		serverTimeOffset,
+		getServerTime
+	} from '$lib/queries/taskQueries';
+	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
+	import { createArtistsByIdsQuery, addDiscoveredArtists } from '$lib/queries/artistQueries';
+	import { queryKeys } from '$lib/queries/queryClient';
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import { fetchArtistsByIds } from '$lib/api/artists';
+	import { claimTask } from '$lib/api/tasks';
+	import { setContracts } from '$lib/stores/contracts';
 
-	let serverTimeOffset = 0; // Difference between server time and client time
-	let loading = true;
-	let error: string | null = null;
+	// Get query client for manual invalidation
+	const queryClient = useQueryClient();
+
+	// Reactive label ID
+	$: labelId = $currentLabel?.id ?? null;
+
+	// Create the tasks query - automatically refetches when labelId changes
+	$: tasksQuery = createLabelTasksQuery(labelId);
+
+	// Split tasks by type (derived from query data)
+	$: taskData = $tasksQuery.data
+		? createTasksByType($tasksQuery.data)
+		: { scoutingTasks: [], contractTasks: [] };
+	$: scoutingTasks = taskData.scoutingTasks;
+	$: contractTasks = taskData.contractTasks;
+
+	// Extract contract IDs directly from task.contractId (available on signing_contract_task)
+	$: contractIds = contractTasks
+		.map((task) => task.contractId)
+		.filter((id): id is string => typeof id === 'string' && id.length > 0);
+
+	// Deduplicate contract IDs (same contract can have multiple negotiation tasks)
+	$: uniqueContractIds = [...new Set(contractIds)];
+
+	// Create contracts query based on unique IDs
+	$: contractsQuery = createContractsByIdsQuery(uniqueContractIds);
+
+	// Sync contracts query data to legacy store for backward compatibility
+	$: if ($contractsQuery.data) {
+		setContracts($contractsQuery.data);
+	}
+
+	// Time tracking for progress bars
+	let currentTime = Date.now();
+
+	// Previous modal state for refresh on close
 	let previousModalState = $modalStore.isOpen;
-	let currentTime = Date.now(); // Current client time, updated every second
-	let hasLoadedOnce = false; // Track if we've loaded tasks at least once
+
+	// Watch for modal state changes to refetch
+	$: {
+		if (previousModalState && !$modalStore.isOpen) {
+			// Modal just closed, refresh tasks
+			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId!) });
+		}
+		previousModalState = $modalStore.isOpen;
+	}
+
+	// Auto-claim finished tasks when data loads
+	$: if ($tasksQuery.data && labelId) {
+		autoClaimFinishedTasks($tasksQuery.data, labelId);
+	}
+
+	// Track which tasks we've already started claiming to avoid duplicates
+	let claimingTaskIds = new Set<string>();
+
+	async function autoClaimFinishedTasks(tasks: TaskResponse[], currentLabelId: string) {
+		const finishedUnclaimed = tasks.filter(
+			(task) => !task.claimedAt && isTaskFinished(task) && !claimingTaskIds.has(task.id)
+		);
+
+		if (finishedUnclaimed.length === 0) return;
+
+		// Mark tasks as being claimed
+		finishedUnclaimed.forEach((task) => claimingTaskIds.add(task.id));
+
+		// Claim all finished tasks in parallel
+		const claimPromises = finishedUnclaimed.map(async (task) => {
+			try {
+				const claimedTask = await claimTask(task.id);
+
+				// Fetch and store discovered artists if this is a scouting task
+				if (claimedTask.results && 'discoveredArtistsIds' in claimedTask.results) {
+					const scoutingResults = claimedTask.results as ScoutingTaskResults;
+					if (scoutingResults.discoveredArtistsIds?.length > 0) {
+						const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
+						addDiscoveredArtists(artists, false);
+					}
+				}
+
+				return { success: true, taskId: task.id };
+			} catch (err) {
+				console.error(`Failed to claim task ${task.id}:`, err);
+				claimingTaskIds.delete(task.id); // Allow retry
+				return { success: false, taskId: task.id, error: err };
+			}
+		});
+
+		await Promise.all(claimPromises);
+
+		// Refetch tasks to get updated state
+		queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(currentLabelId) });
+	}
 
 	function openScoutModal() {
 		modalStore.open('task-modal', {
@@ -29,14 +131,14 @@
 		});
 	}
 
-	async function openScoutResultsModal(scoutingTaskResponse: TaskResponse) {
+	async function openScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist
 		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
-			const scoutingResults = scoutingTaskResponse.results as ScoutingArtistsResults;
+			const scoutingResults = scoutingTaskResponse.results as ScoutingTaskResults;
 			if (scoutingResults.discoveredArtistsIds?.length > 0) {
 				try {
-					const artists = await getArtistsByIds(scoutingResults.discoveredArtistsIds);
-					addMultipleDiscoveredArtists(artists, false);
+					const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
+					addDiscoveredArtists(artists, false);
 				} catch (err) {
 					console.error('Failed to fetch discovered artists:', err);
 				}
@@ -52,141 +154,8 @@
 		});
 	}
 
-	// Watch for modal state changes
-	$: {
-		if (previousModalState && !$modalStore.isOpen) {
-			// Modal just closed, refresh tasks
-			loadTasks();
-		}
-		previousModalState = $modalStore.isOpen;
-	}
-
-	// Reactively load tasks when label becomes available
-	$: if ($label?.id && !hasLoadedOnce) {
-		hasLoadedOnce = true;
-		loadTasks();
-	}
-
-	async function loadTasks() {
-		if (!$label?.id) {
-			// Don't show error if label is not yet loaded - just wait
-			loading = true;
-			return;
-		}
-
-		error = null;
-		loading = true;
-
-		try {
-			const { tasks: fetchedTasks, serverTime: serverTimeStr } = await fetchLabelTasks($label.id);
-
-			// Calculate offset between server time and client time first
-			const serverTime = new Date(serverTimeStr).getTime();
-			const clientTime = Date.now();
-			serverTimeOffset = serverTime - clientTime;
-
-			// Separate tasks by type
-			const fetchedScoutingTasks = fetchedTasks.filter(
-				(task) => task.taskType === TaskType.Scouting
-			);
-			const fetchedContractTasks = fetchedTasks.filter(
-				(task) => task.taskType === TaskType.SigningContract
-			);
-
-			// Update stores
-			scoutingTasks.set(fetchedScoutingTasks);
-			contractTasks.set(fetchedContractTasks);
-
-			// Extract contract IDs from contract tasks and fetch them
-			const contractIds = fetchedContractTasks
-				.map((task) => {
-					const results = task.results as any;
-					return results?.contractId;
-				})
-				.filter((id): id is string => typeof id === 'string');
-
-			if (contractIds.length > 0) {
-				try {
-					const fetchedContracts = await getContractsByIds(contractIds);
-					setContracts(fetchedContracts);
-				} catch (err) {
-					console.error('Failed to fetch contracts:', err);
-				}
-			}
-
-			// Auto-claim all finished tasks that haven't been claimed yet
-			const finishedUnclaimedScoutingTasks = fetchedScoutingTasks.filter(
-				(task) => !task.claimedAt && isTaskFinished(task)
-			);
-			const finishedUnclaimedContractTasks = fetchedContractTasks.filter(
-				(task) => !task.claimedAt && isTaskFinished(task)
-			);
-
-			if (finishedUnclaimedScoutingTasks.length > 0) {
-				// Claim all finished scouting tasks in parallel
-				const scoutingClaimPromises = finishedUnclaimedScoutingTasks.map(async (task) => {
-					try {
-						const claimedTask = await claimTask(task.id);
-						// Update the task in the store
-						updateScoutingTask(task.id, claimedTask);
-
-						// Fetch and store discovered artists if available
-						if (claimedTask.results && 'discoveredArtistsIds' in claimedTask.results) {
-							const scoutingResults = claimedTask.results as ScoutingArtistsResults;
-							if (scoutingResults.discoveredArtistsIds?.length > 0) {
-								const artists = await getArtistsByIds(scoutingResults.discoveredArtistsIds);
-								addMultipleDiscoveredArtists(artists, false);
-							}
-						}
-
-						return { success: true, taskId: task.id };
-					} catch (err) {
-						console.error(`Failed to claim scouting task ${task.id}:`, err);
-						return { success: false, taskId: task.id, error: err };
-					}
-				});
-
-				await Promise.all(scoutingClaimPromises);
-			}
-
-			if (finishedUnclaimedContractTasks.length > 0) {
-				// Claim all finished contract tasks in parallel
-				const contractClaimPromises = finishedUnclaimedContractTasks.map(async (task) => {
-					try {
-						const claimedTask = await claimTask(task.id);
-						// Update the task in the store
-						// Note: updateContractTask would need to be created if needed
-
-						// Fetch and store contract if available
-						if (claimedTask.results && 'contractId' in claimedTask.results) {
-							const contractResults = claimedTask.results as any;
-							if (contractResults.contractId) {
-								const fetchedContracts = await getContractsByIds([contractResults.contractId]);
-								if (fetchedContracts.length > 0) {
-									addMultipleContracts(fetchedContracts);
-								}
-							}
-						}
-
-						return { success: true, taskId: task.id };
-					} catch (err) {
-						console.error(`Failed to claim contract task ${task.id}:`, err);
-						return { success: false, taskId: task.id, error: err };
-					}
-				});
-
-				await Promise.all(contractClaimPromises);
-			}
-
-			loading = false;
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to load tasks';
-			loading = false;
-		}
-	}
-
 	function getCurrentServerTime(): number {
-		return currentTime + serverTimeOffset;
+		return getServerTime($serverTimeOffset);
 	}
 
 	function isTaskFinished(task: TaskResponse): boolean {
@@ -247,15 +216,15 @@
 		return Math.max(0, Math.min(100, progress));
 	}
 
-	function getScoutingType(task: TaskResponse): ScoutingType {
-		const results = task.results as ScoutingArtistsResults | null;
-		return typeof results?.$type === 'number' ? results.$type : ScoutingType.Rappers;
+	function getScoutingType(task: ScoutingTaskResponse): ScoutingType {
+		const results = task.results;
+		// $type in API is string like "rapper" or "beatmaker", map to enum
+		if (results?.$type === 'rapper') return ScoutingType.Rappers;
+		if (results?.$type === 'beatmaker') return ScoutingType.Beatmakers;
+		return ScoutingType.Rappers;
 	}
 
 	onMount(() => {
-		// Initial load is handled by the reactive statement that watches $label
-		// Only set up intervals here
-
 		// Update current time every second for countdown
 		const timeInterval = setInterval(() => {
 			currentTime = Date.now();
@@ -285,29 +254,29 @@
 
 		<div>
 			<h1 class="text-2xl font-bold mb-4">Label Roster</h1>
-			{#if loading}
+			{#if $tasksQuery.isLoading}
 				<p class="text-gray-400">Loading tasks...</p>
-			{:else if error}
-				<p class="text-red-400">Error: {error}</p>
-			{:else if $contractTasks.length === 0}
+			{:else if $tasksQuery.isError}
+				<p class="text-red-400">Error: {$tasksQuery.error?.message}</p>
+			{:else if contractTasks.length === 0}
 				<p class="text-gray-400">No contracts</p>
 			{:else}
-				<ContractsCard contractsTaskResponse={$contractTasks} />
+				<ContractsCard contractsTaskResponse={contractTasks} />
 			{/if}
 		</div>
 		<!-- Ongoing Tasks Section -->
 		<div>
 			<h2 class="text-2xl font-bold mb-4">Ongoing Tasks</h2>
 
-			{#if loading}
+			{#if $tasksQuery.isLoading}
 				<p class="text-gray-400">Loading tasks...</p>
-			{:else if error}
-				<p class="text-red-400">Error: {error}</p>
-			{:else if $scoutingTasks.length === 0}
+			{:else if $tasksQuery.isError}
+				<p class="text-red-400">Error: {$tasksQuery.error?.message}</p>
+			{:else if scoutingTasks.length === 0}
 				<p class="text-gray-400">No ongoing tasks</p>
 			{:else}
 				<div class="flex flex-wrap gap-4">
-					{#each $scoutingTasks as task}
+					{#each scoutingTasks as task}
 						<ScoutingTaskCard
 							state={getTaskStatus(task)}
 							durationText={formatTimeRemaining(task.endTime, currentTime)}

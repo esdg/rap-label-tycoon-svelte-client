@@ -1,19 +1,35 @@
 # AI Coding Guidelines for RLT Svelte Client
 
-- **Stack & entry points**: SvelteKit SPA (SSR disabled in src/routes/+layout.ts). Global shell in src/routes/+layout.svelte pulls in app.css, sets Roboto font, and renders MenuBar for authenticated users.
+- **Stack & entry points**: SvelteKit SPA (SSR disabled in src/routes/+layout.ts). Global shell in src/routes/+layout.svelte pulls in app.css, sets Roboto font, wraps app in QueryClientProvider, and renders MenuBar for authenticated users.
 - **Dev commands**: npm install; npm run dev for local; npm run build for production bundle; npm run preview to serve build; npm run format to apply Prettier + Svelte plugin.
 - **Architecture docs**: High-level screens/components in docs/RLT.md; guard system overview and examples in docs/GUARDS.md.
-- **API layer**: All backend calls go through src/lib/api.ts (API_BASE_URL=http://localhost:5122). Use helpers (createPlayer, getPlayerByFirebaseUserId, getPlayerLabels, createLabel, fetchScoutingScopes, createScoutingTask, predictScoutingCost, fetchLabelTasks, claimTask). Task creation can throw TaskCreationError when backend returns {code,message}; handle specifically.
-- **Auth & state flow**: Firebase auth wrappers in src/lib/firebase.ts; authStore/isAuthenticated/authLoading in src/lib/stores/auth.ts track Firebase user and initialization. initializeAuthState in src/lib/services/auth.ts populates player/label stores on auth change. Public routes are listed in +layout.svelte; non-public routes redirect to /users/login if unauthenticated.
-- **Login/Register flows**: Users login/register pages call firebaseSignIn/firebaseCreateAccount then backend player creation/fetch via api.ts; on success they set player store and either load first label or send to /labels/create. googleSignInAndRedirect handles fallback player creation when none exists.
+
+## Data Fetching (TanStack Query)
+- **Query setup**: QueryClient configured in src/lib/queries/queryClient.ts with sensible defaults (30s stale time, 5min cache). QueryClientProvider wraps app in +layout.svelte.
+- **Query keys**: Centralized in queryKeys object in queryClient.ts. Use these for cache invalidation and consistency.
+- **API layer**: Backend calls organized in src/lib/api/ folder with modules per domain (players.ts, labels.ts, tasks.ts, artists.ts, contracts.ts). Legacy src/lib/api.ts re-exports for backward compatibility.
+- **Query hooks**: Located in src/lib/queries/ folder:
+  - playerQueries.ts: createPlayerByFirebaseIdQuery, createPlayerMutation
+  - labelQueries.ts: createLabelByIdQuery, createPlayerLabelsQuery, createLabelMutation
+  - taskQueries.ts: createLabelTasksQuery, createClaimTaskMutation, createScoutingTaskMutation, serverTimeOffset store
+  - artistQueries.ts: createArtistsByIdsQuery, discoveredArtistsStore (client-side bookmarks), addDiscoveredArtists
+  - contractQueries.ts: createContractsByIdsQuery, createLabelContractsQuery
+- **Usage pattern**: In components, use `$: query = createXxxQuery(id)` to make reactive queries. Access data via `$query.data`, loading via `$query.isLoading`, errors via `$query.error`.
+- **Cache invalidation**: Use queryClient.invalidateQueries({ queryKey: queryKeys.xxx }) after mutations. clearAllQueries() on logout.
+
+## App State
+- **Centralized state**: src/lib/stores/appState.ts contains unified AppState with firebaseUser, player, currentLabel, labels. Use derived stores: currentPlayer, currentLabel, isAuthenticated, isAuthLoading.
+- **Auth service**: src/lib/services/auth.ts handles login/register/logout flows and calls appState.initialize() with fetched data.
+- **Label context**: When switching labels, use appState.switchLabel(labelId) which clears label-specific caches.
+
+## Legacy (Deprecated)
+- Old stores in src/lib/stores/player.ts, label.ts, tasks.ts, artists.ts, contracts.ts, auth.ts are kept for compatibility but prefer appState + queries.
+
 - **Navigation**: Use goto from $app/navigation for route changes; avoid window.location.
-- **Guards**: Guard utilities in src/lib/guards/index.ts + types.ts; reusable rules in src/lib/guards/rules.ts (requireLabel, requirePlayer, preventAccess, allowAccess). executeGuards throws redirect on failure; stopOnFirstFailure defaults true. Home +page.ts uses preventAccess to redirect to /labels; guards for labels dashboard currently commented but kept for reuse.
-- **State stores**: player and label writable stores in src/lib/stores/player.ts and src/lib/stores/label.ts (updateLabelBankroll helper). Scouting tasks store in src/lib/stores/tasks.ts. modalStore in src/lib/stores/modal.ts manages modal type/data.
-- **Modal/task pattern**: Task modal entry at src/lib/components/modals/TaskModal.svelte with sub-modals under task-submodals/. Labels dashboard (src/routes/labels/+page.svelte) opens modals via modalStore, fetches tasks for current label, auto-claims finished tasks via claimTask, and keeps server/client time in sync using x-server-time header.
-- **Data models**: Types under src/lib/types/. Scouting enums/status/cost prediction in src/lib/types/scouting.ts; Label/Player interfaces in src/lib/types/label.ts and src/lib/types/player.ts; rap music styles enum + names in src/lib/types/musicStyles.ts.
-- **UI components**: Shared components in src/lib/components (Button, Modal, MenuBar, form fields, etc.). RLT component specs outlined in docs/RLT.md (e.g., numeric input field emits currentValue, stepper emits stepClicked).
-- **Styling**: Tailwind configured via tailwind.config.js/postcss—default to Tailwind utility classes for layout/spacing/color. app.css loads theme tokens from src/lib/theme.ts and sets base styles. Use provided Button/Stepper/Chip components before adding new primitives.
-- **Assets/fonts**: Google Roboto font preconnected in +layout.svelte; hero images and other artwork live in src/lib/assets/.
-- **Routing map**: Feature folders under src/routes mirror product areas (users/login|register, labels/create|dashboard, artists/detail/[id], etc.). Keep new routes co-located by feature with +page.svelte/+page.ts pairs.
-- **Error handling expectations**: Surface user-friendly messages for auth/api failures (see login/register pages). For fetchLabelTasks, handle non-OK responses with meaningful error text.
-- **Testing status**: No automated tests configured; manually verify flows when adding guards/auth/api changes.
+- **Guards**: Guard utilities in src/lib/guards/index.ts + types.ts; reusable rules in src/lib/guards/rules.ts (requireLabel, requirePlayer, preventAccess, allowAccess). executeGuards throws redirect on failure; stopOnFirstFailure defaults true.
+- **Modal/task pattern**: Task modal entry at src/lib/components/modals/TaskModal.svelte with sub-modals under task-submodals/. Labels dashboard uses queries for tasks, auto-claims finished tasks.
+- **Data models**: Types under src/lib/types/.
+- **UI components**: Shared components in src/lib/components (Button, Modal, MenuBar, form fields, etc.).
+- **Styling**: Tailwind configured via tailwind.config.js/postcss.
+- **Error handling**: Queries expose error state via $query.error. TaskCreationError for task-specific errors.
+- **Testing status**: No automated tests configured; manually verify flows.

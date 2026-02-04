@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { createLabel } from '$lib/api';
-	import { player } from '$lib/stores/player';
-	import { label } from '$lib/stores/label';
+	import { createLabel } from '$lib/api/labels';
+	import { appState, currentPlayer } from '$lib/stores/appState';
 	import Button from '$lib/components/Button.svelte';
 	import Hero from '$lib/components/Hero.svelte';
 	import SelectField from '$lib/components/formfields/SelectField.svelte';
@@ -10,24 +9,18 @@
 	import { RapMusicStyle, RapMusicStyleNames } from '$lib/types/musicStyles';
 	import heroImage from '$lib/assets/hero-create-label.png';
 
-	let currentPlayer = $player;
 	let name: string = '';
 	let description: string = '';
 	let productionStyles: Set<RapMusicStyle> = new Set();
 	let isLoading: boolean = false;
 	let error: string = '';
 
-	// Subscribe to player store
-	player.subscribe((value) => {
-		currentPlayer = value;
-	});
-
 	async function handleCreateLabel() {
 		// Reset error
 		error = '';
 
 		// Validate inputs
-		if (!currentPlayer?.id) {
+		if (!$currentPlayer?.id) {
 			error = 'Player data not found. Please log in first.';
 			return;
 		}
@@ -48,14 +41,14 @@
 
 		try {
 			const response = await createLabel({
-				ownerPlayerId: currentPlayer.id,
+				ownerPlayerId: $currentPlayer.id,
 				name: name.trim(),
 				description: description.trim(),
 				productionStyles: Array.from(productionStyles)
 			});
 
-			// Store label data in global store
-			label.set(response);
+			// Add new label to app state and set as current
+			appState.addLabel(response);
 
 			// Navigate to label dashboard
 			await goto('/labels');
@@ -100,7 +93,7 @@
 					</div>
 				{/if}
 
-				{#if !currentPlayer}
+				{#if !$currentPlayer}
 					<div class="p-4 bg-yellow-900/50 border border-yellow-500 rounded text-yellow-200">
 						Please <a href="/users/login" class="underline">sign in</a> or
 						<a href="/users/register" class="underline">create an account</a> before creating a label.

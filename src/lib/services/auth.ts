@@ -2,47 +2,95 @@
 // Handles the complete auth flow including fetching player and label data
 
 import { goto } from '$app/navigation';
-import { firebaseSignIn, firebaseSignOut, firebaseCreateAccount, firebaseSignInWithGoogle } from '$lib/firebase';
-import { getPlayerByFirebaseUserId, getPlayerLabels, createPlayer } from '$lib/api';
-import { player } from '$lib/stores/player';
-import { label } from '$lib/stores/label';
-import { clearAuthStores, type AuthResult } from '$lib/stores/auth';
-import type { CreatePlayerRequest } from '$lib/types/player';
+import {
+    firebaseSignIn,
+    firebaseSignOut,
+    firebaseCreateAccount,
+    firebaseSignInWithGoogle
+} from '$lib/firebase';
+import { fetchPlayerByFirebaseId, createPlayer } from '$lib/api/players';
+import { fetchLabelsByIds } from '$lib/api/labels';
+import { appState } from '$lib/stores/appState';
+import type { CreatePlayerRequest, Player } from '$lib/types/player';
+import type { Label } from '$lib/types/label';
+
+// Auth result type
+export interface AuthResult {
+    success: boolean;
+    error?: string;
+    errorCode?: string; // Firebase error code for specific error handling
+    player?: Player;
+    labels?: Label[];
+}
+
+// Helper to extract Firebase error codes
+function getFirebaseErrorCode(error: unknown): string | undefined {
+    if (error && typeof error === 'object' && 'code' in error) {
+        return (error as { code: string }).code;
+    }
+    return undefined;
+}
+
+// Helper to get user-friendly error message
+function getFirebaseErrorMessage(error: unknown, defaultMessage: string): string {
+    const code = getFirebaseErrorCode(error);
+    if (!code) {
+        return error instanceof Error ? error.message : defaultMessage;
+    }
+
+    switch (code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+            return 'Invalid email or password';
+        case 'auth/invalid-email':
+            return 'Invalid email address';
+        case 'auth/too-many-requests':
+            return 'Too many failed attempts. Please try again later.';
+        case 'auth/email-already-in-use':
+            return 'An account with this email already exists';
+        case 'auth/weak-password':
+            return 'Password is too weak';
+        case 'auth/popup-closed-by-user':
+            return 'Sign-in cancelled';
+        default:
+            return error instanceof Error ? error.message : defaultMessage;
+    }
+}
 
 /**
  * Complete login flow:
  * 1. Sign in with Firebase
  * 2. Fetch player data from backend
  * 3. Fetch label data if player has labels
- * 4. Redirect to appropriate page
+ * 4. Update app state and redirect
  */
 export async function loginAndRedirect(email: string, password: string): Promise<AuthResult> {
     try {
-        // Sign in with Firebase
         const firebaseUser = await firebaseSignIn(email, password);
+        const playerData = await fetchPlayerByFirebaseId(firebaseUser.uid);
 
-        // Fetch player data using Firebase UID
-        const playerData = await getPlayerByFirebaseUserId(firebaseUser.uid);
-        player.set(playerData);
-
-        // Check if player has labels
+        let labels: Label[] = [];
         if (playerData.labelIds && playerData.labelIds.length > 0) {
-            // Fetch labels
-            const labels = await getPlayerLabels(playerData.labelIds);
-            if (labels.length > 0) {
-                label.set(labels[0]); // Set first label as active
-            }
-            await goto('/labels');
-            return { success: true, player: playerData, labels };
-        } else {
-            // No labels - redirect to create label
-            await goto('/labels/create');
-            return { success: true, player: playerData, labels: [] };
+            labels = await fetchLabelsByIds(playerData.labelIds);
         }
+
+        // Update centralized app state
+        appState.initialize({ player: playerData, labels });
+
+        // Redirect based on whether user has labels
+        if (labels.length > 0) {
+            await goto('/labels');
+        } else {
+            await goto('/labels/create');
+        }
+
+        return { success: true, player: playerData, labels };
     } catch (error) {
         return {
             success: false,
-            error: error instanceof Error ? error.message : 'Login failed'
+            error: getFirebaseErrorMessage(error, 'Login failed'),
+            errorCode: getFirebaseErrorCode(error)
         };
     }
 }
@@ -53,50 +101,49 @@ export async function loginAndRedirect(email: string, password: string): Promise
  * 2. Check if player exists in backend
  * 3. If not, create player with Google account info
  * 4. Fetch label data if player has labels
- * 5. Redirect to appropriate page
+ * 5. Update app state and redirect
  */
 export async function googleSignInAndRedirect(): Promise<AuthResult> {
     try {
-        // Sign in with Google
         const firebaseUser = await firebaseSignInWithGoogle();
 
-        try {
-            // Try to fetch existing player data
-            const playerData = await getPlayerByFirebaseUserId(firebaseUser.uid);
-            player.set(playerData);
+        let playerData: Player;
+        let labels: Label[] = [];
 
-            // Check if player has labels
-            if (playerData.labelIds && playerData.labelIds.length > 0) {
-                // Fetch labels
-                const labels = await getPlayerLabels(playerData.labelIds);
-                if (labels.length > 0) {
-                    label.set(labels[0]); // Set first label as active
-                }
-                await goto('/labels');
-                return { success: true, player: playerData, labels };
-            } else {
-                // No labels - redirect to create label
-                await goto('/labels/create');
-                return { success: true, player: playerData, labels: [] };
-            }
-        } catch (error) {
-            // Player doesn't exist - create new player
+        try {
+            // Try to fetch existing player
+            playerData = await fetchPlayerByFirebaseId(firebaseUser.uid);
+        } catch {
+            // Player doesn't exist - create new one
             const createPlayerData: CreatePlayerRequest = {
                 firebaseUserId: firebaseUser.uid,
                 username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Player',
                 email: firebaseUser.email || ''
             };
-            const playerData = await createPlayer(createPlayerData);
-            player.set(playerData);
-
-            // New users don't have labels, redirect to create
-            await goto('/labels/create');
-            return { success: true, player: playerData, labels: [] };
+            playerData = await createPlayer(createPlayerData);
         }
+
+        // Fetch labels if player has any
+        if (playerData.labelIds && playerData.labelIds.length > 0) {
+            labels = await fetchLabelsByIds(playerData.labelIds);
+        }
+
+        // Update centralized app state
+        appState.initialize({ player: playerData, labels });
+
+        // Redirect based on whether user has labels
+        if (labels.length > 0) {
+            await goto('/labels');
+        } else {
+            await goto('/labels/create');
+        }
+
+        return { success: true, player: playerData, labels };
     } catch (error) {
         return {
             success: false,
-            error: error instanceof Error ? error.message : 'Google sign-in failed'
+            error: getFirebaseErrorMessage(error, 'Google sign-in failed'),
+            errorCode: getFirebaseErrorCode(error)
         };
     }
 }
@@ -105,7 +152,7 @@ export async function googleSignInAndRedirect(): Promise<AuthResult> {
  * Complete registration flow:
  * 1. Create Firebase account
  * 2. Create player in backend
- * 3. Redirect to label creation
+ * 3. Update app state and redirect to label creation
  */
 export async function registerAndRedirect(
     username: string,
@@ -113,25 +160,25 @@ export async function registerAndRedirect(
     password: string
 ): Promise<AuthResult> {
     try {
-        // Create Firebase account
         const firebaseUser = await firebaseCreateAccount(email, password);
 
-        // Create player in backend
         const createPlayerData: CreatePlayerRequest = {
             firebaseUserId: firebaseUser.uid,
             username,
             email
         };
         const playerData = await createPlayer(createPlayerData);
-        player.set(playerData);
 
-        // New users don't have labels, redirect to create
+        // Update centralized app state (no labels for new users)
+        appState.initialize({ player: playerData, labels: [] });
+
         await goto('/labels/create');
         return { success: true, player: playerData, labels: [] };
     } catch (error) {
         return {
             success: false,
-            error: error instanceof Error ? error.message : 'Registration failed'
+            error: getFirebaseErrorMessage(error, 'Registration failed'),
+            errorCode: getFirebaseErrorCode(error)
         };
     }
 }
@@ -139,14 +186,14 @@ export async function registerAndRedirect(
 /**
  * Logout flow:
  * 1. Sign out from Firebase
- * 2. Clear all stores
+ * 2. Reset all app state
  * 3. Redirect to login
  */
 export async function logoutAndRedirect(): Promise<void> {
     try {
         await firebaseSignOut();
     } finally {
-        clearAuthStores();
+        appState.reset();
         await goto('/users/login');
     }
 }
@@ -157,20 +204,17 @@ export async function logoutAndRedirect(): Promise<void> {
  */
 export async function initializeAuthState(firebaseUserId: string): Promise<AuthResult> {
     try {
-        // Fetch player data
-        const playerData = await getPlayerByFirebaseUserId(firebaseUserId);
-        player.set(playerData);
+        const playerData = await fetchPlayerByFirebaseId(firebaseUserId);
 
-        // Fetch labels if player has any
+        let labels: Label[] = [];
         if (playerData.labelIds && playerData.labelIds.length > 0) {
-            const labels = await getPlayerLabels(playerData.labelIds);
-            if (labels.length > 0) {
-                label.set(labels[0]);
-            }
-            return { success: true, player: playerData, labels };
+            labels = await fetchLabelsByIds(playerData.labelIds);
         }
 
-        return { success: true, player: playerData, labels: [] };
+        // Update centralized app state
+        appState.initialize({ player: playerData, labels });
+
+        return { success: true, player: playerData, labels };
     } catch (error) {
         return {
             success: false,

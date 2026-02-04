@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { colors } from '$lib/theme';
 	import { modalStore } from '$lib/stores/modal';
-	import { label } from '$lib/stores/label';
-	import { player } from '$lib/stores/player';
+	import { appState, currentLabel, currentPlayer } from '$lib/stores/appState';
+	import { queryKeys, queryClient } from '$lib/queries/queryClient';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
@@ -48,7 +48,7 @@
 		(contractAlbums ?? 0) + (contractEps ?? 0) + (contractMixtapes ?? 0) + (contractSingles ?? 0);
 	$: usesDuration = contractType === 0;
 	$: readyForCostPrediction =
-		Boolean($label && $player && artist?.id) &&
+		Boolean($currentLabel && $currentPlayer && artist?.id) &&
 		activeStepIndex >= 1 &&
 		((usesDuration && contractLengthYears !== null && contractLengthYears > 0) ||
 			(!usesDuration && totalReleases > 0));
@@ -72,7 +72,16 @@
 		submitError = null;
 
 		try {
-			await createSignArtistContractTask(payload);
+			const response = await createSignArtistContractTask(payload);
+
+			// Update bankroll in appState
+			appState.updateCurrentLabelBankroll(-response.budgetRequired);
+
+			// Invalidate tasks query to refetch
+			if ($currentLabel) {
+				queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel($currentLabel.id) });
+			}
+
 			modalStore.close();
 		} catch (error) {
 			submitError = 'Failed to make an offer. Please try again.';
@@ -110,7 +119,7 @@
 	}
 
 	function buildCostPredictionRequest(): SignArtistContractRequest | null {
-		if (!$label || !$player || !artist?.id) return null;
+		if (!$currentLabel || !$currentPlayer || !artist?.id) return null;
 
 		const sanitize = (value: number | null) => Math.max(0, value ?? 0);
 
@@ -120,9 +129,9 @@
 				: '';
 
 		return {
-			labelId: $label.id,
+			labelId: $currentLabel.id,
 			artistId: artist.id,
-			workerId: $player.id,
+			workerId: $currentPlayer.id,
 			numberOfReleases: {
 				albums: sanitize(contractAlbums),
 				eps: sanitize(contractEps),

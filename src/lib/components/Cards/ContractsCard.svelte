@@ -1,26 +1,20 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { SigningContractResults } from '$lib/types/SigningContractTask';
-	import type { TaskResponse } from '$lib/types/task';
+	import type { SigningContractTaskResponse } from '$lib/types/task';
 	import type { Contract } from '$lib/types/contracts';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import { contracts } from '$lib/stores/contracts';
 	import { discoveredArtists, addMultipleDiscoveredArtists } from '$lib/stores/artists';
 	import { getArtistsByIds } from '$lib/api';
 
-	export let contractsTaskResponse: TaskResponse[] = [];
+	export let contractsTaskResponse: SigningContractTaskResponse[] = [];
 
 	let artistsLoading = false;
 
-	function getContractId(task: TaskResponse): string | null {
-		const results = task.results as SigningContractResults | null;
-		return results?.contractId ?? null;
-	}
-
-	function getContractByTask(task: TaskResponse): Contract | undefined {
-		const contractId = getContractId(task);
-		if (!contractId) return undefined;
-		return $contracts.find((contract) => contract.id === contractId);
+	function getContractByTask(task: SigningContractTaskResponse): Contract | undefined {
+		// contractId is directly on the task object
+		if (!task.contractId) return undefined;
+		return $contracts.find((contract) => contract.id === task.contractId);
 	}
 
 	function getArtistById(artistId: string | null): Artist | undefined {

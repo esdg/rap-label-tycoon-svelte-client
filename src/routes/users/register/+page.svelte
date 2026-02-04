@@ -1,9 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { createPlayer } from '$lib/api';
-	import { player } from '$lib/stores/player';
-	import { firebaseCreateAccount } from '$lib/firebase';
-	import { googleSignInAndRedirect } from '$lib/services/auth';
+	import { registerAndRedirect, googleSignInAndRedirect } from '$lib/services/auth';
 	import Button from '$lib/components/Button.svelte';
 	import GoogleSignInButton from '$lib/components/GoogleSignInButton.svelte';
 	import TextField from '$lib/components/formfields/TextField.svelte';
@@ -54,40 +50,9 @@
 		isLoading = true;
 
 		try {
-			// 1. Create Firebase account
-			const firebaseUser = await firebaseCreateAccount(email.trim(), password);
-
-			// 2. Create player in backend API with Firebase UID
-			const response = await createPlayer({
-				firebaseUserId: firebaseUser.uid,
-				username: username.trim(),
-				email: email.trim()
-			});
-
-			// Store player data in global store
-			player.set(response);
-
-			// Navigate to label creation page (new users don't have labels)
-			await goto('/labels/create');
-		} catch (err: unknown) {
-			// Handle Firebase specific errors
-			if (err && typeof err === 'object' && 'code' in err) {
-				const firebaseError = err as { code: string; message: string };
-				switch (firebaseError.code) {
-					case 'auth/email-already-in-use':
-						error = 'An account with this email already exists';
-						break;
-					case 'auth/invalid-email':
-						error = 'Invalid email address';
-						break;
-					case 'auth/weak-password':
-						error = 'Password is too weak';
-						break;
-					default:
-						error = firebaseError.message || 'An error occurred during registration';
-				}
-			} else {
-				error = err instanceof Error ? err.message : 'An error occurred during registration';
+			const result = await registerAndRedirect(username.trim(), email.trim(), password);
+			if (!result.success && result.error) {
+				error = result.error;
 			}
 		} finally {
 			isLoading = false;
@@ -102,17 +67,6 @@
 			const result = await googleSignInAndRedirect();
 			if (!result.success && result.error) {
 				error = result.error;
-			}
-		} catch (err: unknown) {
-			if (err && typeof err === 'object' && 'code' in err) {
-				const firebaseError = err as { code: string; message: string };
-				if (firebaseError.code === 'auth/popup-closed-by-user') {
-					error = 'Sign-in cancelled';
-				} else {
-					error = firebaseError.message || 'Google sign-in failed';
-				}
-			} else {
-				error = err instanceof Error ? err.message : 'Google sign-in failed';
 			}
 		} finally {
 			isGoogleLoading = false;

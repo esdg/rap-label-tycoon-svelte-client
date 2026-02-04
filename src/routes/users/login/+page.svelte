@@ -1,10 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { getPlayerByFirebaseUserId, getPlayerLabels } from '$lib/api';
-	import { player } from '$lib/stores/player';
-	import { label } from '$lib/stores/label';
-	import { firebaseSignIn } from '$lib/firebase';
-	import { googleSignInAndRedirect } from '$lib/services/auth';
+	import { loginAndRedirect, googleSignInAndRedirect } from '$lib/services/auth';
 	import Button from '$lib/components/Button.svelte';
 	import GoogleSignInButton from '$lib/components/GoogleSignInButton.svelte';
 	import gameLogo from '$lib/assets/game-logo.png';
@@ -37,47 +32,9 @@
 		isLoading = true;
 
 		try {
-			// 1. Sign in with Firebase
-			const firebaseUser = await firebaseSignIn(email.trim(), password);
-
-			// 2. Get player data from backend using Firebase UID
-			const playerData = await getPlayerByFirebaseUserId(firebaseUser.uid);
-			player.set(playerData);
-
-			// 3. Check if player has labels
-			if (playerData.labelIds && playerData.labelIds.length > 0) {
-				// Fetch first label and set it in the store
-				const labels = await getPlayerLabels(playerData.labelIds);
-				if (labels.length > 0) {
-					label.set(labels[0]);
-				}
-				// Navigate to labels dashboard
-				await goto('/labels');
-			} else {
-				// No labels - redirect to create label page
-				await goto('/labels/create');
-			}
-		} catch (err: unknown) {
-			// Handle Firebase specific errors
-			if (err && typeof err === 'object' && 'code' in err) {
-				const firebaseError = err as { code: string; message: string };
-				switch (firebaseError.code) {
-					case 'auth/user-not-found':
-					case 'auth/wrong-password':
-					case 'auth/invalid-credential':
-						error = 'Invalid email or password';
-						break;
-					case 'auth/invalid-email':
-						error = 'Invalid email address';
-						break;
-					case 'auth/too-many-requests':
-						error = 'Too many failed attempts. Please try again later.';
-						break;
-					default:
-						error = firebaseError.message || 'An error occurred during login';
-				}
-			} else {
-				error = err instanceof Error ? err.message : 'An error occurred during login';
+			const result = await loginAndRedirect(email.trim(), password);
+			if (!result.success && result.error) {
+				error = result.error;
 			}
 		} finally {
 			isLoading = false;
@@ -92,17 +49,6 @@
 			const result = await googleSignInAndRedirect();
 			if (!result.success && result.error) {
 				error = result.error;
-			}
-		} catch (err: unknown) {
-			if (err && typeof err === 'object' && 'code' in err) {
-				const firebaseError = err as { code: string; message: string };
-				if (firebaseError.code === 'auth/popup-closed-by-user') {
-					error = 'Sign-in cancelled';
-				} else {
-					error = firebaseError.message || 'Google sign-in failed';
-				}
-			} else {
-				error = err instanceof Error ? err.message : 'Google sign-in failed';
 			}
 		} finally {
 			isGoogleLoading = false;

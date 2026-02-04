@@ -3,21 +3,15 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { QueryClientProvider } from '@tanstack/svelte-query';
+	import { queryClient } from '$lib/queries/queryClient';
 	import Modal from '$lib/components/Modal.svelte';
-	import { authStore, authLoading, isAuthenticated } from '$lib/stores/auth';
 	import { onFirebaseAuthStateChanged } from '$lib/firebase';
-	import { initializeAuthState, logoutAndRedirect } from '$lib/services/auth';
-	import { player } from '$lib/stores/player';
-	import Button from '$lib/components/Button.svelte';
+	import { initializeAuthState } from '$lib/services/auth';
+	import { appState, currentPlayer, isAuthenticated, isAuthLoading } from '$lib/stores/appState';
 	import MenuBar from '$lib/components/MenuBar.svelte';
 
-	let currentPlayer = $player;
 	let initializingPlayer = false;
-
-	// Subscribe to player changes
-	player.subscribe((value) => {
-		currentPlayer = value;
-	});
 
 	// Public routes that don't require authentication
 	const publicRoutes = ['/users/login', '/users/register', '/template', '/labels/create'];
@@ -28,7 +22,9 @@
 	onMount(() => {
 		// Listen for Firebase auth state changes
 		const unsubscribe = onFirebaseAuthStateChanged(async (user) => {
-			if (user && !currentPlayer && !initializingPlayer) {
+			appState.setFirebaseUser(user);
+
+			if (user && !$currentPlayer && !initializingPlayer) {
 				initializingPlayer = true;
 				// User is signed in, initialize player data
 				const result = await initializeAuthState(user.uid);
@@ -47,6 +43,7 @@
 				}
 			} else if (!user && !isPublicRoute) {
 				// User is signed out and on protected route, redirect to login
+				appState.reset();
 				await goto('/users/login');
 			}
 		});
@@ -61,22 +58,25 @@
 	href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
 	rel="stylesheet"
 />
-<Modal />
 
-<div class="flex flex-row antialiased">
-	{#if $authLoading && !isPublicRoute}
-		<div class="min-h-screen bg-gray-900 flex items-center justify-center">
-			<div class="text-white text-xl">Loading...</div>
-		</div>
-	{:else}
-		{#if $isAuthenticated && !isPublicRoute && currentPlayer}
-			<MenuBar username={currentPlayer.username} />
+<QueryClientProvider client={queryClient}>
+	<Modal />
+
+	<div class="flex flex-row antialiased">
+		{#if $isAuthLoading && !isPublicRoute}
+			<div class="min-h-screen bg-gray-900 flex items-center justify-center w-full">
+				<div class="text-white text-xl">Loading...</div>
+			</div>
+		{:else}
+			{#if $isAuthenticated && !isPublicRoute && $currentPlayer}
+				<MenuBar />
+			{/if}
+			<main
+				class="bg-primary-950 flex-grow min-h-screen text-white"
+				style="font-family: 'Roboto', sans-serif;"
+			>
+				<slot />
+			</main>
 		{/if}
-		<main
-			class="bg-primary-950 flex-grow min-h-screen text-white"
-			style="font-family: 'Roboto', sans-serif;"
-		>
-			<slot />
-		</main>
-	{/if}
-</div>
+	</div>
+</QueryClientProvider>

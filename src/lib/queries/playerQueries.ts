@@ -1,0 +1,37 @@
+// Player query hooks
+import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
+import { queryKeys } from './queryClient';
+import { fetchPlayerById, fetchPlayerByFirebaseId, createPlayer } from '$lib/api/players';
+import type { Player, CreatePlayerRequest } from '$lib/types/player';
+
+// Query: Get player by Firebase UID
+export function createPlayerByFirebaseIdQuery(firebaseId: string | null) {
+    return createQuery<Player, Error>({
+        queryKey: firebaseId ? queryKeys.player.byFirebaseId(firebaseId) : ['player', 'none'],
+        queryFn: () => fetchPlayerByFirebaseId(firebaseId!),
+        enabled: !!firebaseId,
+    });
+}
+
+// Query: Get player by ID
+export function createPlayerByIdQuery(playerId: string | null) {
+    return createQuery<Player, Error>({
+        queryKey: playerId ? queryKeys.player.byId(playerId) : ['player', 'none'],
+        queryFn: () => fetchPlayerById(playerId!),
+        enabled: !!playerId,
+    });
+}
+
+// Mutation: Create a new player
+export function createPlayerMutation() {
+    const queryClient = useQueryClient();
+
+    return createMutation<Player, Error, CreatePlayerRequest>({
+        mutationFn: createPlayer,
+        onSuccess: (player) => {
+            // Cache the new player data
+            queryClient.setQueryData(queryKeys.player.byId(player.id), player);
+            queryClient.setQueryData(queryKeys.player.byFirebaseId(player.firebaseUserId), player);
+        },
+    });
+}
