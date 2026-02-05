@@ -21,6 +21,7 @@
 	import CostEstimation from './CostEstimation.svelte';
 	import { TaskCreationErrorType, type TaskCostPrediction } from '$lib/types/task';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
+	import { getTaskErrorMessage } from '$lib/utils';
 
 	// State
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
@@ -109,23 +110,6 @@
 		}
 	}
 
-	function getErrorMessage(errorCode: number, defaultMessage: string): string {
-		const errorMessages: Record<number, string> = {
-			[TaskCreationErrorType.NotFound]: 'Resource not found. Please try again.',
-			[TaskCreationErrorType.ValidationError]: 'Invalid request. Please check your selections.',
-			[TaskCreationErrorType.InsufficientBudget]:
-				'Insufficient budget. You need more funds to start this scouting task.',
-			[TaskCreationErrorType.WorkerBusy]:
-				'You are already assigned to another active task. Complete it first.',
-			[TaskCreationErrorType.TaskLimitReached]:
-				'Your label has reached the maximum number of active tasks.',
-			[TaskCreationErrorType.ActiveContractExists]: 'This artist already has an active contract.',
-			[TaskCreationErrorType.WorkerExhausted]:
-				'You are exhausted and need to rest before taking on new tasks.'
-		};
-		return errorMessages[errorCode] || defaultMessage;
-	}
-
 	async function handleStartScouting() {
 		if (!$currentLabel) {
 			error = 'No label found';
@@ -167,7 +151,7 @@
 			modalStore.close();
 		} catch (err) {
 			if (err instanceof TaskCreationError) {
-				error = getErrorMessage(err.errorResponse.code, err.errorResponse.message);
+				error = getTaskErrorMessage(err.errorResponse.code, err.errorResponse.message);
 			} else {
 				error = 'Failed to create scouting task. Please try again.';
 			}

@@ -3,6 +3,8 @@
  * Centralized error parsing and user-friendly message generation
  */
 
+import { TaskCreationErrorType } from "$lib/types/task";
+
 /**
  * Extracts the Firebase error code from an error object
  *
@@ -85,4 +87,22 @@ export function getErrorMessage(error: unknown, defaultMessage: string = 'An err
         return String((error as { message: unknown }).message);
     }
     return defaultMessage;
+}
+
+
+export function getTaskErrorMessage(errorCode: number, defaultMessage: string): string {
+    const errorMessages: Record<number, string> = {
+        [TaskCreationErrorType.NotFound]: 'Resource not found. Please try again.',
+        [TaskCreationErrorType.ValidationError]: 'Invalid request. Please check your selections.',
+        [TaskCreationErrorType.InsufficientBudget]:
+            'Insufficient budget. You need more funds to start this scouting task.',
+        [TaskCreationErrorType.WorkerBusy]:
+            'You are already assigned to another active task. Complete it first.',
+        [TaskCreationErrorType.TaskLimitReached]:
+            'Your label has reached the maximum number of active tasks.',
+        [TaskCreationErrorType.ActiveContractExists]: 'This artist already has an active contract.',
+        [TaskCreationErrorType.WorkerExhausted]:
+            'You are exhausted and need to rest before taking on new tasks.'
+    };
+    return errorMessages[errorCode] || defaultMessage;
 }

@@ -25,12 +25,6 @@
 
 	let contractTaskGroups: ContractTaskGroup[] = [];
 
-	function getContractByTask(task: SigningContractTaskResponse): Contract | undefined {
-		// contractId is directly on the task object
-		if (!task.contractId) return undefined;
-		return $contracts.find((contract) => contract.id === task.contractId);
-	}
-
 	function getArtistById(artistId: string | null): Artist | undefined {
 		if (!artistId) return undefined;
 		return $discoveredArtists.find((item) => item.artist.id === artistId)?.artist;

@@ -13,12 +13,16 @@
 	import NumericField from '$lib/components/formfields/NumericField.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import CostEstimation from './CostEstimation.svelte';
-	import { predictSignArtistContractCost, createSignArtistContractTask } from '$lib/api';
+	import {
+		predictSignArtistContractCost,
+		createSignArtistContractTask,
+		TaskCreationError
+	} from '$lib/api';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import type { TaskCostPrediction } from '$lib/types/task';
 	import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
-	import { yearsToTimeSpan } from '$lib/utils';
+	import { getTaskErrorMessage, yearsToTimeSpan } from '$lib/utils';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 
 	// State
@@ -44,7 +48,7 @@
 	let advance = 0;
 	let royaltyPercentage = 0;
 	let selectedProspectorId = 1;
-	let submitError: string | null = null;
+	let error: string | null = null;
 
 	$: totalReleases =
 		(contractAlbums ?? 0) + (contractEps ?? 0) + (contractMixtapes ?? 0) + (contractSingles ?? 0);
@@ -66,12 +70,12 @@
 	async function handleMakeOffer() {
 		const payload = buildCostPredictionRequest();
 		if (!payload) {
-			submitError = 'Missing contract details. Please fill out the form.';
+			error = 'Missing contract details. Please fill out the form.';
 			return;
 		}
 
 		loading = true;
-		submitError = null;
+		error = null;
 
 		try {
 			const response = await createSignArtistContractTask(payload);
@@ -85,9 +89,14 @@
 			}
 
 			modalStore.close();
-		} catch (error) {
-			submitError = 'Failed to make an offer. Please try again.';
-			console.error('Failed to create sign-artist contract task', error);
+		} catch (err) {
+			error = 'Failed to make an offer. Please try again.';
+			if (err instanceof TaskCreationError) {
+				error = getTaskErrorMessage(err.errorResponse.code, err.errorResponse.message);
+			} else {
+				error = 'Failed to create signing contract task. Please try again.';
+			}
+			console.error(err);
 		} finally {
 			loading = false;
 		}
@@ -166,7 +175,7 @@
 	}
 </script>
 
-<ScrollableContainer error={submitError}>
+<ScrollableContainer {error}>
 	<svelte:fragment slot="header">
 		<Stepper
 			selectedButtonColor={colors.primary[300]}

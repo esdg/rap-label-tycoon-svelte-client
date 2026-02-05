@@ -6,21 +6,18 @@
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import ScoutingTaskCard from '$lib/components/Cards/ScoutingTaskCard.svelte';
 	import {
-		TaskType,
 		type TaskResponse,
 		type ScoutingTaskResponse,
-		type SigningContractTaskResponse,
 		type ScoutingTaskResults
 	} from '$lib/types/task';
 	import ContractsCard from '$lib/components/Cards/ContractsCard.svelte';
 	import {
 		createLabelTasksQuery,
 		createTasksByType,
-		createClaimTaskMutation,
 		serverTimeOffset
 	} from '$lib/queries/taskQueries';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
-	import { createArtistsByIdsQuery, addDiscoveredArtists } from '$lib/queries/artistQueries';
+	import { addDiscoveredArtists } from '$lib/queries/artistQueries';
 	import { queryKeys } from '$lib/queries/queryClient';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { fetchArtistsByIds } from '$lib/api/artists';
@@ -31,8 +28,7 @@
 		getTaskProgress,
 		getTaskStatus,
 		getScoutingType,
-		isTaskFinished,
-		isTaskClaimed
+		isTaskFinished
 	} from '$lib/utils';
 
 	// Get query client for manual invalidation
@@ -82,8 +78,8 @@
 		previousModalState = $modalStore.isOpen;
 	}
 
-	// Auto-claim finished tasks when data loads
-	$: if ($tasksQuery.data && labelId) {
+	// Auto-claim finished tasks; include currentTime so this re-runs when timers tick
+	$: if ($tasksQuery.data && labelId && currentTime) {
 		autoClaimFinishedTasks($tasksQuery.data, labelId);
 	}
 
@@ -174,6 +170,7 @@
 				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
 		});
 	}
+
 	onMount(() => {
 		// Update current time every second for countdown
 		const timeInterval = setInterval(() => {
