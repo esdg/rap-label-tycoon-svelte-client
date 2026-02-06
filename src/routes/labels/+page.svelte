@@ -223,6 +223,7 @@
 			<h1 class="text-2xl font-bold mb-4">Label Roster</h1>
 
 			<div class="flex flex-col gap-2">
+				<!-- Contract List -->
 				{#if $tasksQuery.isLoading}
 					<p class="text-gray-400">Loading tasks...</p>
 				{:else if $tasksQuery.isError}
@@ -239,24 +240,22 @@
 				{:else if $artistsQuery.isError}
 					<p class="text-red-400 mt-4">Error loading artists: {$artistsQuery.error?.message}</p>
 				{:else if $artistsQuery.data && $artistsQuery.data.length > 0}
-					<div class="">
-						{#each $artistsQuery.data as artist (artist.id)}
-							<ArtistCard {artist} />
-						{/each}
-					</div>
+					{#each $artistsQuery.data as artist (artist.id)}
+						<ArtistCard {artist} />
+					{/each}
 				{/if}
 			</div>
 		</div>
-		<!-- Ongoing Tasks Section -->
+		<!-- Scouting Tasks Section -->
 		<div>
-			<h2 class="text-2xl font-bold mb-4">Ongoing Tasks</h2>
+			<h2 class="text-2xl font-bold mb-4">Scouting Tasks</h2>
 
 			{#if $tasksQuery.isLoading}
-				<p class="text-gray-400">Loading tasks...</p>
+				<p class="text-gray-400">Loading scouting tasks...</p>
 			{:else if $tasksQuery.isError}
 				<p class="text-red-400">Error: {$tasksQuery.error?.message}</p>
 			{:else if scoutingTasks.length === 0}
-				<p class="text-gray-400">No ongoing tasks</p>
+				<p class="text-gray-400">No scouting tasks</p>
 			{:else}
 				<div class="flex flex-wrap gap-4">
 					{#each scoutingTasks as task}
@@ -264,7 +263,7 @@
 							state={getTaskStatus(task, $serverTimeOffset)}
 							durationText={formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)}
 							inProgressDescription="Observing at open mic..."
-							scoutingType={getScoutingType(task)}
+							scoutingType={task.scoutingType}
 							taskProgress={getTaskProgress(task, $serverTimeOffset)}
 							on:viewResults={() => openScoutResultsModal(task)}
 						/>

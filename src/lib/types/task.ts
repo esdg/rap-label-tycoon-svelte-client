@@ -1,3 +1,5 @@
+import type { ScoutingType } from "./scoutingArtistsTask";
+
 export enum TaskType {
     Scouting = 0,
     ProducingBeats = 1,
@@ -65,6 +67,7 @@ export interface TaskCreationErrorResponse {
 export interface ScoutingTaskResponse extends TimedTask {
     taskType: TaskType.Scouting;
     scopeId: string;
+    scoutingType: ScoutingType; // "rapper" or "beatmaker"
     results: ScoutingTaskResults | null;
 }
 

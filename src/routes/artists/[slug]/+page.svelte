@@ -7,6 +7,7 @@
 	import RecordIcon from '$lib/icons/RecordIcon.svelte';
 	import WorldIcon from '$lib/icons/WorldIcon.svelte';
 	import SoundWaveIcon from '$lib/icons/SoundWaveIcon.svelte';
+	import ArtistActionsPanel from '$lib/components/ArtistActionsPanel.svelte';
 
 	// Get data from load function
 	export let data: { artistId: string };
@@ -48,27 +49,8 @@
 				/>
 				<div class="md:basis-3/5 h-screen overflow-y-auto">
 					<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
-						<div class="mb-6 flex gap-2 justify-end">
-							<button
-								class="flex items-center flex-col gap-1 bg-[#080B12] size-28 border border-gray-600 rounded-md p-2 hover:border-secondary-500 transition-colors duration-200 hover:ring-secondary-500 hover:ring-1 select-none"
-							>
-								<RecordIcon />
-								<div class="text-xs uppercase">Produce<br />Record</div>
-							</button>
-							<button
-								class="flex items-center flex-col gap-1 bg-[#080B12] size-28 border border-gray-600 rounded-md p-2 hover:border-secondary-500 transition-colors duration-200 hover:ring-secondary-500 hover:ring-1 select-none"
-							>
-								<WorldIcon />
-								<div class="text-xs uppercase">Send Artist<br />On Tour</div>
-							</button>
-							<button
-								class="flex items-center flex-col gap-1 bg-[#080B12] size-28 border border-gray-600 rounded-md p-2 hover:border-secondary-500 transition-colors duration-200 hover:ring-secondary-500 hover:ring-1 select-none"
-							>
-								<SoundWaveIcon />
-								<div class="text-xs uppercase">Produce<br />Beat(s)</div>
-							</button>
-						</div>
-						<ArtistDetails class="-mt-24" artist={$artistQuery.data} />
+						<ArtistActionsPanel artist={$artistQuery.data} />
+						<ArtistDetails class="-mt-24 " artist={$artistQuery.data} />
 					</div>
 				</div>
 			</div>

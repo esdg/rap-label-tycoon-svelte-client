@@ -26,7 +26,9 @@
 	const sections = getArtistSkillSections(artist);
 </script>
 
-<div class="flex flex-col pb-12 border-b border-white/5 last:border-none last:pb-0 {className}">
+<div
+	class="flex flex-col pb-12 border-b border-white/5 last:border-none last:pb-0 pointer-events-none {className}"
+>
 	<div class="mb-4">
 		<Chip class={getRarityClass(artist.rarity)}>{getRarityLabel(artist.rarity)}</Chip>
 	</div>

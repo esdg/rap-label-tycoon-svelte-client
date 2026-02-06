@@ -40,11 +40,11 @@ export function getRarityClass(rarity: number): string {
     return rarityClasses[label as keyof typeof rarityClasses] ?? 'bg-gray-600 text-white';
 }
 
-function isRapper(artist: Artist): artist is Rapper {
+export function isRapper(artist: Artist): artist is Rapper {
     return Boolean((artist as Rapper).songWritingSkills);
 }
 
-function isBeatmaker(artist: Artist): artist is Beatmaker {
+export function isBeatmaker(artist: Artist): artist is Beatmaker {
     return Boolean((artist as Beatmaker).beatmakingSkills);
 }
 
