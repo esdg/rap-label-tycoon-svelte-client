@@ -64,6 +64,14 @@ export const queryKeys = {
         byLabel: (labelId: string) => ['contracts', 'label', labelId] as const,
     },
 
+    // Beats
+    beats: {
+        all: ['beats'] as const,
+        byId: (id: string) => ['beats', 'byId', id] as const,
+        byIds: (ids: string[]) => ['beats', 'byIds', ids.sort().join(',')] as const,
+        byLabel: (labelId: string) => ['beats', 'label', labelId] as const,
+    },
+
     // Scouting scopes (static reference data)
     scoutingScopes: ['scouting-scopes'] as const,
 } as const;
@@ -73,9 +81,11 @@ export function invalidateLabelData(labelId?: string) {
     if (labelId) {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
         queryClient.invalidateQueries({ queryKey: queryKeys.contracts.byLabel(labelId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.beats.byLabel(labelId) });
     } else {
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
         queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.beats.all });
     }
 }
 

@@ -17,6 +17,7 @@ import type {
     TaskCostPrediction,
     ScoutingTaskResponse,
     SigningContractTaskResponse,
+    ProducingBeatsTaskResponse,
     AnyTaskResponse
 } from '$lib/types/task';
 import { TaskType } from '$lib/types/task';
@@ -54,6 +55,9 @@ export function createTasksByType(tasks: AnyTaskResponse[]) {
         ),
         contractTasks: tasks.filter(
             (t): t is SigningContractTaskResponse => t.taskType === TaskType.SigningContract
+        ),
+        beatProductionTasks: tasks.filter(
+            (t): t is ProducingBeatsTaskResponse => t.taskType === TaskType.ProducingBeats
         ),
     };
 }

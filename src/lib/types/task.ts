@@ -78,8 +78,15 @@ export interface SigningContractTaskResponse extends TimedTask {
     results: SigningContractTaskResults | null;
 }
 
+// Producing beats task - has beatmakerId and production results
+export interface ProducingBeatsTaskResponse extends TimedTask {
+    taskType: TaskType.ProducingBeats;
+    beatmakerId: string;
+    results: ProducingBeatsTaskResults | null;
+}
+
 // Union type for all specific task responses
-export type AnyTaskResponse = ScoutingTaskResponse | SigningContractTaskResponse | TimedTask;
+export type AnyTaskResponse = ScoutingTaskResponse | SigningContractTaskResponse | ProducingBeatsTaskResponse | TimedTask;
 
 // Base results
 export interface TaskResults {
@@ -97,4 +104,10 @@ export interface ScoutingTaskResults extends TaskResults {
 export interface SigningContractTaskResults extends TaskResults {
     $type: string; // "signing_contract"
     contractId: string;
+}
+
+// Producing beats results
+export interface ProducingBeatsTaskResults extends TaskResults {
+    $type: string; // "producing_beats"
+    producedBeatsIds: string[];
 }

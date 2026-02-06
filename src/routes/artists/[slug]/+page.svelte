@@ -4,9 +4,6 @@
 	import Button from '$lib/components/Button.svelte';
 	import { goto } from '$app/navigation';
 	import Hero from '$lib/components/Hero.svelte';
-	import RecordIcon from '$lib/icons/RecordIcon.svelte';
-	import WorldIcon from '$lib/icons/WorldIcon.svelte';
-	import SoundWaveIcon from '$lib/icons/SoundWaveIcon.svelte';
 	import ArtistActionsPanel from '$lib/components/ArtistActionsPanel.svelte';
 
 	// Get data from load function

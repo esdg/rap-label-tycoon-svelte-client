@@ -7,3 +7,4 @@ export * from './labelQueries';
 export * from './taskQueries';
 export * from './artistQueries';
 export * from './contractQueries';
+export * from './beatQueries';

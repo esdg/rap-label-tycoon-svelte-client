@@ -46,3 +46,22 @@ export async function predictSignArtistContractCost(data: SignArtistContractRequ
 export async function createSignArtistContractTask(data: SignArtistContractRequest): Promise<TimedTask> {
     return apiPostTask<SignArtistContractRequest, TimedTask>('/api/v1/tasks/sign-artist-contract', data);
 }
+
+// Producing beats tasks
+export interface ProducingBeatsRequest {
+    labelId: string;
+    beatmakerId: string;
+    numberOfBeats: number;
+    productionStyles: number[];
+}
+
+export async function predictProducingBeatsCost(data: ProducingBeatsRequest): Promise<TaskCostPrediction> {
+    return apiFetch<TaskCostPrediction>('/api/v1/tasks/producing-beats/predict-cost', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function createProducingBeatsTask(data: ProducingBeatsRequest): Promise<TimedTask> {
+    return apiPostTask<ProducingBeatsRequest, TimedTask>('/api/v1/tasks/producing-beats', data);
+}

@@ -7,7 +7,8 @@
 	import {
 		type TimedTask,
 		type ScoutingTaskResponse,
-		type ScoutingTaskResults
+		type ScoutingTaskResults,
+		type ProducingBeatsTaskResponse
 	} from '$lib/types/task';
 	import {
 		createLabelTasksQuery,
@@ -15,7 +16,7 @@
 		serverTimeOffset
 	} from '$lib/queries/taskQueries';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
-	import { addDiscoveredArtists } from '$lib/queries/artistQueries';
+	import { addDiscoveredArtists, createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { queryKeys } from '$lib/queries/queryClient';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { fetchArtistsByIds } from '$lib/api/artists';
@@ -31,7 +32,6 @@
 	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
-	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { ContractStatus } from '$lib/types/contracts';
 
 	// Get query client for manual invalidation
@@ -46,9 +46,10 @@
 	// Split tasks by type (derived from query data)
 	$: taskData = $tasksQuery.data
 		? createTasksByType($tasksQuery.data)
-		: { scoutingTasks: [], contractTasks: [] };
+		: { scoutingTasks: [], contractTasks: [], beatProductionTasks: [] };
 	$: scoutingTasks = taskData.scoutingTasks;
 	$: contractTasks = taskData.contractTasks;
+	$: beatProductionTasks = taskData.beatProductionTasks;
 
 	// Extract contract IDs directly from task.contractId (available on signing_contract_task)
 	$: contractIds = contractTasks
@@ -241,7 +242,14 @@
 					<p class="text-red-400 mt-4">Error loading artists: {$artistsQuery.error?.message}</p>
 				{:else if $artistsQuery.data && $artistsQuery.data.length > 0}
 					{#each $artistsQuery.data as artist (artist.id)}
-						<ArtistCard {artist} />
+						{@const artistBeatTask =
+							beatProductionTasks.find((t) => t.workerId === artist.id) || null}
+						<ArtistCard
+							{artist}
+							beatProductionTask={artistBeatTask}
+							{currentTime}
+							serverTimeOffset={$serverTimeOffset}
+						/>
 					{/each}
 				{/if}
 			</div>

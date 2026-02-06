@@ -1,3 +1,5 @@
+import type { RapMusicStyle } from "./musicStyles";
+
 export interface Label {
     id: string;
     ownerPlayerId: string;
@@ -5,7 +7,7 @@ export interface Label {
     description: string;
     foundedDate: string;
     bankroll: number;
-    productionStyles: number[];
+    productionStyles: RapMusicStyle[];
     taskIds: string[];
     maximumTasksAllowed: number;
     maximumArtistContractsAllowed: number;

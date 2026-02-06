@@ -8,3 +8,4 @@ export * from './tasks';
 export * from './artists';
 export * from './contracts';
 export * from './config';
+export * from './beats';
