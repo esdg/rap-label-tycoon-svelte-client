@@ -10,6 +10,8 @@
 	} from '$lib/utils';
 
 	export let artist: Artist;
+	let className = '';
+	export { className as class };
 
 	function getLegendItems(sections: SkillSection[]) {
 		const seen = new Map<string, string>();
@@ -24,7 +26,7 @@
 	const sections = getArtistSkillSections(artist);
 </script>
 
-<div class="flex flex-col pb-12 border-b border-white/5 last:border-none last:pb-0">
+<div class="flex flex-col pb-12 border-b border-white/5 last:border-none last:pb-0 {className}">
 	<div class="mb-4">
 		<Chip class={getRarityClass(artist.rarity)}>{getRarityLabel(artist.rarity)}</Chip>
 	</div>

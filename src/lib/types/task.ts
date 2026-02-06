@@ -18,6 +18,26 @@ export enum TaskStatus {
     Claimed = 4
 }
 
+// Base task response - common fields for all task types
+export interface TimedTask {
+    id: string;
+    labelId: string;
+    workerId: string;
+    taskType: TaskType;
+    name: string;
+    description: string;
+    budgetRequired: number;
+    staminaCost: number;
+    startTime: string;
+    endTime: string;
+    claimedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    status: TaskStatus;
+    results: TaskResults | null;
+    viewedAt: string | null;
+}
+
 export interface TaskCostPrediction {
     budgetRequired: number;
     duration: string;
@@ -41,41 +61,22 @@ export interface TaskCreationErrorResponse {
     message: string;
 }
 
-// Base task response - common fields for all task types
-export interface TaskResponse {
-    id: string;
-    labelId: string;
-    workerId: string;
-    taskType: TaskType;
-    name: string;
-    description: string;
-    budgetRequired: number;
-    staminaCost: number;
-    startTime: string;
-    endTime: string;
-    claimedAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-    status: TaskStatus;
-    results: TaskResults | null;
-}
-
 // Scouting task - has scopeId for the scouting scope
-export interface ScoutingTaskResponse extends TaskResponse {
+export interface ScoutingTaskResponse extends TimedTask {
     taskType: TaskType.Scouting;
     scopeId: string;
     results: ScoutingTaskResults | null;
 }
 
 // Signing contract task - has contractId for the associated contract
-export interface SigningContractTaskResponse extends TaskResponse {
+export interface SigningContractTaskResponse extends TimedTask {
     taskType: TaskType.SigningContract;
     contractId: string;
     results: SigningContractTaskResults | null;
 }
 
 // Union type for all specific task responses
-export type AnyTaskResponse = ScoutingTaskResponse | SigningContractTaskResponse | TaskResponse;
+export type AnyTaskResponse = ScoutingTaskResponse | SigningContractTaskResponse | TimedTask;
 
 // Base results
 export interface TaskResults {

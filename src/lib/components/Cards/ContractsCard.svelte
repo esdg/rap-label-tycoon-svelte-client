@@ -87,7 +87,7 @@
 	}
 </script>
 
-<article class="bg-primary-950 border border-gray-700 rounded-lg overflow-hidden">
+<article class="bg-primary-950 border border-gray-700 rounded-lg overflow-hidden select-none">
 	<div class="px-4 py-2">Currently negotiating {contractTaskGroups.length} contract(s)</div>
 	<div>
 		{#each contractTaskGroups as { contractId, contract, task }}
@@ -153,7 +153,7 @@
 										<div class="flex flex-col gap-0.5 w-full min-w-0">
 											<div class="flex justify-between gap-2">
 												<span>Signing bonus</span><span
-													>{contractIteration.offert.signingBonus}</span
+													>{contractIteration.offert.signingBonus}$</span
 												>
 											</div>
 											<div class="flex justify-between gap-2">
@@ -162,7 +162,7 @@
 												>
 											</div>
 											<div class="flex justify-between gap-2">
-												<span>Advance</span><span>{contractIteration.offert.advance}</span>
+												<span>Advance</span><span>{contractIteration.offert.advance}$</span>
 											</div>
 											{#if contractIteration.offert.numberOfReleases}
 												<div class="flex justify-between gap-2 w-full min-w-0">

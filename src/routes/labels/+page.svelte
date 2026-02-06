@@ -4,13 +4,11 @@
 	import { currentLabel } from '$lib/stores/appState';
 	import Button from '$lib/components/Button.svelte';
 	import bgImage from '$lib/assets/main-bg-1.png';
-	import ScoutingTaskCard from '$lib/components/Cards/ScoutingTaskCard.svelte';
 	import {
-		type TaskResponse,
+		type TimedTask,
 		type ScoutingTaskResponse,
 		type ScoutingTaskResults
 	} from '$lib/types/task';
-	import ContractsCard from '$lib/components/Cards/ContractsCard.svelte';
 	import {
 		createLabelTasksQuery,
 		createTasksByType,
@@ -30,6 +28,11 @@
 		getScoutingType,
 		isTaskFinished
 	} from '$lib/utils';
+	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
+	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
+	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
+	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
+	import { ContractStatus } from '$lib/types/contracts';
 
 	// Get query client for manual invalidation
 	const queryClient = useQueryClient();
@@ -63,6 +66,23 @@
 		setContracts($contractsQuery.data);
 	}
 
+	// Filter for valid signed contracts (status = signed, end date not passed)
+	// Note: Don't use currentTime here to avoid recreating queries every second
+	$: validContracts = ($contractsQuery.data ?? []).filter((contract) => {
+		if (contract.status !== ContractStatus.Signed) return false;
+		if (!contract.endDate) return true; // No end date means active
+		const endDate = new Date(contract.endDate).getTime();
+		return endDate > Date.now(); // Use Date.now() directly instead of currentTime
+	});
+
+	// Extract artist IDs from valid contracts
+	$: validArtistIds = validContracts
+		.map((contract) => contract.artistId)
+		.filter((id): id is string => typeof id === 'string' && id.length > 0);
+
+	// Create artists query based on valid contract artist IDs
+	$: artistsQuery = createArtistsByIdsQuery(validArtistIds);
+
 	// Time tracking for progress bars
 	let currentTime = Date.now();
 
@@ -86,7 +106,7 @@
 	// Track which tasks we've already started claiming to avoid duplicates
 	let claimingTaskIds = new Set<string>();
 
-	async function autoClaimFinishedTasks(tasks: TaskResponse[], currentLabelId: string) {
+	async function autoClaimFinishedTasks(tasks: TimedTask[], currentLabelId: string) {
 		const finishedUnclaimed = tasks.filter(
 			(task) =>
 				!task.claimedAt && isTaskFinished(task, $serverTimeOffset) && !claimingTaskIds.has(task.id)
@@ -201,15 +221,31 @@
 
 		<div>
 			<h1 class="text-2xl font-bold mb-4">Label Roster</h1>
-			{#if $tasksQuery.isLoading}
-				<p class="text-gray-400">Loading tasks...</p>
-			{:else if $tasksQuery.isError}
-				<p class="text-red-400">Error: {$tasksQuery.error?.message}</p>
-			{:else if contractTasks.length === 0}
-				<p class="text-gray-400">No contracts</p>
-			{:else}
-				<ContractsCard contractsTaskResponse={contractTasks} {currentTime} />
-			{/if}
+
+			<div class="flex flex-col gap-2">
+				{#if $tasksQuery.isLoading}
+					<p class="text-gray-400">Loading tasks...</p>
+				{:else if $tasksQuery.isError}
+					<p class="text-red-400">Error: {$tasksQuery.error?.message}</p>
+				{:else if contractTasks.length === 0}
+					<p class="text-gray-400">No contracts</p>
+				{:else}
+					<ContractsCard contractsTaskResponse={contractTasks} {currentTime} />
+				{/if}
+
+				<!-- Artist List -->
+				{#if $artistsQuery.isLoading}
+					<p class="text-gray-400 mt-4">Loading artists...</p>
+				{:else if $artistsQuery.isError}
+					<p class="text-red-400 mt-4">Error loading artists: {$artistsQuery.error?.message}</p>
+				{:else if $artistsQuery.data && $artistsQuery.data.length > 0}
+					<div class="">
+						{#each $artistsQuery.data as artist (artist.id)}
+							<ArtistCard {artist} />
+						{/each}
+					</div>
+				{/if}
+			</div>
 		</div>
 		<!-- Ongoing Tasks Section -->
 		<div>

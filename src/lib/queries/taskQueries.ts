@@ -13,7 +13,7 @@ import {
 import { loadClientConfig } from '$lib/services/config';
 import { getServerAdjustedTime } from '$lib/utils/timeUtils';
 import type {
-    TaskResponse,
+    TimedTask,
     TaskCostPrediction,
     ScoutingTaskResponse,
     SigningContractTaskResponse,
@@ -76,11 +76,11 @@ export function createScoutingScopesQuery() {
 export function createClaimTaskMutation(labelId: string) {
     const queryClient = useQueryClient();
 
-    return createMutation<TaskResponse, Error, string>({
+    return createMutation<TimedTask, Error, string>({
         mutationFn: claimTask,
         onSuccess: (claimedTask) => {
             // Update the task in the cache
-            queryClient.setQueryData<TaskResponse[]>(
+            queryClient.setQueryData<TimedTask[]>(
                 queryKeys.tasks.byLabel(labelId),
                 (old) => old?.map(t => t.id === claimedTask.id ? claimedTask : t)
             );
@@ -92,11 +92,11 @@ export function createClaimTaskMutation(labelId: string) {
 export function createScoutingTaskMutation(labelId: string) {
     const queryClient = useQueryClient();
 
-    return createMutation<TaskResponse, Error, ScoutingTaskRequest>({
+    return createMutation<TimedTask, Error, ScoutingTaskRequest>({
         mutationFn: createScoutingTask,
         onSuccess: (newTask) => {
             // Add the new task to the cache
-            queryClient.setQueryData<TaskResponse[]>(
+            queryClient.setQueryData<TimedTask[]>(
                 queryKeys.tasks.byLabel(labelId),
                 (old) => old ? [...old, newTask] : [newTask]
             );
@@ -112,10 +112,10 @@ export function createScoutingTaskMutation(labelId: string) {
 export function createSignArtistContractTaskMutation(labelId: string) {
     const queryClient = useQueryClient();
 
-    return createMutation<TaskResponse, Error, SignArtistContractRequest>({
+    return createMutation<TimedTask, Error, SignArtistContractRequest>({
         mutationFn: createSignArtistContractTask,
         onSuccess: (newTask) => {
-            queryClient.setQueryData<TaskResponse[]>(
+            queryClient.setQueryData<TimedTask[]>(
                 queryKeys.tasks.byLabel(labelId),
                 (old) => old ? [...old, newTask] : [newTask]
             );

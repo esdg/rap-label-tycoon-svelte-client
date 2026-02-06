@@ -2,7 +2,7 @@
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { writable, derived, get } from 'svelte/store';
 import { queryKeys } from './queryClient';
-import { fetchArtistsByIds, type AnyArtist } from '$lib/api/artists';
+import { fetchArtistsByIds, fetchArtistById, type AnyArtist } from '$lib/api/artists';
 import { nowISO } from '$lib/utils/timeUtils';
 // Import legacy store for backward compatibility sync
 import { addMultipleDiscoveredArtists as legacyAddArtists } from '$lib/stores/artists';
@@ -17,6 +17,17 @@ export interface DiscoveredArtist {
 // Local store for discovered artists (client-side state that persists across queries)
 // This holds the UI state like bookmarks which isn't stored on backend
 export const discoveredArtistsStore = writable<Map<string, DiscoveredArtist>>(new Map());
+
+// Query: Fetch a single artist by ID
+export function createArtistByIdQuery(id: string) {
+    return createQuery<AnyArtist, Error>({
+        queryKey: queryKeys.artists.byId(id),
+        queryFn: () => fetchArtistById(id),
+        enabled: !!id,
+        // Artists don't change often
+        staleTime: 5 * 60 * 1000,
+    });
+}
 
 // Query: Fetch artists by IDs
 export function createArtistsByIdsQuery(ids: string[]) {

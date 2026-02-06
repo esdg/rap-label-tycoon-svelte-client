@@ -8,11 +8,11 @@
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ArtistDetails from '$lib/components/ArtistDetails.svelte';
-	import type { TaskResponse } from '$lib/types/task';
+	import type { TimedTask } from '$lib/types/task';
 	import { discoveredArtists } from '$lib/stores/artists';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 
-	export let taskResult: TaskResponse;
+	export let taskResult: TimedTask;
 
 	// State
 	let activeArtistIndex = 0;
@@ -52,7 +52,7 @@
 
 	// Type guards
 	function isScoutingArtistsResults(
-		results: TaskResponse['results']
+		results: TimedTask['results']
 	): results is ScoutingArtistsResults {
 		return Boolean(
 			results && Array.isArray((results as ScoutingArtistsResults).discoveredArtistsIds)

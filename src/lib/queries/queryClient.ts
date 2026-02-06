@@ -52,6 +52,7 @@ export const queryKeys = {
     // Artists
     artists: {
         all: ['artists'] as const,
+        byId: (id: string) => ['artists', 'byId', id] as const,
         byIds: (ids: string[]) => ['artists', 'byIds', ids.sort().join(',')] as const,
         discovered: ['artists', 'discovered'] as const,
     },

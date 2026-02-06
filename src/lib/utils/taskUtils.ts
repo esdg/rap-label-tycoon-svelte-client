@@ -1,18 +1,18 @@
 import { getCurrentServerTime } from './timeUtils';
 import { ScoutingType } from '$lib/types/scoutingArtistsTask';
-import type { TaskResponse, ScoutingTaskResponse } from '$lib/types/task';
+import type { TimedTask, ScoutingTaskResponse } from '$lib/types/task';
 
-export function isTaskClaimed(task: TaskResponse): boolean {
+export function isTaskClaimed(task: TimedTask): boolean {
     return Boolean(task.claimedAt);
 }
 
-export function isTaskFinished(task: TaskResponse, serverOffset: number): boolean {
+export function isTaskFinished(task: TimedTask, serverOffset: number): boolean {
     const endTime = new Date(task.endTime).getTime();
     return endTime <= getCurrentServerTime(serverOffset);
 }
 
 export function getTaskStatus(
-    task: TaskResponse,
+    task: TimedTask,
     serverOffset: number
 ): 'in-progress' | 'failed' | 'succeeded' {
     if (!isTaskClaimed(task) && !isTaskFinished(task, serverOffset)) {
@@ -27,7 +27,7 @@ export function getTaskStatus(
     return 'in-progress';
 }
 
-export function getTaskProgress(task: TaskResponse, serverOffset: number): number {
+export function getTaskProgress(task: TimedTask, serverOffset: number): number {
     const startTime = new Date(task.startTime).getTime();
     const endTime = new Date(task.endTime).getTime();
     const currentServerTime = getCurrentServerTime(serverOffset);

@@ -1,6 +1,6 @@
 // Tasks API functions
 import { apiFetch, apiFetchWithTime, apiPostTask, TaskCreationError, type TimestampedResponse } from './client';
-import type { TaskResponse, TaskCostPrediction } from '$lib/types/task';
+import type { TimedTask, TaskCostPrediction } from '$lib/types/task';
 import type { ScoutingTaskRequest, ScoutingScope } from '$lib/types/scoutingArtistsTask';
 import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
 
@@ -8,13 +8,13 @@ import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
 export { TaskCreationError } from './client';
 
 // Fetch all tasks for a label (with server time for sync)
-export async function fetchLabelTasks(labelId: string): Promise<TimestampedResponse<TaskResponse[]>> {
-    return apiFetchWithTime<TaskResponse[]>(`/api/v1/rap-labels/${labelId}/tasks`);
+export async function fetchLabelTasks(labelId: string): Promise<TimestampedResponse<TimedTask[]>> {
+    return apiFetchWithTime<TimedTask[]>(`/api/v1/rap-labels/${labelId}/tasks`);
 }
 
 // Claim a completed task
-export async function claimTask(taskId: string): Promise<TaskResponse> {
-    return apiFetch<TaskResponse>(`/api/v1/tasks/${taskId}/claim`, {
+export async function claimTask(taskId: string): Promise<TimedTask> {
+    return apiFetch<TimedTask>(`/api/v1/tasks/${taskId}/claim`, {
         method: 'PUT',
     });
 }
@@ -31,8 +31,8 @@ export async function predictScoutingCost(data: ScoutingTaskRequest): Promise<Ta
     });
 }
 
-export async function createScoutingTask(data: ScoutingTaskRequest): Promise<TaskResponse> {
-    return apiPostTask<ScoutingTaskRequest, TaskResponse>('/api/v1/tasks/scouting', data);
+export async function createScoutingTask(data: ScoutingTaskRequest): Promise<TimedTask> {
+    return apiPostTask<ScoutingTaskRequest, TimedTask>('/api/v1/tasks/scouting', data);
 }
 
 // Contract tasks
@@ -43,6 +43,6 @@ export async function predictSignArtistContractCost(data: SignArtistContractRequ
     });
 }
 
-export async function createSignArtistContractTask(data: SignArtistContractRequest): Promise<TaskResponse> {
-    return apiPostTask<SignArtistContractRequest, TaskResponse>('/api/v1/tasks/sign-artist-contract', data);
+export async function createSignArtistContractTask(data: SignArtistContractRequest): Promise<TimedTask> {
+    return apiPostTask<SignArtistContractRequest, TimedTask>('/api/v1/tasks/sign-artist-contract', data);
 }

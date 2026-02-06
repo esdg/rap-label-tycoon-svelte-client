@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ContractsCard from '$lib/components/Cards/ContractsCard.svelte';
+	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 </script>
 
 <div class="h-screen">
