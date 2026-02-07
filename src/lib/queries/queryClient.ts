@@ -72,6 +72,23 @@ export const queryKeys = {
         byLabel: (labelId: string) => ['beats', 'label', labelId] as const,
     },
 
+    // Releases
+    releases: {
+        all: ['releases'] as const,
+        byId: (id: string) => ['releases', 'byId', id] as const,
+        byIds: (ids: string[]) => ['releases', 'byIds', ids.sort().join(',')] as const,
+        byLabel: (labelId: string) => ['releases', 'label', labelId] as const,
+    },
+
+    // Tracks
+    tracks: {
+        all: ['tracks'] as const,
+        byId: (id: string) => ['tracks', 'byId', id] as const,
+        byIds: (ids: string[]) => ['tracks', 'byIds', ids.sort().join(',')] as const,
+        byLabel: (labelId: string) => ['tracks', 'label', labelId] as const,
+        byRelease: (releaseId: string) => ['tracks', 'release', releaseId] as const,
+    },
+
     // Scouting scopes (static reference data)
     scoutingScopes: ['scouting-scopes'] as const,
 } as const;

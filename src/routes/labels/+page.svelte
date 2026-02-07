@@ -8,7 +8,8 @@
 		type TimedTask,
 		type ScoutingTaskResponse,
 		type ScoutingTaskResults,
-		type ProducingBeatsTaskResponse
+		type ProducingBeatsTaskResponse,
+		type RecordingReleaseTaskResponse
 	} from '$lib/types/task';
 	import {
 		createLabelTasksQuery,
@@ -46,10 +47,11 @@
 	// Split tasks by type (derived from query data)
 	$: taskData = $tasksQuery.data
 		? createTasksByType($tasksQuery.data)
-		: { scoutingTasks: [], contractTasks: [], beatProductionTasks: [] };
+		: { scoutingTasks: [], contractTasks: [], beatProductionTasks: [], recordingReleaseTasks: [] };
 	$: scoutingTasks = taskData.scoutingTasks;
 	$: contractTasks = taskData.contractTasks;
 	$: beatProductionTasks = taskData.beatProductionTasks;
+	$: recordingReleaseTasks = taskData.recordingReleaseTasks;
 
 	// Extract contract IDs directly from task.contractId (available on signing_contract_task)
 	$: contractIds = contractTasks
@@ -244,9 +246,12 @@
 					{#each $artistsQuery.data as artist (artist.id)}
 						{@const artistBeatTask =
 							beatProductionTasks.find((t) => t.workerId === artist.id) || null}
+						{@const artistRecordingTask =
+							recordingReleaseTasks.find((t) => t.workerId === artist.id) || null}
 						<ArtistCard
 							{artist}
 							beatProductionTask={artistBeatTask}
+							recordingReleaseTask={artistRecordingTask}
 							{currentTime}
 							serverTimeOffset={$serverTimeOffset}
 						/>

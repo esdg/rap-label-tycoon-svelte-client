@@ -65,3 +65,23 @@ export async function predictProducingBeatsCost(data: ProducingBeatsRequest): Pr
 export async function createProducingBeatsTask(data: ProducingBeatsRequest): Promise<TimedTask> {
     return apiPostTask<ProducingBeatsRequest, TimedTask>('/api/v1/tasks/producing-beats', data);
 }
+
+// Recording release tasks
+export interface RecordingReleaseRequest {
+    labelId: string;
+    releaseTypeId: string;
+    productionStyle: number;
+    rapperId: string;
+    beatIds: string[];
+}
+
+export async function predictRecordingReleaseCost(data: RecordingReleaseRequest): Promise<TaskCostPrediction> {
+    return apiFetch<TaskCostPrediction>('/api/v1/tasks/recording-release/predict-cost', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+}
+
+export async function createRecordingReleaseTask(data: RecordingReleaseRequest): Promise<TimedTask> {
+    return apiPostTask<RecordingReleaseRequest, TimedTask>('/api/v1/tasks/recording-release', data);
+}

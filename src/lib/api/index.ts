@@ -9,3 +9,4 @@ export * from './artists';
 export * from './contracts';
 export * from './config';
 export * from './beats';
+export * from './releases';

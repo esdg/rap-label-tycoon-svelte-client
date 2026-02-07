@@ -86,8 +86,17 @@ export interface ProducingBeatsTaskResponse extends TimedTask {
     results: ProducingBeatsTaskResults | null;
 }
 
+// Recording release task - has rapperId and release details
+export interface RecordingReleaseTaskResponse extends TimedTask {
+    taskType: TaskType.RecordingRelease;
+    rapperId: string;
+    releaseTypeId: string;
+    beatIds: string[];
+    results: RecordingReleaseTaskResults | null;
+}
+
 // Union type for all specific task responses
-export type AnyTaskResponse = ScoutingTaskResponse | SigningContractTaskResponse | ProducingBeatsTaskResponse | TimedTask;
+export type AnyTaskResponse = ScoutingTaskResponse | SigningContractTaskResponse | ProducingBeatsTaskResponse | RecordingReleaseTaskResponse | TimedTask;
 
 // Base results
 export interface TaskResults {
@@ -111,4 +120,10 @@ export interface SigningContractTaskResults extends TaskResults {
 export interface ProducingBeatsTaskResults extends TaskResults {
     $type: string; // "producing_beats"
     producedBeatsIds: string[];
+}
+
+// Recording release results
+export interface RecordingReleaseTaskResults extends TaskResults {
+    $type: string; // "recording_release"
+    releaseId: string;
 }
