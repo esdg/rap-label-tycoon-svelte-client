@@ -9,7 +9,8 @@
 		type ScoutingTaskResponse,
 		type ScoutingTaskResults,
 		type ProducingBeatsTaskResponse,
-		type RecordingReleaseTaskResponse
+		type RecordingReleaseTaskResponse,
+		TaskType
 	} from '$lib/types/task';
 	import {
 		createLabelTasksQuery,

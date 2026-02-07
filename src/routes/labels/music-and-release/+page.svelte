@@ -19,7 +19,9 @@
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import { onMount, onDestroy } from 'svelte';
-	import { TaskCreationError } from '$lib/api/tasks';
+	import { TaskCreationError, claimTask } from '$lib/api/tasks';
+	import { queryClient, queryKeys } from '$lib/queries/queryClient';
+	import { isTaskFinished } from '$lib/utils/taskUtils';
 
 	// Tab management
 	let activeTabIndex = 0;
@@ -92,6 +94,43 @@
 	);
 
 	$: console.log('Active publishing tasks:', activePublishingTasks);
+
+	// Auto-claim finished publishing tasks
+	let claimingTaskIds = new Set<string>();
+
+	$: if (tasks.length > 0 && labelId && currentTime) {
+		autoClaimFinishedPublishingTasks(tasks, labelId);
+	}
+
+	async function autoClaimFinishedPublishingTasks(allTasks: TimedTask[], currentLabelId: string) {
+		const finishedPublishing = allTasks.filter(
+			(task) =>
+				task.taskType === TaskType.PublishingRelease &&
+				!task.claimedAt &&
+				isTaskFinished(task, $serverTimeOffset) &&
+				!claimingTaskIds.has(task.id)
+		);
+
+		if (finishedPublishing.length === 0) return;
+
+		// Mark tasks as being claimed
+		finishedPublishing.forEach((task) => claimingTaskIds.add(task.id));
+
+		// Claim all finished tasks
+		for (const task of finishedPublishing) {
+			try {
+				await claimTask(task.id);
+			} catch (err) {
+				console.error(`Failed to claim publishing task ${task.id}:`, err);
+				claimingTaskIds.delete(task.id);
+			}
+		}
+
+		// Invalidate queries to refresh data
+		queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(currentLabelId) });
+		queryClient.invalidateQueries({ queryKey: queryKeys.releases.byLabel(currentLabelId) });
+		queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(currentLabelId) });
+	}
 
 	$: isLoadingBeats = $beatsQuery.isLoading;
 	$: isLoadingReleases = $releasesQuery.isLoading;

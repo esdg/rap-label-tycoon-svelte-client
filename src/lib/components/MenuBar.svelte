@@ -21,9 +21,11 @@
 	<a href="/labels"><HomeIcon class=" hover:text-secondary-500 w-6 h-6" /></a>
 	<a href="/labels/roster"><RosterIcon class=" hover:text-secondary-500 w-6 h-6" /></a>
 	<BuildingOfficeIcon class=" hover:text-secondary-500 w-6 h-6" />
-	<a href="/labels/music-and-release"><RecordIconSmall class=" hover:text-secondary-500 w-6 h-6" /></a>
+	<a href="/labels/music-and-release"
+		><RecordIconSmall class=" hover:text-secondary-500 w-6 h-6" /></a
+	>
 	<MagnifyingGlassCircleIcon class=" hover:text-secondary-500 w-6 h-6" />
-	<CurrencyDollarIcon class=" hover:text-secondary-500 w-6 h-6" />
+	<a href="/labels/finances"><CurrencyDollarIcon class=" hover:text-secondary-500 w-6 h-6" /></a>
 	<MegaphoneIcon class=" hover:text-secondary-500 w-6 h-6" />
 	<CalendarDaysIcon class=" hover:text-secondary-500 w-6 h-6" />
 

@@ -9,3 +9,4 @@ export * from './artistQueries';
 export * from './contractQueries';
 export * from './beatQueries';
 export * from './releaseQueries';
+export * from './performanceReportQueries';

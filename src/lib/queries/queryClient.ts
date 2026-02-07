@@ -89,6 +89,9 @@ export const queryKeys = {
         byRelease: (releaseId: string) => ['tracks', 'release', releaseId] as const,
     },
 
+    // Performance Reports
+    performanceReports: ['performance-reports'] as const,
+
     // Scouting scopes (static reference data)
     scoutingScopes: ['scouting-scopes'] as const,
 } as const;

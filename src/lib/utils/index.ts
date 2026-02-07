@@ -9,6 +9,7 @@ export * from './errorUtils';
 export * from './clickOutside';
 export * from './artistUtils';
 export * from './taskUtils';
+export * from './performanceUtils';
 
 // Re-export formatDuration from timeUtils for backward compatibility
 // (in case old imports still reference formatDuration.ts)

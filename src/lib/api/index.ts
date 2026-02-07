@@ -10,3 +10,4 @@ export * from './contracts';
 export * from './config';
 export * from './beats';
 export * from './releases';
+export * from './performanceReports';
