@@ -71,8 +71,6 @@
 	$: tracks = $tracksQuery.data ?? [];
 	$: tasks = $tasksQuery.data ?? [];
 
-	$: console.log('Tasks updated:', tasks.length, 'tasks');
-
 	// Create a map of releaseId -> hasActiveTask for reactivity
 	$: activePublishingTasks = new Set(
 		tasks
@@ -92,8 +90,6 @@
 			)
 			.map((task) => [(task as any).releaseId, task])
 	);
-
-	$: console.log('Active publishing tasks:', activePublishingTasks);
 
 	// Auto-claim finished publishing tasks
 	let claimingTaskIds = new Set<string>();
