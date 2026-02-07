@@ -1,0 +1,1 @@
+import{M as a}from"./DjsGgg0N.js";import{d as s,h as n,q as i,a as o}from"./DcUeqTlN.js";async function c(){return s("/api/v1/client-config")}async function u(){const e=a(n).clientConfig;if(e)return e;const t=await c();return n.setClientConfig(t),i.setQueryData(o.clientConfig,t),i.setQueryData(o.scoutingScopes,t.scoutingScopes),t}export{u as l};
