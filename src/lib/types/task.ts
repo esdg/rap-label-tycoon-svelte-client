@@ -95,8 +95,15 @@ export interface RecordingReleaseTaskResponse extends TimedTask {
     results: RecordingReleaseTaskResults | null;
 }
 
+// Publishing release task - has releaseId
+export interface PublishingReleaseTaskResponse extends TimedTask {
+    taskType: TaskType.PublishingRelease;
+    releaseId: string;
+    results: PublishingReleaseTaskResults | null;
+}
+
 // Union type for all specific task responses
-export type AnyTaskResponse = ScoutingTaskResponse | SigningContractTaskResponse | ProducingBeatsTaskResponse | RecordingReleaseTaskResponse | TimedTask;
+export type AnyTaskResponse = ScoutingTaskResponse | SigningContractTaskResponse | ProducingBeatsTaskResponse | RecordingReleaseTaskResponse | PublishingReleaseTaskResponse | TimedTask;
 
 // Base results
 export interface TaskResults {
@@ -125,5 +132,11 @@ export interface ProducingBeatsTaskResults extends TaskResults {
 // Recording release results
 export interface RecordingReleaseTaskResults extends TaskResults {
     $type: string; // "recording_release"
+    releaseId: string;
+}
+
+// Publishing release results
+export interface PublishingReleaseTaskResults extends TaskResults {
+    $type: string; // "publishing_release"
     releaseId: string;
 }

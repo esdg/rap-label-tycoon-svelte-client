@@ -85,3 +85,13 @@ export async function predictRecordingReleaseCost(data: RecordingReleaseRequest)
 export async function createRecordingReleaseTask(data: RecordingReleaseRequest): Promise<TimedTask> {
     return apiPostTask<RecordingReleaseRequest, TimedTask>('/api/v1/tasks/recording-release', data);
 }
+
+// Publishing release tasks
+export interface PublishingReleaseRequest {
+    labelId: string;
+    releaseId: string;
+}
+
+export async function createPublishingReleaseTask(data: PublishingReleaseRequest): Promise<TimedTask> {
+    return apiPostTask<PublishingReleaseRequest, TimedTask>('/api/v1/tasks/publishing-release', data);
+}

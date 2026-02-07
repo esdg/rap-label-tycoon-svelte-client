@@ -116,9 +116,14 @@
 		);
 
 		const contractIdsToRefresh = new Set<string>();
+		let hasPublishingTask = false;
+
 		finishedUnclaimed.forEach((task) => {
 			if ('contractId' in task && typeof task.contractId === 'string' && task.contractId) {
 				contractIdsToRefresh.add(task.contractId);
+			}
+			if (task.taskType === TaskType.PublishingRelease) {
+				hasPublishingTask = true;
 			}
 		});
 
@@ -159,6 +164,11 @@
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.contracts.byIds([...contractIdsToRefresh])
 			});
+		}
+
+		// If any publishing tasks were claimed, invalidate releases cache
+		if (hasPublishingTask) {
+			queryClient.invalidateQueries({ queryKey: queryKeys.releases.byLabel(currentLabelId) });
 		}
 	}
 

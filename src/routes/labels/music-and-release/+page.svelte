@@ -4,12 +4,22 @@
 	import { createLabelBeatsQuery } from '$lib/queries/beatQueries';
 	import { createLabelReleasesQuery, createLabelTracksQuery } from '$lib/queries/releaseQueries';
 	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
+	import {
+		createLabelTasksQuery,
+		createPublishingReleaseTaskMutation,
+		serverTimeOffset
+	} from '$lib/queries/taskQueries';
 	import { RapMusicStyleNames } from '$lib/types/musicStyles';
 	import type { ReleaseType } from '$lib/types/config';
+	import { TaskType, TaskStatus } from '$lib/types/task';
+	import type { TimedTask } from '$lib/types/task';
+	import { formatTimeRemaining } from '$lib/utils/timeUtils';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
-	import { onMount } from 'svelte';
+	import Button from '$lib/components/Button.svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { TaskCreationError } from '$lib/api/tasks';
 
 	// Tab management
 	let activeTabIndex = 0;
@@ -22,12 +32,27 @@
 	// Release types from config
 	let releaseTypes: ReleaseType[] = [];
 
+	// Timer for updating remaining time
+	let currentTime = Date.now();
+	let timerInterval: ReturnType<typeof setInterval>;
+
 	onMount(async () => {
 		try {
 			const config = await loadClientConfig();
 			releaseTypes = config.releaseTypes;
 		} catch (err) {
 			console.error('Failed to load config:', err);
+		}
+
+		// Update timer every second
+		timerInterval = setInterval(() => {
+			currentTime = Date.now();
+		}, 1000);
+	});
+
+	onDestroy(() => {
+		if (timerInterval) {
+			clearInterval(timerInterval);
 		}
 	});
 
@@ -36,10 +61,37 @@
 	$: beatsQuery = createLabelBeatsQuery(labelId);
 	$: releasesQuery = createLabelReleasesQuery(labelId);
 	$: tracksQuery = createLabelTracksQuery(labelId);
+	$: tasksQuery = createLabelTasksQuery(labelId);
+	$: publishMutation = createPublishingReleaseTaskMutation(labelId ?? '');
 
 	$: beats = $beatsQuery.data ?? [];
 	$: releases = $releasesQuery.data ?? [];
 	$: tracks = $tracksQuery.data ?? [];
+	$: tasks = $tasksQuery.data ?? [];
+
+	$: console.log('Tasks updated:', tasks.length, 'tasks');
+
+	// Create a map of releaseId -> hasActiveTask for reactivity
+	$: activePublishingTasks = new Set(
+		tasks
+			.filter(
+				(task) =>
+					task.taskType === TaskType.PublishingRelease && 'releaseId' in task && !task.claimedAt
+			)
+			.map((task) => (task as any).releaseId)
+	);
+
+	// Create a map of releaseId -> task for getting task details (like endTime)
+	$: publishingTaskMap = new Map<string, TimedTask>(
+		tasks
+			.filter(
+				(task) =>
+					task.taskType === TaskType.PublishingRelease && 'releaseId' in task && !task.claimedAt
+			)
+			.map((task) => [(task as any).releaseId, task])
+	);
+
+	$: console.log('Active publishing tasks:', activePublishingTasks);
 
 	$: isLoadingBeats = $beatsQuery.isLoading;
 	$: isLoadingReleases = $releasesQuery.isLoading;
@@ -83,6 +135,53 @@
 		const secs = seconds % 60;
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}
+
+	// Helper function to check if release is unpublished
+	function isUnpublished(releaseDate: string | null): boolean {
+		if (!releaseDate) return true; // null or empty date means unpublished
+		const now = new Date();
+		const release = new Date(releaseDate);
+		return release > now;
+	}
+
+	// Check if a release has an active publishing task
+	function hasActivePublishingTask(releaseId: string): boolean {
+		console.log('Checking publishing task for release:', releaseId, 'Tasks count:', tasks.length);
+		return tasks.some(
+			(task) =>
+				task.taskType === TaskType.PublishingRelease &&
+				'releaseId' in task &&
+				(task as any).releaseId === releaseId &&
+				!task.claimedAt
+		);
+	}
+
+	// Publishing state tracking
+	let publishingReleaseId: string | null = null;
+	let publishError: string | null = null;
+
+	async function handlePublish(releaseId: string) {
+		if (!labelId) return;
+
+		publishingReleaseId = releaseId;
+		publishError = null;
+
+		try {
+			await $publishMutation.mutateAsync({
+				labelId,
+				releaseId
+			});
+		} catch (err) {
+			if (err instanceof TaskCreationError) {
+				publishError = err.message;
+			} else {
+				publishError = 'Failed to create publishing task';
+			}
+			console.error('Publishing task creation failed:', err);
+		} finally {
+			publishingReleaseId = null;
+		}
+	}
 </script>
 
 <div class="music-and-release-page p-4 md:p-6 lg:p-8">
@@ -116,21 +215,29 @@
 					<p class="text-primary-300 text-center py-8">No releases yet. Record some music!</p>
 				{:else}
 					<div class="space-y-2">
+						<!-- Error Message -->
+						{#if publishError}
+							<div class="bg-red-900 border border-red-600 text-red-200 px-4 py-3 rounded mb-4">
+								{publishError}
+							</div>
+						{/if}
+
 						<!-- Header -->
 						<div
-							class="grid grid-cols-[2fr_120px_120px_120px_80px] gap-4 px-4 py-3 text-xs uppercase bg-primary-900 text-primary-300 border-b border-primary-300 rounded-t"
+							class="grid grid-cols-[2fr_120px_120px_120px_80px_120px] gap-4 px-4 py-3 text-xs uppercase bg-primary-900 text-primary-300 border-b border-primary-300 rounded-t"
 						>
 							<div>Title</div>
 							<div class="text-center">Type</div>
 							<div class="text-center">Release Date</div>
 							<div class="text-center">Rating</div>
 							<div class="text-center">Hype</div>
+							<div class="text-center">Actions</div>
 						</div>
 
 						<!-- Releases List -->
 						{#each releases as release (release.id)}
 							<div
-								class="grid grid-cols-[2fr_120px_120px_120px_80px] gap-4 px-4 py-3 items-center border-b border-primary-800 hover:bg-primary-900 transition-colors text-sm"
+								class="grid grid-cols-[2fr_120px_120px_120px_80px_120px] gap-4 px-4 py-3 items-center border-b border-primary-800 hover:bg-primary-900 transition-colors text-sm"
 							>
 								<div class="font-medium text-primary-100 truncate">{release.title}</div>
 								<div class="text-center text-primary-200">
@@ -144,6 +251,30 @@
 								</div>
 								<div class="text-center text-primary-200">
 									{release.hype}
+								</div>
+								<div class="flex justify-center">
+									{#if activePublishingTasks.has(release.id)}
+										{@const task = publishingTaskMap.get(release.id)}
+										<span class="px-2 py-1 text-xs bg-yellow-600 text-white rounded">
+											Publishing... {task
+												? formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)
+												: ''}
+										</span>
+									{:else if isUnpublished(release.releaseDate)}
+										<Button
+											color="primary"
+											class="px-3 py-1 text-xs"
+											loading={publishingReleaseId === release.id}
+											disabled={publishingReleaseId !== null}
+											on:clicked={() => handlePublish(release.id)}
+										>
+											Publish
+										</Button>
+									{:else}
+										<span class="px-2 py-1 text-xs bg-green-600 text-white rounded">
+											Published
+										</span>
+									{/if}
 								</div>
 							</div>
 						{/each}

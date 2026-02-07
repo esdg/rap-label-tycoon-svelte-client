@@ -9,6 +9,8 @@ import {
     predictScoutingCost,
     createSignArtistContractTask,
     predictSignArtistContractCost,
+    createPublishingReleaseTask,
+    type PublishingReleaseRequest,
 } from '$lib/api/tasks';
 import { loadClientConfig } from '$lib/services/config';
 import { getServerAdjustedTime } from '$lib/utils/timeUtils';
@@ -129,6 +131,24 @@ export function createSignArtistContractTaskMutation(labelId: string) {
             );
             queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(labelId) });
+        },
+    });
+}
+
+// Mutation: Create publishing release task
+export function createPublishingReleaseTaskMutation(labelId: string) {
+    const queryClient = useQueryClient();
+
+    return createMutation<TimedTask, Error, PublishingReleaseRequest>({
+        mutationFn: createPublishingReleaseTask,
+        onSuccess: (newTask) => {
+            queryClient.setQueryData<TimedTask[]>(
+                queryKeys.tasks.byLabel(labelId),
+                (old) => old ? [...old, newTask] : [newTask]
+            );
+            queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(labelId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.releases.byLabel(labelId) });
         },
     });
 }
