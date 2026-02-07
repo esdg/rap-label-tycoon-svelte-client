@@ -1,5 +1,5 @@
 // Centralized API configuration and base fetch utility
-const API_BASE_URL = 'http://localhost:5122';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5122';
 
 // Custom error class for API errors with proper typing
 export class ApiError extends Error {
