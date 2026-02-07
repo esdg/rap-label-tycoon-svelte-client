@@ -7,6 +7,7 @@
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { createLabelBeatsQuery } from '$lib/queries/beatQueries';
+	import { createLabelTracksQuery } from '$lib/queries/releaseQueries';
 	import { queryKeys, queryClient } from '$lib/queries/queryClient';
 	import { loadClientConfig } from '$lib/services/config';
 	import { ContractStatus } from '$lib/types/contracts';
@@ -56,6 +57,7 @@
 	$: labelId = $currentLabel?.id || null;
 	$: tasksQuery = createLabelTasksQuery(labelId);
 	$: beatsQuery = createLabelBeatsQuery(labelId);
+	$: tracksQuery = createLabelTracksQuery(labelId);
 
 	// Split tasks by type
 	$: taskData = $tasksQuery.data
@@ -122,10 +124,15 @@
 	// Get selected release type object
 	$: selectedReleaseType = releaseTypes.find((rt) => rt.id === selectedReleaseTypeId);
 
-	// Filter beats by selected genre
+	// Get set of beat IDs that are already used in tracks
+	$: usedBeatIds = new Set(($tracksQuery.data ?? []).map((track) => track.beatId));
+
+	// Filter beats by selected genre and exclude beats that are sold or already used
 	$: filteredBeats =
 		selectedGenre !== null
-			? ($beatsQuery.data ?? []).filter((beat) => beat.genre === selectedGenre && !beat.isSold)
+			? ($beatsQuery.data ?? []).filter(
+					(beat) => beat.genre === selectedGenre && !beat.isSold && !usedBeatIds.has(beat.id)
+				)
 			: [];
 
 	// Clear selected beats when genre changes
@@ -155,7 +162,12 @@
 	}
 
 	// Set loading/error states
-	$: if ($tasksQuery.isLoading || $contractsQuery.isLoading || $artistsQuery.isLoading) {
+	$: if (
+		$tasksQuery.isLoading ||
+		$contractsQuery.isLoading ||
+		$artistsQuery.isLoading ||
+		$tracksQuery.isLoading
+	) {
 		error = null;
 	} else if ($tasksQuery.error) {
 		error = `Failed to load tasks: ${$tasksQuery.error.message}`;
@@ -165,6 +177,8 @@
 		error = `Failed to load rappers: ${$artistsQuery.error.message}`;
 	} else if ($beatsQuery.error) {
 		error = `Failed to load beats: ${$beatsQuery.error.message}`;
+	} else if ($tracksQuery.error) {
+		error = `Failed to load tracks: ${$tracksQuery.error.message}`;
 	}
 
 	// Lifecycle

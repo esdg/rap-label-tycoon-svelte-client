@@ -118,6 +118,7 @@
 
 		const contractIdsToRefresh = new Set<string>();
 		let hasPublishingTask = false;
+		let hasBeatProductionTask = false;
 
 		finishedUnclaimed.forEach((task) => {
 			if ('contractId' in task && typeof task.contractId === 'string' && task.contractId) {
@@ -125,6 +126,9 @@
 			}
 			if (task.taskType === TaskType.PublishingRelease) {
 				hasPublishingTask = true;
+			}
+			if (task.taskType === TaskType.ProducingBeats) {
+				hasBeatProductionTask = true;
 			}
 		});
 
@@ -170,6 +174,11 @@
 		// If any publishing tasks were claimed, invalidate releases cache
 		if (hasPublishingTask) {
 			queryClient.invalidateQueries({ queryKey: queryKeys.releases.byLabel(currentLabelId) });
+		}
+
+		// If any beat production tasks were claimed, invalidate beats cache
+		if (hasBeatProductionTask) {
+			queryClient.invalidateQueries({ queryKey: queryKeys.beats.byLabel(currentLabelId) });
 		}
 	}
 
@@ -256,9 +265,21 @@
 				{:else if $artistsQuery.data && $artistsQuery.data.length > 0}
 					{#each $artistsQuery.data as artist (artist.id)}
 						{@const artistBeatTask =
-							beatProductionTasks.find((t) => t.workerId === artist.id) || null}
+							beatProductionTasks.find((t) => {
+								if (t.workerId !== artist.id) return false;
+								const adjustedNow = currentTime + $serverTimeOffset;
+								const startTime = new Date(t.startTime).getTime();
+								const endTime = new Date(t.endTime).getTime();
+								return startTime <= adjustedNow && endTime > adjustedNow;
+							}) || null}
 						{@const artistRecordingTask =
-							recordingReleaseTasks.find((t) => t.workerId === artist.id) || null}
+							recordingReleaseTasks.find((t) => {
+								if (t.workerId !== artist.id) return false;
+								const adjustedNow = currentTime + $serverTimeOffset;
+								const startTime = new Date(t.startTime).getTime();
+								const endTime = new Date(t.endTime).getTime();
+								return startTime <= adjustedNow && endTime > adjustedNow;
+							}) || null}
 						<ArtistCard
 							{artist}
 							beatProductionTask={artistBeatTask}
