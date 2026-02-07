@@ -47,7 +47,7 @@
 		<div class="relative h-full w-28 flex-shrink-0">
 			<img
 				src={artist.profileImage ??
-					`/artists/profiles/default/artist-default-${artist.sex === 0 ? 'm' : 'f'}-1.png`}
+					`/artists/profiles/default/artist-default-${artist.sex === 'Male' ? 'm' : 'f'}-1.png`}
 				alt={artist.stageName}
 				class="h-full w-full object-cover"
 			/>

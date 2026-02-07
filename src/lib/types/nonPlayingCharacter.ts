@@ -3,7 +3,7 @@ export interface NonPlayableCharacter {
     id: string;
     firstName: string;
     lastName: string;
-    sex: number;
+    sex: string;
     birthDate: string;
     deathDate: string;
     retirementDate: string;

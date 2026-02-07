@@ -42,7 +42,7 @@
 			<div class="flex md:flex-row flex-col-reverse h-full">
 				<Hero
 					image={$artistQuery.data.profileImage ??
-						`/artists/profiles/default/artist-default-${$artistQuery.data.sex === 0 ? 'm' : 'f'}-1.png`}
+						`/artists/profiles/default/artist-default-${$artistQuery.data.sex === 'Male' ? 'm' : 'f'}-1.png`}
 				/>
 				<div class="md:basis-3/5 h-screen overflow-y-auto">
 					<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
