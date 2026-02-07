@@ -21,7 +21,7 @@
 		? formatTimeRemaining(beatProductionTask.endTime, currentTime, serverTimeOffset)
 		: '';
 	$: progress = beatProductionTask ? getTaskProgress(beatProductionTask, serverTimeOffset) : 0;
-	$: numberOfBeats = beatProductionTask?.results?.producedBeatsIds?.length || 1;
+	$: numberOfBeats = beatProductionTask?.numberOfBeats || 1;
 </script>
 
 <button

@@ -82,6 +82,7 @@ export interface SigningContractTaskResponse extends TimedTask {
 export interface ProducingBeatsTaskResponse extends TimedTask {
     taskType: TaskType.ProducingBeats;
     beatmakerId: string;
+    numberOfBeats: number;
     results: ProducingBeatsTaskResults | null;
 }
 

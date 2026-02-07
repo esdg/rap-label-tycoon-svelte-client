@@ -19,6 +19,14 @@
 				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
 		});
 	}
+	async function openRecordingReleaseModal() {
+		modalStore.open('task-modal', {
+			subModal: 'recording-release',
+			title: 'Recording Release',
+			imageUrl:
+				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
+		});
+	}
 </script>
 
 <div class="mb-6 flex gap-2 justify-end {className}">
@@ -35,6 +43,7 @@
 	<!-- Produce record Buttons -->
 	{#if isRapper(artist)}
 		<button
+			on:click={() => openRecordingReleaseModal()}
 			class="flex items-center flex-col gap-1 bg-[#080B12] size-28 border border-gray-600 rounded-md p-2 hover:border-secondary-500 transition-colors duration-200 hover:ring-secondary-500 hover:ring-1 select-none"
 		>
 			<RecordIcon />

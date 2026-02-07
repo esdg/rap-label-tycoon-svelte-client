@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Hero from '../Hero.svelte';
 	import ProducingBeat from './task-submodals/ProducingBeat.svelte';
+	import RecordingRelease from './task-submodals/RecordingRelease.svelte';
 	import ScoutTalents from './task-submodals/ScoutTalents.svelte';
 	import ScoutTalentsResults from './task-submodals/ScoutTalentsResults.svelte';
 	import SignContract from './task-submodals/SignContract.svelte';
@@ -10,7 +11,13 @@
 	const DEFAULT_IMAGE_URL =
 		'https://res.cloudinary.com/dig430oem/image/upload/v1769554993/artists/profile_images/fpuc64oh9s5w8uoc9u5s.jpg';
 
-	const VALID_SUBMODALS = new Set(['scout', 'sign-contract', 'scout-results', 'producing-beats']);
+	const VALID_SUBMODALS = new Set([
+		'scout',
+		'sign-contract',
+		'scout-results',
+		'producing-beats',
+		'recording-release'
+	]);
 
 	let imageOverride: string | null = null;
 
@@ -57,6 +64,8 @@
 			/>
 		{:else if activeSubModal === 'producing-beats'}
 			<ProducingBeat />
+		{:else if activeSubModal === 'recording-release'}
+			<RecordingRelease />
 		{:else}
 			<ScoutTalents />
 		{/if}
