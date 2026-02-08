@@ -11,6 +11,7 @@
 	import { initializeAuthState } from '$lib/services/auth';
 	import { appState, currentPlayer, isAuthenticated, isAuthLoading } from '$lib/stores/appState';
 	import MenuBar from '$lib/components/MenuBar.svelte';
+	import { VERSION, GIT_HASH } from '$lib/version';
 
 	let initializingPlayer = false;
 
@@ -81,5 +82,7 @@
 			</main>
 		{/if}
 	</div>
-	<div class="fixed bottom-2 right-4 select-none text-xs text-white">version MVP 0.0.1</div>
+	<div class="fixed bottom-2 right-4 select-none text-xs text-white">
+		MVP v{VERSION} ({GIT_HASH})
+	</div>
 </QueryClientProvider>
