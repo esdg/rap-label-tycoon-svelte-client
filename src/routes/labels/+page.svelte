@@ -17,6 +17,7 @@
 	} from '$lib/queries/taskQueries';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { addDiscoveredArtists, createArtistsByIdsQuery } from '$lib/queries/artistQueries';
+	import { createPerformanceReportsByLabelQuery } from '$lib/queries/performanceReportQueries';
 	import { queryKeys } from '$lib/queries/queryClient';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { fetchArtistsByIds } from '$lib/api/artists';
@@ -29,6 +30,7 @@
 		getTaskStatus,
 		isTaskFinished
 	} from '$lib/utils';
+	import { getDateRange } from '$lib/utils/performanceUtils';
 	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
@@ -85,6 +87,36 @@
 
 	// Create artists query based on valid contract artist IDs
 	$: artistsQuery = createArtistsByIdsQuery(validArtistIds);
+
+	// Fetch performance reports for last 2 days to calculate monthly revenue and trend
+	$: dateParams = getDateRange(2); // Last 2 days
+	$: reportsQuery = createPerformanceReportsByLabelQuery(labelId || '', dateParams);
+
+	// Calculate monthly revenue (today's revenue)
+	$: monthlyRevenue = $reportsQuery.data
+		? $reportsQuery.data
+				.filter((report) => {
+					// Get today's date in YYYY-MM-DD format
+					const today = new Date().toISOString().split('T')[0];
+					return report.reportDate.startsWith(today);
+				})
+				.reduce((sum, report) => sum + report.performanceStatsForThePeriod.revenue, 0)
+		: 0;
+
+	// Calculate yesterday's revenue for comparison
+	$: yesterdayRevenue = $reportsQuery.data
+		? $reportsQuery.data
+				.filter((report) => {
+					// Get yesterday's date in YYYY-MM-DD format
+					const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+					return report.reportDate.startsWith(yesterday);
+				})
+				.reduce((sum, report) => sum + report.performanceStatsForThePeriod.revenue, 0)
+		: 0;
+
+	// Determine trend indicator
+	$: trendIndicator =
+		monthlyRevenue > yesterdayRevenue ? '▲' : monthlyRevenue < yesterdayRevenue ? '▼' : '―';
 
 	// Time tracking for progress bars
 	let currentTime = Date.now();
@@ -232,18 +264,7 @@
 	<!-- 1 col -->
 	<div class="space-y-6 sm:space-y-8">
 		<div>
-			<Button
-				color="primary"
-				style="normal"
-				altText="Open scout talents modal"
-				on:clicked={openScoutModal}
-			>
-				Scout Talents
-			</Button>
-		</div>
-
-		<div>
-			<h1 class="text-2xl font-bold mb-4">Label Roster</h1>
+			<h1 class="text-2xl font-thin mb-1">Label Roster</h1>
 
 			<div class="flex flex-col gap-2">
 				<!-- Contract List -->
@@ -310,6 +331,13 @@
 					<span class="text-2xl font-black">{formatCurrency($currentLabel?.bankroll)}</span>
 				</div>
 			{/if}
+			<div id="monthly-revenue" class="flex flex-col-reverse items-center">
+				<span class="uppercase text-xs text-secondary-700">Monthly<br />Revenue</span>
+				<div class="flex items-center text-category-2-500">
+					<span class="text-2xl font-black">{formatCurrency(monthlyRevenue)}</span>
+					<span class="text-xs mt-2">{trendIndicator}</span>
+				</div>
+			</div>
 		</div>
 
 		<!-- Scouting Tasks Section -->
@@ -319,7 +347,16 @@
 			{:else if $tasksQuery.isError}
 				<p class="text-red-400">Error: {$tasksQuery.error?.message}</p>
 			{:else if scoutingTasks.length === 0}
-				<p class="text-gray-400">No scouting tasks</p>
+				<div>
+					<Button
+						color="primary"
+						style="normal"
+						altText="Open scout talents modal"
+						on:clicked={openScoutModal}
+					>
+						Scout Talents
+					</Button>
+				</div>
 			{:else}
 				{@const lastTask = scoutingTasks[scoutingTasks.length - 1]}
 				<div class="flex flex-wrap gap-4">

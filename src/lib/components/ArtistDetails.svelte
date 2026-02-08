@@ -44,10 +44,32 @@
 
 	<!-- Artist Details -->
 	<div class="pt-6 lg:pt-8 flex gap-6 lg:gap-8 flex-col text-sm">
+		<!-- Sex -->
+		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+			<div
+				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
+			>
+				Sex
+			</div>
+			<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
+				{artist.sex}
+			</p>
+		</div>
+		<!-- Etnicity -->
+		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+			<div
+				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
+			>
+				Etnicity
+			</div>
+			<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
+				{artist.ethnicity}
+			</p>
+		</div>
 		<!-- Bio -->
 		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
 			<div
-				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm"
+				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
 			>
 				Bio
 			</div>
@@ -59,7 +81,7 @@
 		<!-- Background -->
 		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
 			<div
-				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm"
+				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
 			>
 				Background
 			</div>
@@ -71,7 +93,7 @@
 		<!-- Appearance -->
 		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
 			<div
-				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm"
+				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
 			>
 				Appearance
 			</div>
