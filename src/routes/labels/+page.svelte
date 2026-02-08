@@ -8,8 +8,6 @@
 		type TimedTask,
 		type ScoutingTaskResponse,
 		type ScoutingTaskResults,
-		type ProducingBeatsTaskResponse,
-		type RecordingReleaseTaskResponse,
 		TaskType
 	} from '$lib/types/task';
 	import {
@@ -25,16 +23,17 @@
 	import { claimTask } from '$lib/api/tasks';
 	import { setContracts } from '$lib/stores/contracts';
 	import {
+		formatCurrency,
 		formatTimeRemaining,
 		getTaskProgress,
 		getTaskStatus,
-		getScoutingType,
 		isTaskFinished
 	} from '$lib/utils';
 	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
 	import { ContractStatus } from '$lib/types/contracts';
+	import { label } from '$lib/stores';
 
 	// Get query client for manual invalidation
 	const queryClient = useQueryClient();
@@ -227,9 +226,10 @@
 </script>
 
 <div
-	class="min-h-screen text-white p-4 sm:p-8 overflow-x-hidden"
+	class="grid grid-cols-[1fr_1fr_max-content] min-h-screen text-white p-4 sm:p-8 overflow-x-hidden"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
+	<!-- 1 col -->
 	<div class="space-y-6 sm:space-y-8">
 		<div>
 			<Button
@@ -291,10 +291,29 @@
 				{/if}
 			</div>
 		</div>
+	</div>
+	<!-- 2 col -->
+	<div></div>
+	<!-- 3 col -->
+	<div class="flex flex-col items-center gap-8">
+		<div id="label-stats" class="grow flex flex-col gap-4">
+			<div class="text-center font-black text-3xl uppercase max-w-52">{$currentLabel?.name}</div>
+			{#if $currentLabel?.rating}
+				<div id="label-rating" class="flex flex-col-reverse items-center">
+					<span class="uppercase text-xs text-secondary-700">Rating</span>
+					<span class="text-2xl text-category-1-500">{$currentLabel?.rating}</span>
+				</div>
+			{/if}
+			{#if $currentLabel?.bankroll}
+				<div id="label-bank" class="flex flex-col-reverse items-center">
+					<span class="uppercase text-xs text-secondary-700">Bank</span>
+					<span class="text-2xl font-black">{formatCurrency($currentLabel?.bankroll)}</span>
+				</div>
+			{/if}
+		</div>
+
 		<!-- Scouting Tasks Section -->
 		<div>
-			<h2 class="text-2xl font-bold mb-4">Scouting Tasks</h2>
-
 			{#if $tasksQuery.isLoading}
 				<p class="text-gray-400">Loading scouting tasks...</p>
 			{:else if $tasksQuery.isError}
@@ -302,17 +321,16 @@
 			{:else if scoutingTasks.length === 0}
 				<p class="text-gray-400">No scouting tasks</p>
 			{:else}
+				{@const lastTask = scoutingTasks[scoutingTasks.length - 1]}
 				<div class="flex flex-wrap gap-4">
-					{#each scoutingTasks as task}
-						<ScoutingTaskCard
-							state={getTaskStatus(task, $serverTimeOffset)}
-							durationText={formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)}
-							inProgressDescription="Observing at open mic..."
-							scoutingType={task.scoutingType}
-							taskProgress={getTaskProgress(task, $serverTimeOffset)}
-							on:viewResults={() => openScoutResultsModal(task)}
-						/>
-					{/each}
+					<ScoutingTaskCard
+						state={getTaskStatus(lastTask, $serverTimeOffset)}
+						durationText={formatTimeRemaining(lastTask.endTime, currentTime, $serverTimeOffset)}
+						inProgressDescription="Observing at open mic..."
+						scoutingType={lastTask.scoutingType}
+						taskProgress={getTaskProgress(lastTask, $serverTimeOffset)}
+						on:viewResults={() => openScoutResultsModal(lastTask)}
+					/>
 				</div>
 			{/if}
 		</div>

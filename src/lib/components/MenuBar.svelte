@@ -24,7 +24,9 @@
 	<a href="/labels/music-and-release"
 		><RecordIconSmall class=" hover:text-secondary-500 w-6 h-6" /></a
 	>
-	<MagnifyingGlassCircleIcon class=" hover:text-secondary-500 w-6 h-6" />
+	<a href="/artists/talents-scouting"
+		><MagnifyingGlassCircleIcon class=" hover:text-secondary-500 w-6 h-6" /></a
+	>
 	<a href="/labels/finances"><CurrencyDollarIcon class=" hover:text-secondary-500 w-6 h-6" /></a>
 	<MegaphoneIcon class=" hover:text-secondary-500 w-6 h-6" />
 	<CalendarDaysIcon class=" hover:text-secondary-500 w-6 h-6" />
