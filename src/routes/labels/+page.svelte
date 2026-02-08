@@ -257,7 +257,7 @@
 </script>
 
 <div
-	class="grid min-h-screen grid-cols-[1fr_1fr_max-content] overflow-x-hidden p-4 text-white sm:p-8"
+	class="grid min-h-screen grid-cols-[minmax(0,35rem)_1fr_max-content] overflow-x-hidden p-4 text-white sm:p-8"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
 	<!-- 1 col -->
