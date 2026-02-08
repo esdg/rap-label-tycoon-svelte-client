@@ -19,7 +19,7 @@
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 	import { colors } from '$lib/theme';
 	import CostEstimation from './CostEstimation.svelte';
-	import { TaskCreationErrorType, type TaskCostPrediction } from '$lib/types/task';
+	import { type TaskCostPrediction } from '$lib/types/task';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 	import { getTaskErrorMessage } from '$lib/utils';
 
@@ -196,14 +196,14 @@
 	</svelte:fragment>
 	<svelte:fragment>
 		<ContentPanel
-			class="pt-0 p-4 max-w-xl lg:max-w-3xl xl:max-w-4xl mx-auto"
+			class="mx-auto max-w-xl p-4 lg:max-w-3xl xl:max-w-4xl"
 			activeStepIndex={currentStep}
 			transition="slide"
 			duration={300}
 		>
 			<!-- Step 1: Scouting Parameters -->
 			<ContentPanelItem
-				class="space-y-8 sm:space-y-12 lg:space-y-16 xl:space-y-20 text-white pb-8 2xl:pl-40"
+				class="space-y-8 pb-8 text-white sm:space-y-12 lg:space-y-16 xl:space-y-20 2xl:pl-40"
 			>
 				<SelectField
 					label="Scout for"
@@ -241,9 +241,9 @@
 	</svelte:fragment>
 	<svelte:fragment slot="footer">
 		<!-- Prospector -->
-		<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
+		<div class="flex items-center gap-3 sm:mr-auto lg:gap-4">
 			<label
-				class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
+				class="whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-gray-600 lg:text-sm xl:text-base"
 				for="prospector-btn"
 			>
 				Prospector
@@ -260,7 +260,7 @@
 
 		<!-- Action Buttons -->
 		<ContentPanel activeStepIndex={currentStep} class="w-full sm:w-auto">
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"
@@ -281,7 +281,7 @@
 				</Button>
 			</ContentPanelItem>
 
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"

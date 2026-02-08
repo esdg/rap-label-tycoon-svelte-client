@@ -236,15 +236,15 @@
 	</svelte:fragment>
 	<svelte:fragment>
 		<ContentPanel
-			class="pt-0 p-4 max-w-xl lg:max-w-3xl xl:max-w-4xl mx-auto h-full"
+			class="mx-auto h-full max-w-xl p-4 lg:max-w-3xl xl:max-w-4xl"
 			{activeStepIndex}
 			transition="slide"
 			duration={300}
 		>
 			<!-- Step 1: Production Parameters -->
-			<ContentPanelItem class="space-y-8 text-white pb-8">
+			<ContentPanelItem class="space-y-8 pb-8 text-white">
 				<div class="space-y-4">
-					<p class="text-sm sm:text-base text-gray-300 leading-relaxed max-w-3xl">
+					<p class="max-w-3xl text-sm leading-relaxed text-gray-300">
 						Select a beatmaker and choose how many beats you want to produce. Each beatmaker has
 						different efficiency, affecting the total cost, production time, and stamina
 						consumption. The number of beats you request will directly scale these values. Before
@@ -284,9 +284,9 @@
 
 	<svelte:fragment slot="footer">
 		<!-- Prospector -->
-		<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
+		<div class="flex items-center gap-3 sm:mr-auto lg:gap-4">
 			<label
-				class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
+				class="whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-gray-600 lg:text-sm xl:text-base"
 				for="prospector-btn"
 			>
 				Beatmaker
@@ -303,7 +303,7 @@
 
 		<!-- Action Buttons -->
 		<ContentPanel {activeStepIndex} class="w-full sm:w-auto">
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"
@@ -327,7 +327,7 @@
 				</Button>
 			</ContentPanelItem>
 
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"

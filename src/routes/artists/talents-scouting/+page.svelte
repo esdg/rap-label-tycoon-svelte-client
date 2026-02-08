@@ -46,7 +46,7 @@
 			scoutingTaskResponse: scoutingTaskResponse,
 			title: 'Scouting talents',
 			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
+				'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
 		});
 	}
 	function openScoutModal() {
@@ -54,7 +54,7 @@
 			subModal: 'scout',
 			title: 'Scouting talents',
 			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
+				'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
 		});
 	}
 </script>
