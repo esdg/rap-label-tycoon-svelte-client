@@ -35,7 +35,6 @@
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
 	import { ContractStatus } from '$lib/types/contracts';
-	import { label } from '$lib/stores';
 
 	// Get query client for manual invalidation
 	const queryClient = useQueryClient();
@@ -116,7 +115,7 @@
 
 	// Determine trend indicator
 	$: trendIndicator =
-		monthlyRevenue > yesterdayRevenue ? '▲' : monthlyRevenue < yesterdayRevenue ? '▼' : '―';
+		monthlyRevenue > yesterdayRevenue ? '▲' : monthlyRevenue < yesterdayRevenue ? '▼' : '-';
 
 	// Time tracking for progress bars
 	let currentTime = Date.now();
@@ -350,7 +349,7 @@
 				<div>
 					<Button
 						color="primary"
-						style="normal"
+						style="hollow"
 						altText="Open scout talents modal"
 						on:clicked={openScoutModal}
 					>

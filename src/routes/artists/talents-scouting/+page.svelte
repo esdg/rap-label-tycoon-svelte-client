@@ -10,6 +10,9 @@
 	import { currentLabel } from '$lib/stores/appState';
 	import type { ScoutingTaskResponse, ScoutingTaskResults } from '$lib/types/task';
 	import { formatTimeRemaining, getTaskProgress, getTaskStatus } from '$lib/utils';
+	import bgImage from '$lib/assets/main-bg-1.png';
+	import Button from '$lib/components/Button.svelte';
+	import { modalStore } from '$lib/stores';
 
 	// Reactive label ID
 	$: labelId = $currentLabel?.id ?? null;
@@ -38,27 +41,50 @@
 			}
 		}
 	}
+	function openScoutModal() {
+		modalStore.open('task-modal', {
+			subModal: 'scout',
+			title: 'Scouting talents',
+			imageUrl:
+				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
+		});
+	}
 </script>
 
-<div>
-	{#if $tasksQuery.isLoading}
-		<p class="text-gray-400">Loading scouting tasks...</p>
-	{:else if $tasksQuery.isError}
-		<p class="text-red-400">Error: {$tasksQuery.error?.message}</p>
-	{:else if scoutingTasks.length === 0}
-		<p class="text-gray-400">No scouting tasks</p>
-	{:else}
-		<div class="flex flex-wrap gap-4">
-			{#each scoutingTasks as task}
-				<ScoutingTaskCard
-					state={getTaskStatus(task, $serverTimeOffset)}
-					durationText={formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)}
-					inProgressDescription="Observing at open mic..."
-					scoutingType={task.scoutingType}
-					taskProgress={getTaskProgress(task, $serverTimeOffset)}
-					on:viewResults={() => openScoutResultsModal(task)}
-				/>
-			{/each}
-		</div>
-	{/if}
+<div
+	class=" min-h-screen text-white p-4 sm:p-8 overflow-x-hidden"
+	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
+>
+	<div class="mb-6">
+		<Button
+			color="primary"
+			style="hollow"
+			altText="Open scout talents modal"
+			on:clicked={openScoutModal}
+		>
+			Scout Talents
+		</Button>
+	</div>
+	<div class="grid grid-cols-[1fr_1fr_max-content]">
+		{#if $tasksQuery.isLoading}
+			<p class="text-gray-400">Loading scouting tasks...</p>
+		{:else if $tasksQuery.isError}
+			<p class="text-red-400">Error: {$tasksQuery.error?.message}</p>
+		{:else if scoutingTasks.length === 0}
+			<p class="text-gray-400">No scouting tasks</p>
+		{:else}
+			<div class="flex flex-wrap gap-4">
+				{#each scoutingTasks as task}
+					<ScoutingTaskCard
+						state={getTaskStatus(task, $serverTimeOffset)}
+						durationText={formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)}
+						inProgressDescription="Observing at open mic..."
+						scoutingType={task.scoutingType}
+						taskProgress={getTaskProgress(task, $serverTimeOffset)}
+						on:viewResults={() => openScoutResultsModal(task)}
+					/>
+				{/each}
+			</div>
+		{/if}
+	</div>
 </div>

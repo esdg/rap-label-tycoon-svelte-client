@@ -27,7 +27,7 @@
 
 	// Color mapping for hollow style
 	const hollowColorMap: Record<string, string> = {
-		primary: 'text-gray-500 border-gray-500 hover:border-primary-400 hover:text-primary-500',
+		primary: 'text-gray-200 border-gray-200 hover:border-primary-400 hover:text-primary-500',
 		secondary: 'text-gray-500 border-gray-500 hover:border-secondary-400 hover:text-secondary-500',
 		gray: 'text-gray-800 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
 	};
