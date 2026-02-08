@@ -40,6 +40,14 @@
 				}
 			}
 		}
+
+		modalStore.open('task-modal', {
+			subModal: 'scout-results',
+			scoutingTaskResponse: scoutingTaskResponse,
+			title: 'Scouting talents',
+			imageUrl:
+				'https://res.cloudinary.com/dig430oem/image/upload/v1769715987/scouting-cover_mtrurs.png'
+		});
 	}
 	function openScoutModal() {
 		modalStore.open('task-modal', {
@@ -52,7 +60,7 @@
 </script>
 
 <div
-	class=" min-h-screen text-white p-4 sm:p-8 overflow-x-hidden"
+	class=" min-h-screen overflow-x-hidden p-4 text-white sm:p-8"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
 	<div class="mb-6">
