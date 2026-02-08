@@ -18,11 +18,10 @@
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { addDiscoveredArtists, createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { createPerformanceReportsByLabelQuery } from '$lib/queries/performanceReportQueries';
+	import { fetchArtistsByIds } from '$lib/api/artists';
 	import { queryKeys } from '$lib/queries/queryClient';
 	import { useQueryClient } from '@tanstack/svelte-query';
-	import { fetchArtistsByIds } from '$lib/api/artists';
 	import { claimTask } from '$lib/api/tasks';
-	import { setContracts } from '$lib/stores/contracts';
 	import {
 		formatCurrency,
 		formatTimeRemaining,
@@ -64,11 +63,6 @@
 
 	// Create contracts query based on unique IDs
 	$: contractsQuery = createContractsByIdsQuery(uniqueContractIds);
-
-	// Sync contracts query data to legacy store for backward compatibility
-	$: if ($contractsQuery.data) {
-		setContracts($contractsQuery.data);
-	}
 
 	// Filter for valid signed contracts (status = signed, end date not passed)
 	// Note: Don't use currentTime here to avoid recreating queries every second
@@ -176,8 +170,12 @@
 				if (claimedTask.results && 'discoveredArtistsIds' in claimedTask.results) {
 					const scoutingResults = claimedTask.results as ScoutingTaskResults;
 					if (scoutingResults.discoveredArtistsIds?.length > 0) {
-						const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
-						addDiscoveredArtists(artists, false);
+						// Prefetch artists into TanStack Query cache
+						const result = await queryClient.fetchQuery({
+							queryKey: queryKeys.artists.byIds(scoutingResults.discoveredArtistsIds),
+							queryFn: () => fetchArtistsByIds(scoutingResults.discoveredArtistsIds)
+						});
+						addDiscoveredArtists(result, false);
 					}
 				}
 
@@ -226,15 +224,16 @@
 		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
 			const scoutingResults = scoutingTaskResponse.results as ScoutingTaskResults;
 			if (scoutingResults.discoveredArtistsIds?.length > 0) {
-				try {
-					const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
-					addDiscoveredArtists(artists, false);
-				} catch (err) {
-					console.error('Failed to fetch discovered artists:', err);
-				}
+				// Use query to fetch and cache artists - wait for completion
+				const artists = await queryClient.fetchQuery({
+					queryKey: queryKeys.artists.byIds(scoutingResults.discoveredArtistsIds),
+					queryFn: () => fetchArtistsByIds(scoutingResults.discoveredArtistsIds)
+				});
+				addDiscoveredArtists(artists, false);
 			}
 		}
 
+		// Open modal after artists are loaded
 		modalStore.open('task-modal', {
 			subModal: 'scout-results',
 			scoutingTaskResponse: scoutingTaskResponse,
@@ -274,7 +273,11 @@
 				{:else if contractTasks.length === 0}
 					<p class="text-gray-400">No contracts</p>
 				{:else}
-					<ContractsCard contractsTaskResponse={contractTasks} {currentTime} />
+					<ContractsCard
+						contractsTaskResponse={contractTasks}
+						contracts={$contractsQuery.data ?? []}
+						{currentTime}
+					/>
 				{/if}
 
 				<!-- Artist List -->

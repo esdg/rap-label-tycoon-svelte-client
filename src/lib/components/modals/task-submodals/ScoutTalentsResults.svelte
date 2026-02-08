@@ -9,7 +9,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import ArtistDetails from '$lib/components/ArtistDetails.svelte';
 	import type { TimedTask } from '$lib/types/task';
-	import { discoveredArtists } from '$lib/stores/artists';
+	import { discoveredArtistsList } from '$lib/queries/artistQueries';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 
 	export let taskResult: TimedTask;
@@ -22,7 +22,7 @@
 
 	// Reactive statements
 	$: taskArtists = isScoutingArtistsResults(taskResult.results)
-		? $discoveredArtists
+		? $discoveredArtistsList
 				.filter(
 					(item) =>
 						taskResult.results &&
@@ -113,7 +113,7 @@
 
 	<svelte:fragment>
 		<ContentPanel
-			class="pt-0 p-4 mx-auto h-full"
+			class="mx-auto h-full p-4 pt-0"
 			activeStepIndex={activeArtistIndex}
 			transition="slide"
 			duration={300}
@@ -123,7 +123,7 @@
 					{#if taskArtists.length === 0}
 						<p class="text-center text-gray-400">No artists were discovered during scouting.</p>
 					{:else}
-						<div class="w-full max-w-5xl mx-auto space-y-12 sm:space-y-16">
+						<div class="mx-auto w-full max-w-5xl space-y-12 sm:space-y-16">
 							{#each taskArtists as artist}
 								<ContentPanelItem>
 									<ArtistDetails {artist} />
@@ -137,7 +137,7 @@
 	</svelte:fragment>
 	<svelte:fragment slot="footer">
 		<Button
-			class="w-full sm:w-auto sm:min-w-32 order-last sm:order-first sm:ml-auto"
+			class="order-last w-full sm:order-first sm:ml-auto sm:w-auto sm:min-w-32"
 			color="primary"
 			style="hollow"
 			altText="Cancel scouting task"
@@ -149,7 +149,7 @@
 		{#if taskArtists.length > 1}
 			<div class="flex gap-2 sm:gap-3">
 				<Button
-					class="flex-1 sm:flex-none sm:min-w-32"
+					class="flex-1 sm:min-w-32 sm:flex-none"
 					color="primary"
 					altText="View previous artist"
 					on:clicked={handlePrevious}
@@ -158,7 +158,7 @@
 					Previous
 				</Button>
 				<Button
-					class="flex-1 sm:flex-none sm:min-w-32"
+					class="flex-1 sm:min-w-32 sm:flex-none"
 					color="primary"
 					altText="View next artist"
 					on:clicked={handleNext}

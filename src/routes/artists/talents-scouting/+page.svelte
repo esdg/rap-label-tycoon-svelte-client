@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { fetchArtistsByIds } from '$lib/api';
 	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
 	import {
 		addDiscoveredArtists,
@@ -7,12 +6,17 @@
 		createTasksByType,
 		serverTimeOffset
 	} from '$lib/queries';
+	import { queryKeys } from '$lib/queries/queryClient';
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import { fetchArtistsByIds } from '$lib/api/artists';
 	import { currentLabel } from '$lib/stores/appState';
 	import type { ScoutingTaskResponse, ScoutingTaskResults } from '$lib/types/task';
 	import { formatTimeRemaining, getTaskProgress, getTaskStatus } from '$lib/utils';
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import Button from '$lib/components/Button.svelte';
 	import { modalStore } from '$lib/stores';
+
+	const queryClient = useQueryClient();
 
 	// Reactive label ID
 	$: labelId = $currentLabel?.id ?? null;
@@ -32,15 +36,16 @@
 		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
 			const scoutingResults = scoutingTaskResponse.results as ScoutingTaskResults;
 			if (scoutingResults.discoveredArtistsIds?.length > 0) {
-				try {
-					const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
-					addDiscoveredArtists(artists, false);
-				} catch (err) {
-					console.error('Failed to fetch discovered artists:', err);
-				}
+				// Use query to fetch and cache artists - wait for completion
+				const artists = await queryClient.fetchQuery({
+					queryKey: queryKeys.artists.byIds(scoutingResults.discoveredArtistsIds),
+					queryFn: () => fetchArtistsByIds(scoutingResults.discoveredArtistsIds)
+				});
+				addDiscoveredArtists(artists, false);
 			}
 		}
 
+		// Open modal after artists are loaded
 		modalStore.open('task-modal', {
 			subModal: 'scout-results',
 			scoutingTaskResponse: scoutingTaskResponse,
