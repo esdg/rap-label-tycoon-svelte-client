@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import BeatmakerIcon from '$lib/icons/BeatmakerIcon.svelte';
+	import RapperIcon from '$lib/icons/RapperIcon.svelte';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import type { ProducingBeatsTaskResponse, RecordingReleaseTaskResponse } from '$lib/types/task';
 	import { getRarityClass, getRarityLabel, getTaskProgress, getTaskStatus } from '$lib/utils';
@@ -39,7 +41,7 @@
 </script>
 
 <button
-	class="flex flex-col bg-primary-950 border border-gray-700 rounded-lg overflow-hidden hover:border-secondary-500 transition-colors duration-200 hover:ring-secondary-500 hover:ring-1 cursor-pointer select-none w-full text-left"
+	class="flex w-full cursor-pointer select-none flex-col overflow-hidden rounded-lg border border-gray-700 bg-primary-950 text-left transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
 	on:click={handleClick}
 	type="button"
 >
@@ -53,14 +55,20 @@
 			/>
 			<div class="absolute inset-0 bg-gradient-to-r from-transparent to-primary-950"></div>
 		</div>
-		<div class="py-4 pr-4 flex-1 flex flex-col">
-			<h2 class="font-black text-3xl uppercase leading-none">
-				{artist.stageName}<Chip
-					class={getRarityClass(artist.rarity) + ' inline-block ml-2 relative top-auto bottom-2'}
+		<div class="flex flex-1 flex-col py-4 pr-4">
+			<h2 class="text-3xl font-black uppercase leading-none">
+				{artist.stageName}
+				{#if artist.$type === 'rapper'}
+					<RapperIcon class="relative bottom-2 top-auto inline-block size-4" />
+				{:else if artist.$type === 'beatmaker'}
+					<BeatmakerIcon class="relative bottom-2 top-auto inline-block size-4" />
+				{/if}
+				<Chip
+					class={getRarityClass(artist.rarity) + ' relative bottom-2 top-auto ml-2 inline-block'}
 					>{getRarityLabel(artist.rarity)}</Chip
 				>
 			</h2>
-			<p class="font-thin text-2xl uppercase">{artist.lastName} {artist.firstName}</p>
+			<p class="text-2xl font-thin uppercase">{artist.lastName} {artist.firstName}</p>
 
 			<!-- Beat Production Task Progress -->
 			{#if beatProductionTask}
@@ -70,11 +78,11 @@
 							>Producing {numberOfBeats} beat{numberOfBeats !== 1 ? 's' : ''}</span
 						>
 						{#if beatTaskState === 'in-progress'}
-							<span class="text-amber-400 font-medium">{beatTimeRemaining}</span>
+							<span class="font-medium text-amber-400">{beatTimeRemaining}</span>
 						{:else if beatTaskState === 'succeeded'}
-							<span class="text-success-500 font-medium">Complete</span>
+							<span class="font-medium text-success-500">Complete</span>
 						{:else if beatTaskState === 'failed'}
-							<span class="text-error-500 font-medium">Failed</span>
+							<span class="font-medium text-error-500">Failed</span>
 						{/if}
 					</div>
 					<ProgressBar
@@ -103,11 +111,11 @@
 							>Recording {numberOfTracks} track{numberOfTracks !== 1 ? 's' : ''}</span
 						>
 						{#if recordingTaskState === 'in-progress'}
-							<span class="text-purple-400 font-medium">{recordingTimeRemaining}</span>
+							<span class="font-medium text-purple-400">{recordingTimeRemaining}</span>
 						{:else if recordingTaskState === 'succeeded'}
-							<span class="text-success-500 font-medium">Complete</span>
+							<span class="font-medium text-success-500">Complete</span>
 						{:else if recordingTaskState === 'failed'}
-							<span class="text-error-500 font-medium">Failed</span>
+							<span class="font-medium text-error-500">Failed</span>
 						{/if}
 					</div>
 					<ProgressBar

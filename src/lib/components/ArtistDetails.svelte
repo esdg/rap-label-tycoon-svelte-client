@@ -8,6 +8,8 @@
 		getRarityLabel,
 		type SkillSection
 	} from '$lib/utils';
+	import BeatmakerIcon from '$lib/icons/BeatmakerIcon.svelte';
+	import RapperIcon from '$lib/icons/RapperIcon.svelte';
 
 	export let artist: Artist;
 	let className = '';
@@ -27,77 +29,82 @@
 </script>
 
 <div
-	class="flex flex-col pb-12 border-b border-white/5 last:border-none last:pb-0 pointer-events-none {className}"
+	class="pointer-events-none flex flex-col border-b border-white/5 pb-12 last:border-none last:pb-0 {className}"
 >
 	<div class="mb-4">
 		<Chip class={getRarityClass(artist.rarity)}>{getRarityLabel(artist.rarity)}</Chip>
 	</div>
 
 	<!-- Artist Header -->
-	<h3 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white uppercase leading-tight">
+	<h3 class="text-3xl font-black uppercase leading-tight text-white sm:text-5xl lg:text-6xl">
 		{artist.stageName}
+		{#if artist.$type === 'rapper'}
+			<RapperIcon class="relative bottom-2 top-auto inline-block size-8" />
+		{:else if artist.$type === 'beatmaker'}
+			<BeatmakerIcon class="relative bottom-2 top-auto inline-block size-8" />
+		{/if}
 	</h3>
-	<p class="text-xl sm:text-3xl lg:text-4xl font-thin text-gray-400 uppercase">
+	<p class="text-xl font-thin uppercase text-gray-400 sm:text-3xl lg:text-4xl">
 		{artist.firstName}
 		{artist.lastName}
 	</p>
 
 	<!-- Artist Details -->
-	<div class="pt-6 lg:pt-8 flex gap-6 lg:gap-8 flex-col text-sm">
+	<div class="flex flex-col gap-6 pt-6 text-sm lg:gap-8 lg:pt-8">
 		<!-- Sex -->
-		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+		<div class="flex flex-col gap-2 sm:flex-row sm:gap-4 lg:gap-6">
 			<div
-				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
+				class="select-none text-xs uppercase tracking-[0.3em] text-primary-500 sm:w-32 sm:flex-none sm:text-right lg:w-40 lg:text-sm"
 			>
 				Sex
 			</div>
-			<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
+			<p class="flex-1 text-xs leading-relaxed text-gray-300 lg:text-sm">
 				{artist.sex}
 			</p>
 		</div>
 		<!-- Etnicity -->
-		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+		<div class="flex flex-col gap-2 sm:flex-row sm:gap-4 lg:gap-6">
 			<div
-				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
+				class="select-none text-xs uppercase tracking-[0.3em] text-primary-500 sm:w-32 sm:flex-none sm:text-right lg:w-40 lg:text-sm"
 			>
 				Etnicity
 			</div>
-			<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
+			<p class="flex-1 text-xs leading-relaxed text-gray-300 lg:text-sm">
 				{artist.ethnicity}
 			</p>
 		</div>
 		<!-- Bio -->
-		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+		<div class="flex flex-col gap-2 sm:flex-row sm:gap-4 lg:gap-6">
 			<div
-				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
+				class="select-none text-xs uppercase tracking-[0.3em] text-primary-500 sm:w-32 sm:flex-none sm:text-right lg:w-40 lg:text-sm"
 			>
 				Bio
 			</div>
-			<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
+			<p class="flex-1 text-xs leading-relaxed text-gray-300 lg:text-sm">
 				{artist.bio}
 			</p>
 		</div>
 
 		<!-- Background -->
-		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+		<div class="flex flex-col gap-2 sm:flex-row sm:gap-4 lg:gap-6">
 			<div
-				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
+				class="select-none text-xs uppercase tracking-[0.3em] text-primary-500 sm:w-32 sm:flex-none sm:text-right lg:w-40 lg:text-sm"
 			>
 				Background
 			</div>
-			<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
+			<p class="flex-1 text-xs leading-relaxed text-gray-300 lg:text-sm">
 				{artist.backgroundStory}
 			</p>
 		</div>
 
 		<!-- Appearance -->
-		<div class="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:gap-6">
+		<div class="flex flex-col gap-2 sm:flex-row sm:gap-4 lg:gap-6">
 			<div
-				class="text-primary-500 sm:flex-none sm:w-32 lg:w-40 sm:text-right uppercase tracking-[0.3em] text-xs lg:text-sm select-none"
+				class="select-none text-xs uppercase tracking-[0.3em] text-primary-500 sm:w-32 sm:flex-none sm:text-right lg:w-40 lg:text-sm"
 			>
 				Appearance
 			</div>
-			<p class="text-xs lg:text-sm text-gray-300 flex-1 leading-relaxed">
+			<p class="flex-1 text-xs leading-relaxed text-gray-300 lg:text-sm">
 				{artist.physicalDescription}
 			</p>
 		</div>
@@ -106,15 +113,15 @@
 	<!-- Skills Section -->
 	{#if sections.length}
 		<div
-			class="mt-8 sm:mt-10 lg:mt-12 rounded-xl sm:rounded-2xl border border-white/5 bg-[#080B12] p-4 sm:p-8 lg:p-10 shadow-lg shadow-black/30"
+			class="mt-8 rounded-xl border border-white/5 bg-[#080B12] p-4 shadow-lg shadow-black/30 sm:mt-10 sm:rounded-2xl sm:p-8 lg:mt-12 lg:p-10"
 		>
 			<!-- Legend -->
 			<div
-				class="flex flex-wrap gap-3 sm:gap-4 lg:gap-5 text-[10px] sm:text-[11px] lg:text-xs font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-gray-400"
+				class="flex flex-wrap gap-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-gray-400 sm:gap-4 sm:text-[11px] sm:tracking-[0.35em] lg:gap-5 lg:text-xs"
 			>
 				{#each getLegendItems(sections) as legend}
 					<div class="flex items-center gap-1.5 sm:gap-2">
-						<span class={`inline-block h-1.5 sm:h-2 w-4 sm:w-6 rounded-full ${legend.colorClass}`}
+						<span class={`inline-block h-1.5 w-4 rounded-full sm:h-2 sm:w-6 ${legend.colorClass}`}
 						></span>
 						<span class="hidden sm:inline">{legend.label}</span>
 					</div>
@@ -122,17 +129,17 @@
 			</div>
 
 			<!-- Skills Grid -->
-			<div class="mt-4 sm:mt-6 lg:mt-8 grid gap-6 sm:gap-8 lg:gap-10 lg:grid-cols-2">
+			<div class="mt-4 grid gap-6 sm:mt-6 sm:gap-8 lg:mt-8 lg:grid-cols-2 lg:gap-10">
 				{#each sections as section}
 					<div>
-						<p class="text-xs lg:text-sm uppercase tracking-[0.35em] text-gray-500">
+						<p class="text-xs uppercase tracking-[0.35em] text-gray-500 lg:text-sm">
 							{section.title}
 						</p>
-						<div class="mt-2 sm:mt-3 lg:mt-4 space-y-2 sm:space-y-3 lg:space-y-4">
+						<div class="mt-2 space-y-2 sm:mt-3 sm:space-y-3 lg:mt-4 lg:space-y-4">
 							{#each section.skills as skill}
 								<div class="flex items-center gap-2 sm:gap-4 lg:gap-5">
 									<span
-										class="w-24 sm:w-32 lg:w-40 text-[10px] sm:text-[11px] lg:text-xs uppercase tracking-[0.1em] sm:tracking-[0.2em] text-gray-400 truncate"
+										class="w-24 truncate text-[10px] uppercase tracking-[0.1em] text-gray-400 sm:w-32 sm:text-[11px] sm:tracking-[0.2em] lg:w-40 lg:text-xs"
 									>
 										{skill.label}
 									</span>
@@ -147,7 +154,7 @@
 										/>
 									</div>
 									<span
-										class="w-10 lg:w-12 text-right text-[11px] lg:text-xs font-semibold text-gray-300"
+										class="w-10 text-right text-[11px] font-semibold text-gray-300 lg:w-12 lg:text-xs"
 									>
 										{skill.value}
 									</span>
