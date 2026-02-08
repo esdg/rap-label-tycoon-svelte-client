@@ -55,7 +55,7 @@
 	$: usesDuration = contractType === 0;
 	$: readyForCostPrediction =
 		Boolean($currentLabel && $currentPlayer && artist?.id) &&
-		activeStepIndex >= 1 &&
+		activeStepIndex === 2 &&
 		((usesDuration && contractLengthYears !== null && contractLengthYears > 0) ||
 			(!usesDuration && totalReleases > 0));
 
@@ -63,7 +63,18 @@
 		costPrediction = null;
 	}
 
-	$: if (readyForCostPrediction) {
+	// Trigger cost prediction when on review step (step 2)
+	$: if (
+		readyForCostPrediction &&
+		(signingBonus !== undefined ||
+			advance !== undefined ||
+			royaltyPercentage !== undefined ||
+			contractAlbums !== undefined ||
+			contractEps !== undefined ||
+			contractMixtapes !== undefined ||
+			contractSingles !== undefined ||
+			contractLengthYears !== undefined)
+	) {
 		fetchCostPrediction();
 	}
 
