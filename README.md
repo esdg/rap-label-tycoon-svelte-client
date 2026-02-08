@@ -182,6 +182,36 @@ npm run preview
 npm run format
 ```
 
+## Versioning
+
+The app displays the current version from `package.json` along with the git commit hash. Version is automatically injected at build time.
+
+**To increment the version:**
+
+```bash
+# Patch release (0.0.1 → 0.0.2) - Bug fixes
+npm version patch
+
+# Minor release (0.0.2 → 0.1.0) - New features
+npm version minor
+
+# Major release (0.1.0 → 1.0.0) - Breaking changes
+npm version major
+```
+
+This command will:
+1. Update the version in `package.json`
+2. Create a git commit with the version change
+3. Create a git tag (e.g., `v0.0.2`)
+
+After running `npm version`, push the changes and tag:
+
+```bash
+git push && git push --tags
+```
+
+The version will be displayed in the bottom-right corner of the app after the next build.
+
 ## Key Features
 
 - **Real-time task tracking** with server time synchronization
