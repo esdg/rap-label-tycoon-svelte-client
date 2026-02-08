@@ -257,13 +257,13 @@
 </script>
 
 <div
-	class="grid grid-cols-[1fr_1fr_max-content] min-h-screen text-white p-4 sm:p-8 overflow-x-hidden"
+	class="grid min-h-screen grid-cols-[1fr_1fr_max-content] overflow-x-hidden p-4 text-white sm:p-8"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
 	<!-- 1 col -->
 	<div class="space-y-6 sm:space-y-8">
 		<div>
-			<h1 class="text-2xl font-thin mb-1">Label Roster</h1>
+			<h1 class="mb-1 text-2xl font-thin">Label Roster</h1>
 
 			<div class="flex flex-col gap-2">
 				<!-- Contract List -->
@@ -279,9 +279,9 @@
 
 				<!-- Artist List -->
 				{#if $artistsQuery.isLoading}
-					<p class="text-gray-400 mt-4">Loading artists...</p>
+					<p class="mt-4 text-gray-400">Loading artists...</p>
 				{:else if $artistsQuery.isError}
-					<p class="text-red-400 mt-4">Error loading artists: {$artistsQuery.error?.message}</p>
+					<p class="mt-4 text-red-400">Error loading artists: {$artistsQuery.error?.message}</p>
 				{:else if $artistsQuery.data && $artistsQuery.data.length > 0}
 					{#each $artistsQuery.data as artist (artist.id)}
 						{@const artistBeatTask =
@@ -316,25 +316,25 @@
 	<div></div>
 	<!-- 3 col -->
 	<div class="flex flex-col items-center gap-8">
-		<div id="label-stats" class="grow flex flex-col gap-4">
-			<div class="text-center font-black text-3xl uppercase max-w-52">{$currentLabel?.name}</div>
+		<div id="label-stats" class="flex grow flex-col gap-4">
+			<div class="max-w-52 text-center text-3xl font-black uppercase">{$currentLabel?.name}</div>
 			{#if $currentLabel?.rating}
 				<div id="label-rating" class="flex flex-col-reverse items-center">
-					<span class="uppercase text-xs text-secondary-700">Rating</span>
+					<span class="text-xs uppercase text-secondary-700">Rating</span>
 					<span class="text-2xl text-category-1-500">{$currentLabel?.rating}</span>
 				</div>
 			{/if}
 			{#if $currentLabel?.bankroll}
 				<div id="label-bank" class="flex flex-col-reverse items-center">
-					<span class="uppercase text-xs text-secondary-700">Bank</span>
+					<span class="text-xs uppercase text-secondary-700">Bank</span>
 					<span class="text-2xl font-black">{formatCurrency($currentLabel?.bankroll)}</span>
 				</div>
 			{/if}
 			<div id="monthly-revenue" class="flex flex-col-reverse items-center">
-				<span class="uppercase text-xs text-secondary-700">Monthly<br />Revenue</span>
+				<span class="text-xs uppercase text-secondary-700">Monthly<br />Revenue</span>
 				<div class="flex items-center text-category-2-500">
 					<span class="text-2xl font-black">{formatCurrency(monthlyRevenue)}</span>
-					<span class="text-xs mt-2">{trendIndicator}</span>
+					<span class="mt-2 text-xs">{trendIndicator}</span>
 				</div>
 			</div>
 		</div>
