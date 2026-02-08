@@ -18,18 +18,21 @@
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { addDiscoveredArtists, createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { createPerformanceReportsByLabelQuery } from '$lib/queries/performanceReportQueries';
-	import { fetchArtistsByIds } from '$lib/api/artists';
 	import { queryKeys } from '$lib/queries/queryClient';
 	import { useQueryClient } from '@tanstack/svelte-query';
+	import { fetchArtistsByIds } from '$lib/api/artists';
 	import { claimTask } from '$lib/api/tasks';
 	import {
 		formatCurrency,
 		formatTimeRemaining,
 		getTaskProgress,
 		getTaskStatus,
-		isTaskFinished
+		isTaskFinished,
+		handleError,
+		getUserFriendlyError
 	} from '$lib/utils';
 	import { getDateRange } from '$lib/utils/performanceUtils';
+	import { errorNotifications } from '$lib/stores/errorNotifications';
 	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
@@ -170,18 +173,15 @@
 				if (claimedTask.results && 'discoveredArtistsIds' in claimedTask.results) {
 					const scoutingResults = claimedTask.results as ScoutingTaskResults;
 					if (scoutingResults.discoveredArtistsIds?.length > 0) {
-						// Prefetch artists into TanStack Query cache
-						const result = await queryClient.fetchQuery({
-							queryKey: queryKeys.artists.byIds(scoutingResults.discoveredArtistsIds),
-							queryFn: () => fetchArtistsByIds(scoutingResults.discoveredArtistsIds)
-						});
-						addDiscoveredArtists(result, false);
+						const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
+						addDiscoveredArtists(artists, false);
 					}
 				}
 
 				return { success: true, taskId: task.id };
 			} catch (err) {
-				console.error(`Failed to claim task ${task.id}:`, err);
+				handleError('ClaimTask', err);
+				errorNotifications.add('Task Claim Failed', getUserFriendlyError(err).message);
 				claimingTaskIds.delete(task.id); // Allow retry
 				return { success: false, taskId: task.id, error: err };
 			}
@@ -224,16 +224,16 @@
 		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
 			const scoutingResults = scoutingTaskResponse.results as ScoutingTaskResults;
 			if (scoutingResults.discoveredArtistsIds?.length > 0) {
-				// Use query to fetch and cache artists - wait for completion
-				const artists = await queryClient.fetchQuery({
-					queryKey: queryKeys.artists.byIds(scoutingResults.discoveredArtistsIds),
-					queryFn: () => fetchArtistsByIds(scoutingResults.discoveredArtistsIds)
-				});
-				addDiscoveredArtists(artists, false);
+				try {
+					const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
+					addDiscoveredArtists(artists, false);
+				} catch (err) {
+					handleError('FetchScoutedArtists', err);
+					errorNotifications.add('Fetch Failed', 'Could not load discovered artists.');
+				}
 			}
 		}
 
-		// Open modal after artists are loaded
 		modalStore.open('task-modal', {
 			subModal: 'scout-results',
 			scoutingTaskResponse: scoutingTaskResponse,

@@ -1,22 +1,41 @@
-// Artists query hooks
+/**
+ * Artist Query Hooks
+ *
+ * Provides TanStack Query hooks for fetching artist data and managing discovered artists.
+ * Discovered artists are stored locally with bookmark status that persists across sessions.
+ */
+
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { writable, derived, get } from 'svelte/store';
 import { queryKeys } from './queryClient';
 import { fetchArtistsByIds, fetchArtistById, type AnyArtist } from '$lib/api/artists';
 import { nowISO } from '$lib/utils/timeUtils';
 
-// Extended type to track discovery and bookmark status
+/**
+ * Extended artist type that tracks discovery timestamp and bookmark status
+ */
 export interface DiscoveredArtist {
 	artist: AnyArtist;
 	isBookmarked: boolean;
 	discoveredAt: string;
 }
 
-// Local store for discovered artists (client-side state that persists across queries)
-// This holds the UI state like bookmarks which isn't stored on backend
+/**
+ * Local store for discovered artists (client-side state that persists across queries)
+ * This holds UI state like bookmarks which isn't stored on the backend
+ */
 export const discoveredArtistsStore = writable<Map<string, DiscoveredArtist>>(new Map());
 
-// Query: Fetch a single artist by ID
+/**
+ * Create a query hook to fetch a single artist by ID
+ *
+ * @param id - The artist ID to fetch
+ * @returns TanStack Query object with artist data
+ *
+ * @example
+ * $: artistQuery = createArtistByIdQuery(artistId);
+ * $: artist = $artistQuery.data;
+ */
 export function createArtistByIdQuery(id: string) {
 	return createQuery<AnyArtist, Error>({
 		queryKey: queryKeys.artists.byId(id),
@@ -27,7 +46,16 @@ export function createArtistByIdQuery(id: string) {
 	});
 }
 
-// Query: Fetch artists by IDs
+/**
+ * Create a query hook to fetch multiple artists by their IDs
+ *
+ * @param ids - Array of artist IDs to fetch
+ * @returns TanStack Query object with array of artists
+ *
+ * @example
+ * $: artistsQuery = createArtistsByIdsQuery(artistIds);
+ * $: artists = $artistsQuery.data ?? [];
+ */
 export function createArtistsByIdsQuery(ids: string[]) {
 	return createQuery<AnyArtist[], Error>({
 		queryKey: ids.length > 0 ? queryKeys.artists.byIds(ids) : ['artists', 'none'],
@@ -38,7 +66,22 @@ export function createArtistsByIdsQuery(ids: string[]) {
 	});
 }
 
-// Add discovered artists to the local store
+/**
+ * Add newly discovered artists to the local store
+ *
+ * This function stores artists that have been discovered through scouting tasks,
+ * along with their bookmark status and discovery timestamp.
+ *
+ * @param artists - Array of artists to add to discovered artists
+ * @param isBookmarked - Whether to mark these artists as bookmarked (default: false)
+ *
+ * @example
+ * // Add scouted artists without bookmarking
+ * addDiscoveredArtists(scoutedArtists, false);
+ *
+ * // Add and immediately bookmark
+ * addDiscoveredArtists([artist], true);
+ */
 export function addDiscoveredArtists(artists: AnyArtist[], isBookmarked: boolean = false) {
 	const discoveredAt = nowISO();
 
@@ -53,7 +96,14 @@ export function addDiscoveredArtists(artists: AnyArtist[], isBookmarked: boolean
 	});
 }
 
-// Toggle bookmark status
+/**
+ * Toggle the bookmark status of a discovered artist
+ *
+ * @param artistId - The ID of the artist to toggle bookmark status
+ *
+ * @example
+ * toggleArtistBookmark(artist.id);
+ */
 export function toggleArtistBookmark(artistId: string) {
 	discoveredArtistsStore.update((map) => {
 		const newMap = new Map(map);

@@ -200,7 +200,7 @@
 	</svelte:fragment>
 	<svelte:fragment>
 		<ContentPanel
-			class="pt-0 px-16 mx-auto h-full"
+			class="mx-auto h-full px-16 pt-0"
 			{activeStepIndex}
 			transition="slide"
 			duration={300}
@@ -216,7 +216,7 @@
 				</ContentPanelItem>
 				<ContentPanelItem>
 					<!-- Step 2: Contract Terms -->
-					<div class="space-y-8 max-w-5xl mx-auto w-full">
+					<div class="mx-auto w-full max-w-5xl space-y-8">
 						<SelectGroupField class="h-xl w-full" bind:selected={contractType}>
 							<div slot="left">
 								<!-- left content -->
@@ -230,7 +230,7 @@
 								</div>
 								<div class="flex flex-col items-center gap-3">
 									<label
-										class="block w-18 text-center uppercase font-thin select-none"
+										class="w-18 block select-none text-center font-thin uppercase"
 										for="contract-length">Contract Length</label
 									>
 									<NumericField
@@ -254,11 +254,11 @@
 									>
 								</div>
 								<div
-									class="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-4 sm:gap-6 justify-items-center w-full"
+									class="grid w-full grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] justify-items-center gap-4 sm:gap-6"
 								>
 									<div class="flex flex-col items-center gap-2">
 										<label
-											class="block w-18 text-center uppercase font-thin select-none"
+											class="w-18 block select-none text-center font-thin uppercase"
 											for="contract-albums">Albums</label
 										>
 										<NumericField
@@ -271,7 +271,7 @@
 									</div>
 									<div class="flex flex-col items-center gap-2">
 										<label
-											class="block w-18 text-center uppercase font-thin select-none"
+											class="w-18 block select-none text-center font-thin uppercase"
 											for="contract-ep">EP</label
 										>
 										<NumericField
@@ -284,7 +284,7 @@
 									</div>
 									<div class="flex flex-col items-center gap-2">
 										<label
-											class="block w-18 text-center uppercase font-thin select-none"
+											class="w-18 block select-none text-center font-thin uppercase"
 											for="contract-mixtapes">Mixtapes</label
 										>
 										<NumericField
@@ -297,7 +297,7 @@
 									</div>
 									<div class="flex flex-col items-center gap-2">
 										<label
-											class="block w-18 text-center uppercase font-thin select-none"
+											class="w-18 block select-none text-center font-thin uppercase"
 											for="contract-singles">Singles</label
 										>
 										<NumericField
@@ -312,11 +312,11 @@
 							</div>
 						</SelectGroupField>
 						<div
-							class="grid w-full gap-4 grid-cols-1 sm:grid-cols-2 text-white max-w-2xl mx-auto items-stretch"
+							class="mx-auto grid w-full max-w-2xl grid-cols-1 items-stretch gap-4 text-white sm:grid-cols-2"
 						>
-							<div class="grow flex flex-wrap gap-2 justify-center items-center">
+							<div class="flex grow flex-wrap items-center justify-center gap-2">
 								<label
-									class="block w-20 text-center uppercase font-thin select-none"
+									class="block w-20 select-none text-center font-thin uppercase"
 									for="contract-bonus">Bonus</label
 								>
 								<NumericField
@@ -329,9 +329,9 @@
 									max={10000}
 								/>
 							</div>
-							<div class="flex flex-wrap gap-2 justify-center items-center">
+							<div class="flex flex-wrap items-center justify-center gap-2">
 								<label
-									class="block w-20 text-center uppercase font-thin select-none"
+									class="block w-20 select-none text-center font-thin uppercase"
 									for="contract-advance">Advance</label
 								>
 								<NumericField
@@ -344,9 +344,9 @@
 									max={10000}
 								/>
 							</div>
-							<div class="flex flex-wrap gap-2 justify-center items-center">
+							<div class="flex flex-wrap items-center justify-center gap-2">
 								<label
-									class="block w-20 text-center uppercase font-thin select-none"
+									class="block w-20 select-none text-center font-thin uppercase"
 									for="contract-royalties">Royalties</label
 								>
 								<NumericField
@@ -373,9 +373,9 @@
 	</svelte:fragment>
 	<svelte:fragment slot="footer">
 		<!-- Prospector -->
-		<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
+		<div class="flex items-center gap-3 sm:mr-auto lg:gap-4">
 			<label
-				class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
+				class="whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-gray-600 lg:text-sm xl:text-base"
 				for="prospector-btn"
 			>
 				Prospector
@@ -386,11 +386,10 @@
 				bind:value={selectedProspectorId}
 				placeholder="Choose..."
 				direction="up"
-				on:change={(e) => console.log('Selected:', e.detail)}
 			/>
 		</div>
 		<ContentPanel {activeStepIndex} class="w-full sm:w-auto">
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"
@@ -409,7 +408,7 @@
 					Next
 				</Button>
 			</ContentPanelItem>
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"
@@ -437,7 +436,7 @@
 				</Button>
 			</ContentPanelItem>
 
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"

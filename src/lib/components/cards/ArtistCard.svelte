@@ -56,8 +56,8 @@
 			<div class="absolute inset-0 bg-gradient-to-r from-transparent to-primary-950"></div>
 		</div>
 		<div class="flex flex-1 flex-col py-4 pr-4">
-			<h2 class="text-3xl font-black uppercase leading-none">
-				{artist.stageName}
+			<h2 class="text-3xl uppercase leading-none">
+				<span class="font-black">{artist.stageName}</span>
 				{#if artist.$type === 'rapper'}
 					<RapperIcon class="relative bottom-2 top-auto inline-block size-4" />
 				{:else if artist.$type === 'beatmaker'}

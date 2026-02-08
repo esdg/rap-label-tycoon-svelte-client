@@ -14,6 +14,7 @@
 	import { TaskType, TaskStatus } from '$lib/types/task';
 	import type { TimedTask } from '$lib/types/task';
 	import { formatTimeRemaining } from '$lib/utils/timeUtils';
+	import { isPublishingReleaseTask } from '$lib/utils/typeGuards';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
@@ -75,20 +76,20 @@
 	$: activePublishingTasks = new Set(
 		tasks
 			.filter(
-				(task) =>
-					task.taskType === TaskType.PublishingRelease && 'releaseId' in task && !task.claimedAt
+				(task): task is import('$lib/types/task').PublishingReleaseTaskResponse =>
+					isPublishingReleaseTask(task) && !task.claimedAt
 			)
-			.map((task) => (task as any).releaseId)
+			.map((task) => task.releaseId)
 	);
 
 	// Create a map of releaseId -> task for getting task details (like endTime)
 	$: publishingTaskMap = new Map<string, TimedTask>(
 		tasks
 			.filter(
-				(task) =>
-					task.taskType === TaskType.PublishingRelease && 'releaseId' in task && !task.claimedAt
+				(task): task is import('$lib/types/task').PublishingReleaseTaskResponse =>
+					isPublishingReleaseTask(task) && !task.claimedAt
 			)
-			.map((task) => [(task as any).releaseId, task])
+			.map((task) => [task.releaseId, task])
 	);
 
 	// Auto-claim finished publishing tasks
@@ -181,13 +182,8 @@
 
 	// Check if a release has an active publishing task
 	function hasActivePublishingTask(releaseId: string): boolean {
-		console.log('Checking publishing task for release:', releaseId, 'Tasks count:', tasks.length);
 		return tasks.some(
-			(task) =>
-				task.taskType === TaskType.PublishingRelease &&
-				'releaseId' in task &&
-				(task as any).releaseId === releaseId &&
-				!task.claimedAt
+			(task) => isPublishingReleaseTask(task) && task.releaseId === releaseId && !task.claimedAt
 		);
 	}
 
@@ -220,7 +216,7 @@
 </script>
 
 <div class="music-and-release-page p-4 md:p-6 lg:p-8">
-	<h1 class="text-3xl font-bold mb-6 text-primary-100">Music & Release</h1>
+	<h1 class="mb-6 text-3xl font-bold text-primary-100">Music & Release</h1>
 
 	<!-- Tabs -->
 	<div class="mb-6">
@@ -237,29 +233,29 @@
 	<ContentPanel activeStepIndex={activeTabIndex} transition="fade" duration={200}>
 		<!-- Releases Tab -->
 		<ContentPanelItem>
-			<div class="bg-primary-950 border border-primary-200 rounded-lg p-6">
-				<h2 class="text-xl font-semibold text-primary-100 mb-4">Releases</h2>
+			<div class="rounded-lg border border-primary-200 bg-primary-950 p-6">
+				<h2 class="mb-4 text-xl font-semibold text-primary-100">Releases</h2>
 
 				{#if isLoadingReleases}
-					<p class="text-primary-300 text-center py-8">Loading releases...</p>
+					<p class="py-8 text-center text-primary-300">Loading releases...</p>
 				{:else if releasesError}
-					<p class="text-red-400 text-center py-8">
+					<p class="py-8 text-center text-red-400">
 						Error loading releases: {releasesError.message}
 					</p>
 				{:else if releases.length === 0}
-					<p class="text-primary-300 text-center py-8">No releases yet. Record some music!</p>
+					<p class="py-8 text-center text-primary-300">No releases yet. Record some music!</p>
 				{:else}
-					<div class="space-y-2">
+					<div>
 						<!-- Error Message -->
 						{#if publishError}
-							<div class="bg-red-900 border border-red-600 text-red-200 px-4 py-3 rounded mb-4">
+							<div class="mb-4 rounded border border-red-600 bg-red-900 px-4 py-3 text-red-200">
 								{publishError}
 							</div>
 						{/if}
 
 						<!-- Header -->
 						<div
-							class="grid grid-cols-[2fr_120px_120px_120px_80px_120px] gap-4 px-4 py-3 text-xs uppercase bg-primary-900 text-primary-300 border-b border-primary-300 rounded-t"
+							class="grid grid-cols-[2fr_120px_120px_120px_80px_120px] gap-4 rounded-t border-b border-primary-300 bg-primary-900 px-4 py-3 text-xs uppercase text-primary-300"
 						>
 							<div>Title</div>
 							<div class="text-center">Type</div>
@@ -272,9 +268,9 @@
 						<!-- Releases List -->
 						{#each releases as release (release.id)}
 							<div
-								class="grid grid-cols-[2fr_120px_120px_120px_80px_120px] gap-4 px-4 py-3 items-center border-b border-primary-800 hover:bg-primary-900 transition-colors text-sm"
+								class="grid grid-cols-[2fr_120px_120px_120px_80px_120px] items-center gap-4 border-b border-primary-800 px-4 py-3 text-sm transition-colors hover:bg-primary-900"
 							>
-								<div class="font-medium text-primary-100 truncate">{release.title}</div>
+								<div class="truncate font-medium text-primary-100">{release.title}</div>
 								<div class="text-center text-primary-200">
 									{getReleaseTypeName(release.releaseTypeId)}
 								</div>
@@ -290,7 +286,7 @@
 								<div class="flex justify-center">
 									{#if activePublishingTasks.has(release.id)}
 										{@const task = publishingTaskMap.get(release.id)}
-										<span class="px-2 py-1 text-xs bg-yellow-600 text-white rounded">
+										<span class="rounded bg-yellow-600 px-2 py-1 text-xs text-white">
 											Publishing... {task
 												? formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)
 												: ''}
@@ -306,7 +302,7 @@
 											Publish
 										</Button>
 									{:else}
-										<span class="px-2 py-1 text-xs bg-green-600 text-white rounded">
+										<span class="rounded bg-green-600 px-2 py-1 text-xs text-white">
 											Published
 										</span>
 									{/if}
@@ -320,20 +316,20 @@
 
 		<!-- Tracks Tab -->
 		<ContentPanelItem>
-			<div class="bg-primary-950 border border-primary-200 rounded-lg p-6">
-				<h2 class="text-xl font-semibold text-primary-100 mb-4">Tracks</h2>
+			<div class="rounded-lg border border-primary-200 bg-primary-950 p-6">
+				<h2 class="mb-4 text-xl font-semibold text-primary-100">Tracks</h2>
 
 				{#if isLoadingTracks}
-					<p class="text-primary-300 text-center py-8">Loading tracks...</p>
+					<p class="py-8 text-center text-primary-300">Loading tracks...</p>
 				{:else if tracksError}
-					<p class="text-red-400 text-center py-8">Error loading tracks: {tracksError.message}</p>
+					<p class="py-8 text-center text-red-400">Error loading tracks: {tracksError.message}</p>
 				{:else if tracks.length === 0}
-					<p class="text-primary-300 text-center py-8">No tracks yet. Record some music!</p>
+					<p class="py-8 text-center text-primary-300">No tracks yet. Record some music!</p>
 				{:else}
-					<div class="space-y-2">
+					<div>
 						<!-- Header -->
 						<div
-							class="grid grid-cols-[2fr_1fr_100px_100px_80px_80px_100px] gap-4 px-4 py-3 text-xs uppercase bg-primary-900 text-primary-300 border-b border-primary-300 rounded-t"
+							class="grid grid-cols-[2fr_1fr_100px_100px_80px_80px_100px] gap-4 rounded-t border-b border-primary-300 bg-primary-900 px-4 py-3 text-xs uppercase text-primary-300"
 						>
 							<div>Title</div>
 							<div>Artist(s)</div>
@@ -347,10 +343,10 @@
 						<!-- Tracks List -->
 						{#each tracks as track (track.id)}
 							<div
-								class="grid grid-cols-[2fr_1fr_100px_100px_80px_80px_100px] gap-4 px-4 py-3 items-center border-b border-primary-800 hover:bg-primary-900 transition-colors text-sm"
+								class="grid grid-cols-[2fr_1fr_100px_100px_80px_80px_100px] items-center gap-4 border-b border-primary-800 px-4 py-3 text-sm transition-colors hover:bg-primary-900"
 							>
-								<div class="font-medium text-primary-100 truncate">{track.title}</div>
-								<div class="text-primary-200 truncate">
+								<div class="truncate font-medium text-primary-100">{track.title}</div>
+								<div class="truncate text-primary-200">
 									{getArtistNames(track.artistId)}
 								</div>
 								<div class="text-center text-primary-200">
@@ -377,20 +373,20 @@
 
 		<!-- Beats Tab -->
 		<ContentPanelItem>
-			<div class="bg-primary-950 border border-primary-200 rounded-lg p-6">
-				<h2 class="text-xl font-semibold text-primary-100 mb-4">Beats</h2>
+			<div class="rounded-lg border border-primary-200 bg-primary-950 p-6">
+				<h2 class="mb-4 text-xl font-semibold text-primary-100">Beats</h2>
 
 				{#if isLoadingBeats}
-					<p class="text-primary-300 text-center py-8">Loading beats...</p>
+					<p class="py-8 text-center text-primary-300">Loading beats...</p>
 				{:else if beatsError}
-					<p class="text-red-400 text-center py-8">Error loading beats: {beatsError.message}</p>
+					<p class="py-8 text-center text-red-400">Error loading beats: {beatsError.message}</p>
 				{:else if beats.length === 0}
-					<p class="text-primary-300 text-center py-8">No beats owned by this label yet.</p>
+					<p class="py-8 text-center text-primary-300">No beats owned by this label yet.</p>
 				{:else}
-					<div class="space-y-2">
+					<div>
 						<!-- Header -->
 						<div
-							class="grid grid-cols-[2fr_1fr_80px_80px_80px_120px_100px] gap-4 px-4 py-3 text-xs uppercase bg-primary-900 text-primary-300 border-b border-primary-300 rounded-t"
+							class="grid grid-cols-[2fr_1fr_80px_80px_80px_120px_100px] gap-4 rounded-t border-b border-primary-300 bg-primary-900 px-4 py-3 text-xs uppercase text-primary-300"
 						>
 							<div>Title</div>
 							<div>Genre</div>
@@ -404,29 +400,29 @@
 						<!-- Beats List -->
 						{#each beats as beat (beat.id)}
 							<div
-								class="grid grid-cols-[2fr_1fr_80px_80px_80px_120px_100px] gap-4 px-4 py-3 items-center border-b border-primary-800 hover:bg-primary-900 transition-colors text-sm"
+								class="grid grid-cols-[2fr_1fr_80px_80px_80px_120px_100px] items-center gap-4 border-b border-primary-800 px-4 py-3 text-sm transition-colors hover:bg-primary-900"
 							>
-								<div class="font-medium text-primary-100 truncate">{beat.title}</div>
-								<div class="text-primary-200 truncate">{beat.genre}</div>
+								<div class="truncate font-medium text-primary-100">{beat.title}</div>
+								<div class="truncate text-primary-200">{beat.genre}</div>
 								<div class="text-center text-primary-200">{beat.bpm}</div>
 								<div class="text-center text-primary-200">{beat.rating.toFixed(1)}/10</div>
 								<div class="text-center text-primary-200">{beat.rarity}</div>
 								<div class="flex justify-center">
 									{#if beat.isExclusive}
-										<span class="px-2 py-1 text-xs bg-secondary-500 text-primary-950 rounded">
+										<span class="rounded bg-secondary-500 px-2 py-1 text-xs text-primary-950">
 											Exclusive
 										</span>
 									{:else}
-										<span class="px-2 py-1 text-xs bg-primary-700 text-primary-200 rounded">
+										<span class="rounded bg-primary-700 px-2 py-1 text-xs text-primary-200">
 											Non-Exclusive
 										</span>
 									{/if}
 								</div>
 								<div class="flex justify-center">
 									{#if beat.isSold}
-										<span class="px-2 py-1 text-xs bg-red-600 text-white rounded">Sold</span>
+										<span class="rounded bg-red-600 px-2 py-1 text-xs text-white">Sold</span>
 									{:else}
-										<span class="px-2 py-1 text-xs bg-green-600 text-white rounded">
+										<span class="rounded bg-green-600 px-2 py-1 text-xs text-white">
 											Available
 										</span>
 									{/if}

@@ -91,7 +91,7 @@
 			title: 'Signing Contract',
 			imageUrl:
 				artist.profileImage ??
-				'https://res.cloudinary.com/dig430oem/image/upload/v1769554993/artists/profile_images/fpuc64oh9s5w8uoc9u5s.jpg'
+				'https://res.cloudinary.com/dig430oem/image/upload/v1770582358/signing-contract-cover_zk5vee.png'
 		});
 	}
 </script>

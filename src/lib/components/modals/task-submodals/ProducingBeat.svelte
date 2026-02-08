@@ -297,7 +297,6 @@
 				bind:value={selectedBeatmakerId}
 				placeholder="Choose..."
 				direction="up"
-				on:change={(e) => console.log('Selected:', e.detail)}
 			/>
 		</div>
 

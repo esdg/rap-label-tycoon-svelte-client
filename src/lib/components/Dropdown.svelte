@@ -79,12 +79,12 @@
 		type="button"
 		on:click={toggleDropdown}
 		{disabled}
-		class="h-8 lg:h-10 xl:h-12 px-4 lg:px-5 xl:px-6 min-w-32 lg:min-w-40 xl:min-w-48 border rounded-lg text-left flex items-center justify-between
-			transition-all duration-200 text-sm lg:text-base xl:text-lg font-medium font-thin select-none
+		class="flex h-8 min-w-32 select-none items-center justify-between rounded-lg border px-4 text-left text-sm font-medium font-thin transition-all duration-200
+			lg:h-10 lg:min-w-40 lg:px-5 lg:text-base xl:h-12 xl:min-w-48 xl:px-6 xl:text-lg
 			{disabled
-			? 'bg-gray-900 border-gray-700 text-gray-300 cursor-not-allowed'
+			? 'cursor-not-allowed border-gray-700 bg-gray-900 text-gray-300'
 			: isOpen
-				? 'border-secondary-600 ring-2 ring-secondary-600 shadow-sm'
+				? 'border-secondary-600 shadow-sm ring-2 ring-secondary-600'
 				: 'border-gray-700 hover:border-secondary-600 hover:shadow-sm'}"
 		aria-haspopup="listbox"
 		aria-expanded={isOpen}
@@ -96,7 +96,7 @@
 			{displayText}
 		</span>
 		<svg
-			class="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 transition-transform duration-200 {isOpen &&
+			class="h-5 w-5 transition-transform duration-200 lg:h-6 lg:w-6 xl:h-7 xl:w-7 {isOpen &&
 			direction === 'down'
 				? 'rotate-180'
 				: isOpen && direction === 'up'
@@ -115,19 +115,19 @@
 	<!-- Dropdown Menu -->
 	{#if isOpen}
 		<div
-			class="absolute z-50 w-full bg-primary-950 border border-gray-200 rounded-lg shadow-lg
-				{direction === 'up' ? 'bottom-full mb-1 animate-in-up' : 'mt-1 animate-in-down'}"
+			class="absolute z-50 w-full rounded-lg border border-gray-200 bg-primary-950 shadow-lg
+				{direction === 'up' ? 'animate-in-up bottom-full mb-1' : 'animate-in-down mt-1'}"
 		>
 			<!-- Search Input -->
 			{#if searchable}
-				<div class="p-2 border-b border-gray-200">
+				<div class="border-b border-gray-200 p-2">
 					<input
 						bind:this={searchInput}
 						bind:value={searchQuery}
 						type="text"
 						placeholder="Search..."
-						class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm
-							focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+						class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
+							focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
 					/>
 				</div>
 			{/if}
@@ -135,7 +135,7 @@
 			<!-- Options List -->
 			<div class="max-h-60 overflow-y-auto py-1" role="listbox">
 				{#if filteredOptions.length === 0}
-					<div class="px-4 py-3 text-sm text-gray-500 text-center">No options found</div>
+					<div class="px-4 py-3 text-center text-sm text-gray-500">No options found</div>
 				{:else}
 					{#each filteredOptions as option}
 						{@const isSelected = value === option.value}
@@ -146,19 +146,19 @@
 							disabled={option.disabled}
 							on:click={() => selectOption(option)}
 							on:keydown={(e) => handleKeydown(e, option)}
-							class="w-full px-4 py-2.5 text-left text-sm flex items-center justify-between font-thin
+							class="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm font-thin
 								transition-colors duration-150
 								{option.disabled
-								? 'text-gray-400 cursor-not-allowed'
+								? 'cursor-not-allowed text-gray-400'
 								: isSelected
-									? 'text-primary-500 font-medium'
-									: 'text-white hover:bg-primary-500 hover:text-white cursor-pointer'}"
+									? 'font-medium text-primary-500'
+									: 'cursor-pointer text-white hover:bg-primary-500 hover:text-white'}"
 						>
 							<span class="block truncate" title={option.name}>
 								{option.name}
 							</span>
 							{#if isSelected}
-								<svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 20 20">
+								<svg class="h-5 w-5 text-primary-500" fill="currentColor" viewBox="0 0 20 20">
 									<path
 										fill-rule="evenodd"
 										d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
