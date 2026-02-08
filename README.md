@@ -124,6 +124,38 @@ await $claimMutation.mutateAsync(taskId);
 - **UI Layer**: `ErrorAlert` component displays notifications
 - **Development**: Errors logged to console in DEV mode only
 
+### Modal System
+
+The app uses a centralized modal system with type-safe helpers:
+
+**Modal Helpers** (`src/lib/modals/helpers.ts`):
+
+- `openScoutingModal()` - Open scouting task modal
+- `openScoutResultsModal(task)` - Display scouting results
+- `openSignContractModal(artist, options?)` - Open contract signing modal
+- `openProducingBeatsModal(options?)` - Open beat production modal
+- `openRecordingReleaseModal(options?)` - Open release recording modal
+
+**Configuration** (`src/lib/modals/constants.ts`):
+
+- `MODAL_DEFAULTS` - Default titles/images for each modal type
+- `TASK_SUB_MODALS` - Const enum for sub-modal identifiers
+
+```typescript
+import { openScoutingModal, openSignContractModal } from '$lib/modals/helpers';
+
+// Simple modal
+openScoutingModal();
+
+// Modal with data and overrides
+openSignContractModal(artist, {
+	title: 'Custom Title',
+	imageUrl: artist.profileImage
+});
+```
+
+**Benefits**: Type safety, centralized defaults, consistent behavior, IDE autocomplete
+
 ### Type Safety
 
 - TypeScript strict mode enabled

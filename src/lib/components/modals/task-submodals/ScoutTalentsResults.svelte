@@ -11,6 +11,7 @@
 	import type { TimedTask } from '$lib/types/task';
 	import { discoveredArtistsList } from '$lib/queries/artistQueries';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
+	import { openSignContractModal } from '$lib/modals/helpers';
 
 	export let taskResult: TimedTask;
 
@@ -82,17 +83,6 @@
 		if (activeArtistIndex < taskArtists.length - 1) {
 			activeArtistIndex += 1;
 		}
-	}
-
-	function openSignContractModal(artist: Artist) {
-		modalStore.transition('task-modal', {
-			subModal: 'sign-contract',
-			artist: artist,
-			title: 'Signing Contract',
-			imageUrl:
-				artist.profileImage ??
-				'https://res.cloudinary.com/dig430oem/image/upload/v1770582358/signing-contract-cover_zk5vee.png'
-		});
 	}
 </script>
 

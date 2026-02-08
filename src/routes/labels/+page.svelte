@@ -33,6 +33,7 @@
 	} from '$lib/utils';
 	import { getDateRange } from '$lib/utils/performanceUtils';
 	import { errorNotifications } from '$lib/stores/errorNotifications';
+	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
 	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
@@ -210,16 +211,7 @@
 		}
 	}
 
-	function openScoutModal() {
-		modalStore.open('task-modal', {
-			subModal: 'scout',
-			title: 'Scouting talents',
-			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
-		});
-	}
-
-	async function openScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
+	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist
 		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
 			const scoutingResults = scoutingTaskResponse.results as ScoutingTaskResults;
@@ -234,13 +226,7 @@
 			}
 		}
 
-		modalStore.open('task-modal', {
-			subModal: 'scout-results',
-			scoutingTaskResponse: scoutingTaskResponse,
-			title: 'Scouting talents',
-			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
-		});
+		openScoutResultsModal(scoutingTaskResponse);
 	}
 
 	onMount(() => {
@@ -354,7 +340,7 @@
 						color="primary"
 						style="hollow"
 						altText="Open scout talents modal"
-						on:clicked={openScoutModal}
+						on:clicked={openScoutingModal}
 					>
 						Scout Talents
 					</Button>
@@ -368,7 +354,7 @@
 						inProgressDescription="Observing at open mic..."
 						scoutingType={lastTask.scoutingType}
 						taskProgress={getTaskProgress(lastTask, $serverTimeOffset)}
-						on:viewResults={() => openScoutResultsModal(lastTask)}
+						on:viewResults={() => handleOpenScoutResultsModal(lastTask)}
 					/>
 				</div>
 			{/if}

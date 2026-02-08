@@ -12,7 +12,7 @@
 	import { formatTimeRemaining, getTaskProgress, getTaskStatus } from '$lib/utils';
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import Button from '$lib/components/Button.svelte';
-	import { modalStore } from '$lib/stores';
+	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
 
 	// Reactive label ID
 	$: labelId = $currentLabel?.id ?? null;
@@ -27,7 +27,7 @@
 	// Time tracking for progress bars
 	let currentTime = Date.now();
 
-	async function openScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
+	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist
 		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
 			const scoutingResults = scoutingTaskResponse.results as ScoutingTaskResults;
@@ -41,21 +41,7 @@
 			}
 		}
 
-		modalStore.open('task-modal', {
-			subModal: 'scout-results',
-			scoutingTaskResponse: scoutingTaskResponse,
-			title: 'Scouting talents',
-			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
-		});
-	}
-	function openScoutModal() {
-		modalStore.open('task-modal', {
-			subModal: 'scout',
-			title: 'Scouting talents',
-			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
-		});
+		openScoutResultsModal(scoutingTaskResponse);
 	}
 </script>
 
@@ -68,7 +54,7 @@
 			color="primary"
 			style="hollow"
 			altText="Open scout talents modal"
-			on:clicked={openScoutModal}
+			on:clicked={openScoutingModal}
 		>
 			Scout Talents
 		</Button>
@@ -89,7 +75,7 @@
 						inProgressDescription="Observing at open mic..."
 						scoutingType={task.scoutingType}
 						taskProgress={getTaskProgress(task, $serverTimeOffset)}
-						on:viewResults={() => openScoutResultsModal(task)}
+						on:viewResults={() => handleOpenScoutResultsModal(task)}
 					/>
 				{/each}
 			</div>
