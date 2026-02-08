@@ -72,7 +72,7 @@
 
 			<!-- Beat Production Task Progress -->
 			{#if beatProductionTask}
-				<div class="mt-3 space-y-1">
+				<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 					<div class="flex items-center justify-between text-xs">
 						<span class="text-gray-400"
 							>Producing {numberOfBeats} beat{numberOfBeats !== 1 ? 's' : ''}</span
@@ -88,7 +88,7 @@
 					<ProgressBar
 						value={beatProgress}
 						lengthClass="w-full"
-						thicknessClass="h-2"
+						thicknessClass="h-1"
 						useGradient={beatTaskState === 'in-progress'}
 						gradientFromClass="from-amber-500"
 						gradientToClass="to-red-500"
@@ -105,7 +105,7 @@
 
 			<!-- Recording Release Task Progress -->
 			{#if recordingReleaseTask}
-				<div class="mt-3 space-y-1">
+				<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 					<div class="flex items-center justify-between text-xs">
 						<span class="text-gray-400"
 							>Recording {numberOfTracks} track{numberOfTracks !== 1 ? 's' : ''}</span
@@ -121,7 +121,7 @@
 					<ProgressBar
 						value={recordingProgress}
 						lengthClass="w-full"
-						thicknessClass="h-2"
+						thicknessClass="h-1"
 						useGradient={recordingTaskState === 'in-progress'}
 						gradientFromClass="from-purple-500"
 						gradientToClass="to-pink-500"

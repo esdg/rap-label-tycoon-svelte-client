@@ -62,6 +62,19 @@
 				{artist.sex}
 			</p>
 		</div>
+		<!-- Age -->
+		<div class="flex flex-col gap-2 sm:flex-row sm:gap-4 lg:gap-6">
+			<div
+				class="select-none text-xs uppercase tracking-[0.3em] text-primary-500 sm:w-32 sm:flex-none sm:text-right lg:w-40 lg:text-sm"
+			>
+				Age
+			</div>
+			<p class="flex-1 text-xs leading-relaxed text-gray-300 lg:text-sm">
+				{artist.birthDate
+					? new Date().getFullYear() - new Date(artist.birthDate).getFullYear()
+					: 'Unknown'}
+			</p>
+		</div>
 		<!-- Etnicity -->
 		<div class="flex flex-col gap-2 sm:flex-row sm:gap-4 lg:gap-6">
 			<div
