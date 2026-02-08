@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	let className = '';
 	export { className as class };
 </script>
@@ -7,9 +7,9 @@
 	class="
     lowercase
     rounded
-    px-2 py-0.5 min-w-12 w-fit text-center
+    px-2 py-0 min-w-12 w-fit text-center
     text-xs
-    bg-primary-500 text-black {className}"
+    {className}"
 >
 	<slot />
 </div>

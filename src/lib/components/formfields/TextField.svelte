@@ -22,7 +22,7 @@
 			{placeholder}
 			{required}
 			{rows}
-			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black"
+			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black focus:ring-2 focus:ring-secondary-500"
 		/>
 	{:else if inputType === 'email'}
 		<input
@@ -33,7 +33,7 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black"
+			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black focus:ring-2 focus:ring-secondary-500"
 		/>
 	{:else if inputType === 'password'}
 		<input
@@ -44,7 +44,7 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black"
+			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black focus:ring-2 focus:ring-secondary-500"
 		/>
 	{:else}
 		<input
@@ -55,7 +55,7 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black"
+			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black focus:ring-2 focus:ring-secondary-500"
 		/>
 	{/if}
 </div>

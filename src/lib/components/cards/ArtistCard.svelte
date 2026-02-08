@@ -55,7 +55,8 @@
 		</div>
 		<div class="py-4 pr-4 flex-1 flex flex-col">
 			<h2 class="font-black text-3xl uppercase leading-none">
-				{artist.stageName}<Chip class={getRarityClass(artist.rarity) + ' inline-block ml-2'}
+				{artist.stageName}<Chip
+					class={getRarityClass(artist.rarity) + ' inline-block ml-2 relative top-auto bottom-2'}
 					>{getRarityLabel(artist.rarity)}</Chip
 				>
 			</h2>
