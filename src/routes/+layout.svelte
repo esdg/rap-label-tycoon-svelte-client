@@ -81,4 +81,5 @@
 			</main>
 		{/if}
 	</div>
+	<div class="fixed bottom-2 right-4 select-none text-xs text-white">version MVP 0.0.1</div>
 </QueryClientProvider>
