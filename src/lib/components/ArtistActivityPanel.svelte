@@ -34,7 +34,7 @@
 
 {#if !hasAnyTask}
 	<!-- Idle State -->
-	<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 		<div class="flex items-center justify-between text-xs">
 			<span class="text-gray-500">Idle</span>
 		</div>

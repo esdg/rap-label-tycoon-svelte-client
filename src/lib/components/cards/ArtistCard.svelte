@@ -5,8 +5,10 @@
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import type { ProducingBeatsTaskResponse, RecordingReleaseTaskResponse } from '$lib/types/task';
 	import { getRarityClass, getRarityLabel } from '$lib/utils';
+	import { BoltIcon, FaceSmileIcon } from 'heroicons-svelte/24/solid';
 	import ArtistActivityPanel from '../ArtistActivityPanel.svelte';
 	import Chip from '../Chip.svelte';
+	import ProgressBar from '../progress-bars/ProgressBar.svelte';
 
 	export let artist: Artist;
 	export let beatProductionTask: ProducingBeatsTaskResponse | null = null;
@@ -34,21 +36,45 @@
 			/>
 			<div class="absolute inset-0 bg-gradient-to-r from-transparent to-primary-950"></div>
 		</div>
-		<div class="flex flex-1 flex-col py-4 pr-4">
-			<h2 class="text-3xl uppercase leading-none">
-				<span class="font-black">{artist.stageName}</span>
-				{#if artist.$type === 'rapper'}
-					<RapperIcon class="relative bottom-2 top-auto inline-block size-4" />
-				{:else if artist.$type === 'beatmaker'}
-					<BeatmakerIcon class="relative bottom-2 top-auto inline-block size-4" />
-				{/if}
-				<Chip
-					class={getRarityClass(artist.rarity) + ' relative bottom-2 top-auto ml-2 inline-block'}
-					>{getRarityLabel(artist.rarity)}</Chip
-				>
-			</h2>
-			<p class="text-2xl font-thin uppercase">{artist.lastName} {artist.firstName}</p>
-
+		<div class="flex flex-1 flex-col justify-between gap-2 py-4 pr-4">
+			<div class="flex flex-1 justify-between">
+				<div>
+					<h2 class="text-3xl uppercase leading-none">
+						<span class="font-black">{artist.stageName}</span>
+						{#if artist.$type === 'rapper'}
+							<RapperIcon class="relative bottom-2 top-auto inline-block size-4" />
+						{:else if artist.$type === 'beatmaker'}
+							<BeatmakerIcon class="relative bottom-2 top-auto inline-block size-4" />
+						{/if}
+						<Chip
+							class={getRarityClass(artist.rarity) +
+								' relative bottom-2 top-auto ml-2 inline-block'}
+							>{getRarityLabel(artist.rarity)}</Chip
+						>
+					</h2>
+					<p class="text-2xl font-thin uppercase">{artist.lastName} {artist.firstName}</p>
+				</div>
+				<div class="vitality-infos flex w-24 flex-col gap-1 self-end">
+					<div class="flex gap-2">
+						<FaceSmileIcon class="h-3 w-3 flex-none text-secondary-500" /><ProgressBar
+							thicknessClass="h-2"
+							value={artist.vitalityStats.happinessPercent}
+							useGradient={true}
+							gradientFromClass="from-secondary-600"
+							gradientToClass="to-secondary-400"
+						/>
+					</div>
+					<div class="flex gap-2">
+						<BoltIcon class="h-3 w-3 flex-none text-primary-500" /><ProgressBar
+							thicknessClass="h-2"
+							value={artist.vitalityStats.staminaPercent}
+							useGradient={true}
+							gradientFromClass="from-primary-600"
+							gradientToClass="to-primary-400"
+						/>
+					</div>
+				</div>
+			</div>
 			<ArtistActivityPanel
 				{beatProductionTask}
 				{recordingReleaseTask}
