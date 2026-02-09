@@ -8,21 +8,21 @@ import { modalStore } from '$lib/stores/modal';
  * Call this function from any page or component
  */
 export const openTaskModal = (data?: Record<string, any>) => {
-    modalStore.open('task-modal', data);
+	modalStore.open('task-modal', data);
 };
 
 /**
  * Example 1a: Open Scout Talents sub-modal
  */
 export const openScoutTalentsModal = (data?: Record<string, any>) => {
-    modalStore.open('task-modal', { ...data, subModal: 'scout' });
+	modalStore.open('task-modal', { ...data, subModal: 'scout' });
 };
 
 /**
  * Example 1b: Open Sign Artist sub-modal
  */
 export const openSignArtistModal = (data?: Record<string, any>) => {
-    modalStore.open('task-modal', { ...data, subModal: 'sign' });
+	modalStore.open('task-modal', { ...data, subModal: 'sign' });
 };
 
 /**
@@ -30,7 +30,7 @@ export const openSignArtistModal = (data?: Record<string, any>) => {
  * Call this function from any page or component
  */
 export const openExampleModal2 = (data?: Record<string, any>) => {
-    modalStore.open('example2', data);
+	modalStore.open('example2', data);
 };
 
 /**
@@ -38,7 +38,7 @@ export const openExampleModal2 = (data?: Record<string, any>) => {
  * Call this function to close any open modal
  */
 export const closeModal = () => {
-    modalStore.close();
+	modalStore.close();
 };
 
 /**
@@ -46,7 +46,7 @@ export const closeModal = () => {
  * Useful for updating modal content without closing and reopening
  */
 export const updateModalData = (data: Record<string, any>) => {
-    modalStore.updateData(data);
+	modalStore.updateData(data);
 };
 
 // ============================================

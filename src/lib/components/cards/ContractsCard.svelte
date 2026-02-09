@@ -1,11 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { SigningContractTaskResponse } from '$lib/types/task';
 	import type { Contract } from '$lib/types/contracts';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
-	import { contracts } from '$lib/stores/contracts';
-	import { discoveredArtists, addMultipleDiscoveredArtists } from '$lib/stores/artists';
-	import { getArtistsByIds } from '$lib/api';
+	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { serverTimeOffset } from '$lib/queries/taskQueries';
 	import ProgressBar from '../progress-bars/ProgressBar.svelte';
 	import { getProgressPercent, formatTimeRemaining } from '$lib/utils';
@@ -13,9 +10,8 @@
 	import EllipsedTextWithQuote from '../EllipsedTextWithQuote.svelte';
 
 	export let contractsTaskResponse: SigningContractTaskResponse[] = [];
+	export let contracts: Contract[] = [];
 	export let currentTime: number = Date.now();
-
-	let artistsLoading = false;
 
 	type ContractTaskGroup = {
 		contractId: string;
@@ -25,9 +21,17 @@
 
 	let contractTaskGroups: ContractTaskGroup[] = [];
 
+	// Extract artist IDs from contracts
+	$: artistIds = contracts
+		.map((c) => c.artistId)
+		.filter((id): id is string => typeof id === 'string' && id.length > 0);
+
+	// Create query for artists
+	$: artistsQuery = createArtistsByIdsQuery(artistIds);
+
 	function getArtistById(artistId: string | null): Artist | undefined {
-		if (!artistId) return undefined;
-		return $discoveredArtists.find((item) => item.artist.id === artistId)?.artist;
+		if (!artistId || !$artistsQuery.data) return undefined;
+		return $artistsQuery.data.find((artist) => artist.id === artistId);
 	}
 
 	function formatReleases(numberOfReleases?: Record<string, number | null> | null): string {
@@ -37,39 +41,11 @@
 		return entries.map(([key, value]) => `${key}: ${value ?? 0}`).join(', ');
 	}
 
-	async function fetchArtistsForContracts() {
-		if (artistsLoading) return;
-		artistsLoading = true;
-
-		try {
-			const artistIds = new Set<string>();
-			for (const { contract } of contractTaskGroups) {
-				if (contract?.artistId && !getArtistById(contract.artistId)) {
-					artistIds.add(contract.artistId);
-				}
-			}
-
-			if (artistIds.size > 0) {
-				const artists = await getArtistsByIds(Array.from(artistIds));
-				addMultipleDiscoveredArtists(artists, false);
-			}
-		} catch (err) {
-			console.error('Failed to fetch artists for contracts:', err);
-		} finally {
-			artistsLoading = false;
-		}
-	}
-
-	onMount(() => {
-		fetchArtistsForContracts();
-	});
-
 	$: contractTaskGroups = (() => {
 		const map = new Map<string, ContractTaskGroup>();
-		const currentContracts = $contracts; // make store changes reactive here
 		for (const task of contractsTaskResponse) {
 			if (!task.contractId) continue;
-			const contract = currentContracts.find((c) => c.id === task.contractId);
+			const contract = contracts.find((c) => c.id === task.contractId);
 			const contractId = contract?.id ?? task.contractId;
 
 			const existing = map.get(contractId);
@@ -81,23 +57,19 @@
 		}
 		return Array.from(map.values());
 	})();
-
-	$: if (contractTaskGroups.length > 0 && !artistsLoading) {
-		fetchArtistsForContracts();
-	}
 </script>
 
-<article class="bg-primary-950 border border-gray-700 rounded-lg overflow-hidden select-none">
+<article class="select-none overflow-hidden rounded-lg border border-gray-700 bg-primary-950">
 	<div class="px-4 py-2">Currently negotiating {contractTaskGroups.length} contract(s)</div>
 	<div>
 		{#each contractTaskGroups as { contractId, contract, task }}
 			{@const artist = contract ? getArtistById(contract.artistId) : undefined}
 			<div
-				class="bg-black grid grid-cols-[60px,190px,1fr,1fr,5fr] border-t border-gray-700 px-4 py-1 text-sm gap-4 items-center"
+				class="grid grid-cols-[60px,190px,1fr,1fr,5fr] items-center gap-4 border-t border-gray-700 bg-black px-4 py-1 text-sm"
 			>
 				{#if contract && artist}
 					<div class="font-stretch-condensed text-right">{artist.stageName}</div>
-					<div class="">
+					<div>
 						<ProgressBar
 							value={getProgressPercent(
 								task.startTime,
@@ -120,9 +92,9 @@
 					<div class="flex">
 						{#each contract.iterations ?? [] as contractIteration}
 							<Tooltip position="bottom">
-								<div slot="trigger" class="size-4 flex items-center justify-center">
+								<div slot="trigger" class="flex size-4 items-center justify-center">
 									<span
-										class="w-2 h-2 block rounded-full"
+										class="block h-2 w-2 rounded-full"
 										class:bg-green-500={contractIteration.response?.accepted}
 										class:bg-red-500={contractIteration.response?.accepted === false}
 										class:bg-gray-600={!contractIteration.response}
@@ -132,9 +104,9 @@
 									/>
 								</div>
 								<div
-									class="text-xs text-gray-400 italic flex flex-col items-stretch gap-1 min-w-0 w-full max-w-[240px]"
+									class="flex w-full min-w-0 max-w-[240px] flex-col items-stretch gap-1 text-xs italic text-gray-400"
 								>
-									<div class="flex text-white justify-between gap-2 w-full mb-1">
+									<div class="mb-1 flex w-full justify-between gap-2 text-white">
 										<span class="font-semibold"
 											>Iteration {contractIteration.iterationNumber ?? '—'}</span
 										>
@@ -150,7 +122,7 @@
 									</div>
 
 									{#if contractIteration.offert}
-										<div class="flex flex-col gap-0.5 w-full min-w-0">
+										<div class="flex w-full min-w-0 flex-col gap-0.5">
 											<div class="flex justify-between gap-2">
 												<span>Signing bonus</span><span
 													>{contractIteration.offert.signingBonus}$</span
@@ -165,9 +137,9 @@
 												<span>Advance</span><span>{contractIteration.offert.advance}$</span>
 											</div>
 											{#if contractIteration.offert.numberOfReleases}
-												<div class="flex justify-between gap-2 w-full min-w-0">
+												<div class="flex w-full min-w-0 justify-between gap-2">
 													<span>Releases</span>
-													<span class="text-right truncate min-w-0"
+													<span class="min-w-0 truncate text-right"
 														>{formatReleases(contractIteration.offert.numberOfReleases)}</span
 													>
 												</div>
@@ -188,10 +160,12 @@
 							</Tooltip>
 						{/each}
 					</div>
-				{:else if contract && artistsLoading}
-					<div>Loading artist...</div>
+				{:else if contract && $artistsQuery.isLoading}
+					<div class="col-span-5 text-gray-400">Loading artist...</div>
+				{:else if contract}
+					<div class="col-span-5 text-gray-400">Artist data unavailable</div>
 				{:else}
-					<div>Contract {contractId}</div>
+					<div class="col-span-5 text-gray-400">Contract {contractId}</div>
 				{/if}
 			</div>
 		{/each}

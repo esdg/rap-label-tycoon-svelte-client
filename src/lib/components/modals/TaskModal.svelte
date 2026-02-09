@@ -36,11 +36,11 @@
 </script>
 
 <div
-	class="flex flex-col lg:flex-row h-full w-full rounded-lg overflow-hidden bg-primary-950 border border-gray-700 shadow-lg"
+	class="flex h-full w-full flex-col overflow-hidden rounded-lg border border-gray-700 bg-primary-950 shadow-lg lg:flex-row"
 >
 	<!-- Hero section - hidden on mobile, visible on larger screens -->
 	<div
-		class="hidden md:grid md:h-auto md:basis-1/3 md:overflow-hidden relative select-none"
+		class="relative hidden select-none md:grid md:h-auto md:basis-1/3 md:overflow-hidden"
 		aria-hidden="true"
 	>
 		<Hero
@@ -48,13 +48,13 @@
 			image={imageUrl}
 			gradientClass="bg-gradient-to-t from-primary-500 to-transparent"
 		>
-			<div class="relative z-10 mx-auto flex h-full max-w-6xl items-end text-white pb-6">
-				<h2 class="text-7xl font-thin text-right uppercase">{data?.title}</h2>
+			<div class="relative z-10 mx-auto flex h-full max-w-6xl items-end pb-6 text-white">
+				<h2 class="text-right text-7xl font-thin uppercase">{data?.title}</h2>
 			</div>
 		</Hero>
 	</div>
 
-	<div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+	<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 		{#if activeSubModal === 'sign-contract'}
 			<SignContract />
 		{:else if activeSubModal === 'scout-results'}

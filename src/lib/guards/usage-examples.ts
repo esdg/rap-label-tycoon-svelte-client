@@ -159,7 +159,7 @@ import type { PageLoad } from './$types';
 import { executeGuards } from '$lib/guards';
 import { redirectResult, passResult } from '$lib/guards';
 import { requireAuth } from '$lib/guards/rules';
-import { api } from '$lib/api';
+import { apiFetch } from '$lib/api/client';
 
 export const load: PageLoad = async ({ params }) => {
     await executeGuards({
@@ -168,7 +168,7 @@ export const load: PageLoad = async ({ params }) => {
             {
                 name: 'tournament-registration',
                 check: async () => {
-                    const tournament = await api(`/api/tournaments/${params.id}`);
+                    const tournament = await apiFetch(`/api/tournaments/${params.id}`);
 
                     if (tournament.registrationClosed) {
                         return redirectResult(
@@ -234,7 +234,7 @@ export async function load() {
 import { executeGuards } from '$lib/guards';
 import { requireAuth } from '$lib/guards/rules';
 import { redirectResult, passResult } from '$lib/guards';
-import { api } from '$lib/api';
+import { apiFetch } from '$lib/api/client';
 
 export async function load() {
     await executeGuards({
@@ -243,7 +243,7 @@ export async function load() {
             {
                 name: 'previous-steps',
                 check: async () => {
-                    const progress = await api('/api/onboarding/progress');
+                    const progress = await apiFetch('/api/onboarding/progress');
 
                     if (!progress.step1Completed) {
                         return redirectResult(
@@ -289,7 +289,7 @@ import type { PageLoad } from './$types';
 import { executeGuards } from '$lib/guards';
 import { requireAuth } from '$lib/guards/rules';
 import { redirectResult, passResult } from '$lib/guards';
-import { api } from '$lib/api';
+import { apiFetch } from '$lib/api/client';
 
 export const load: PageLoad = async () => {
     await executeGuards({
@@ -299,7 +299,7 @@ export const load: PageLoad = async () => {
                 name: 'data-available',
                 check: async () => {
                     try {
-                        const stats = await api('/api/stats');
+                        const stats = await apiFetch('/api/stats');
                         
                         if (!stats || stats.length === 0) {
                             return redirectResult(

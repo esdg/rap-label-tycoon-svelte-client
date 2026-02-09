@@ -4,6 +4,7 @@
 	import { createQuery } from '@tanstack/svelte-query';
 	import { fetchTracksByLabelId } from '$lib/api/releases';
 	import { fetchReleasesByLabelId } from '$lib/api/releases';
+	import bgImage from '$lib/assets/main-bg-finances.png';
 	import { fetchArtistsByIds } from '$lib/api/artists';
 	import {
 		groupByRelease,
@@ -101,7 +102,10 @@
 	}
 </script>
 
-<div class="finances-page">
+<div
+	class="finances-page min-h-screen overflow-x-hidden p-4 text-white sm:p-8"
+	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
+>
 	<div class="page-header">
 		<h1>Financial Dashboard</h1>
 		<div class="header-controls">
@@ -299,13 +303,6 @@
 </div>
 
 <style>
-	.finances-page {
-		padding: 2rem;
-		max-width: 1400px;
-		margin: 0 auto;
-		min-height: 100vh;
-	}
-
 	.page-header {
 		display: flex;
 		justify-content: space-between;

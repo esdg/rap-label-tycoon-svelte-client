@@ -6,10 +6,12 @@
 	import { QueryClientProvider } from '@tanstack/svelte-query';
 	import { queryClient } from '$lib/queries/queryClient';
 	import Modal from '$lib/components/Modal.svelte';
+	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import { onFirebaseAuthStateChanged } from '$lib/firebase';
 	import { initializeAuthState } from '$lib/services/auth';
 	import { appState, currentPlayer, isAuthenticated, isAuthLoading } from '$lib/stores/appState';
 	import MenuBar from '$lib/components/MenuBar.svelte';
+	import { VERSION, GIT_HASH } from '$lib/version';
 
 	let initializingPlayer = false;
 
@@ -61,22 +63,26 @@
 
 <QueryClientProvider client={queryClient}>
 	<Modal />
+	<ErrorAlert />
 
 	<div class="flex flex-row antialiased">
 		{#if $isAuthLoading && !isPublicRoute}
-			<div class="min-h-screen bg-gray-900 flex items-center justify-center w-full">
-				<div class="text-white text-xl">Loading...</div>
+			<div class="flex min-h-screen w-full items-center justify-center bg-gray-900">
+				<div class="text-xl text-white">Loading...</div>
 			</div>
 		{:else}
 			{#if $isAuthenticated && !isPublicRoute && $currentPlayer}
 				<MenuBar />
 			{/if}
 			<main
-				class="bg-primary-950 flex-grow min-h-screen text-white"
+				class="min-h-screen flex-grow bg-primary-950 text-white"
 				style="font-family: 'Roboto', sans-serif;"
 			>
 				<slot />
 			</main>
 		{/if}
+	</div>
+	<div class="fixed bottom-2 right-4 select-none text-xs text-white">
+		MVP v{VERSION} ({GIT_HASH})
 	</div>
 </QueryClientProvider>

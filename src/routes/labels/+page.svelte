@@ -3,7 +3,7 @@
 	import { modalStore } from '$lib/stores/modal';
 	import { currentLabel } from '$lib/stores/appState';
 	import Button from '$lib/components/Button.svelte';
-	import bgImage from '$lib/assets/main-bg-1.png';
+	import bgImage from '$lib/assets/main-bg-office.png';
 	import {
 		type TimedTask,
 		type ScoutingTaskResponse,
@@ -22,15 +22,18 @@
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { fetchArtistsByIds } from '$lib/api/artists';
 	import { claimTask } from '$lib/api/tasks';
-	import { setContracts } from '$lib/stores/contracts';
 	import {
 		formatCurrency,
 		formatTimeRemaining,
 		getTaskProgress,
 		getTaskStatus,
-		isTaskFinished
+		isTaskFinished,
+		handleError,
+		getUserFriendlyError
 	} from '$lib/utils';
 	import { getDateRange } from '$lib/utils/performanceUtils';
+	import { errorNotifications } from '$lib/stores/errorNotifications';
+	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
 	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
@@ -64,11 +67,6 @@
 
 	// Create contracts query based on unique IDs
 	$: contractsQuery = createContractsByIdsQuery(uniqueContractIds);
-
-	// Sync contracts query data to legacy store for backward compatibility
-	$: if ($contractsQuery.data) {
-		setContracts($contractsQuery.data);
-	}
 
 	// Filter for valid signed contracts (status = signed, end date not passed)
 	// Note: Don't use currentTime here to avoid recreating queries every second
@@ -183,7 +181,8 @@
 
 				return { success: true, taskId: task.id };
 			} catch (err) {
-				console.error(`Failed to claim task ${task.id}:`, err);
+				handleError('ClaimTask', err);
+				errorNotifications.add('Task Claim Failed', getUserFriendlyError(err).message);
 				claimingTaskIds.delete(task.id); // Allow retry
 				return { success: false, taskId: task.id, error: err };
 			}
@@ -212,16 +211,7 @@
 		}
 	}
 
-	function openScoutModal() {
-		modalStore.open('task-modal', {
-			subModal: 'scout',
-			title: 'Scouting talents',
-			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
-		});
-	}
-
-	async function openScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
+	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist
 		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
 			const scoutingResults = scoutingTaskResponse.results as ScoutingTaskResults;
@@ -230,18 +220,13 @@
 					const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
 					addDiscoveredArtists(artists, false);
 				} catch (err) {
-					console.error('Failed to fetch discovered artists:', err);
+					handleError('FetchScoutedArtists', err);
+					errorNotifications.add('Fetch Failed', 'Could not load discovered artists.');
 				}
 			}
 		}
 
-		modalStore.open('task-modal', {
-			subModal: 'scout-results',
-			scoutingTaskResponse: scoutingTaskResponse,
-			title: 'Scouting talents',
-			imageUrl:
-				'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
-		});
+		openScoutResultsModal(scoutingTaskResponse);
 	}
 
 	onMount(() => {
@@ -274,7 +259,11 @@
 				{:else if contractTasks.length === 0}
 					<p class="text-gray-400">No contracts</p>
 				{:else}
-					<ContractsCard contractsTaskResponse={contractTasks} {currentTime} />
+					<ContractsCard
+						contractsTaskResponse={contractTasks}
+						contracts={$contractsQuery.data ?? []}
+						{currentTime}
+					/>
 				{/if}
 
 				<!-- Artist List -->
@@ -351,7 +340,7 @@
 						color="primary"
 						style="hollow"
 						altText="Open scout talents modal"
-						on:clicked={openScoutModal}
+						on:clicked={openScoutingModal}
 					>
 						Scout Talents
 					</Button>
@@ -365,7 +354,7 @@
 						inProgressDescription="Observing at open mic..."
 						scoutingType={lastTask.scoutingType}
 						taskProgress={getTaskProgress(lastTask, $serverTimeOffset)}
-						on:viewResults={() => openScoutResultsModal(lastTask)}
+						on:viewResults={() => handleOpenScoutResultsModal(lastTask)}
 					/>
 				</div>
 			{/if}
