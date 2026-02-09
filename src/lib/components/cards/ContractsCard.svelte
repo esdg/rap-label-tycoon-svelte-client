@@ -5,7 +5,7 @@
 	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { serverTimeOffset } from '$lib/queries/taskQueries';
 	import ProgressBar from '../progress-bars/ProgressBar.svelte';
-	import { getProgressPercent, formatTimeRemaining } from '$lib/utils';
+	import { getProgressPercent, formatTimeRemaining, formatDuration } from '$lib/utils';
 	import Tooltip from '../Tooltip.svelte';
 	import EllipsedTextWithQuote from '../EllipsedTextWithQuote.svelte';
 
@@ -122,6 +122,21 @@
 									</div>
 
 									{#if contractIteration.offert}
+										{#if contractIteration.offert.contractDuration && contractIteration.offert.contractDuration !== '0'}
+											<div class="flex w-full min-w-0 justify-between gap-2">
+												<span>Releases</span>
+												<span class="min-w-0 truncate text-right"
+													>{formatDuration(contractIteration.offert.contractDuration)}</span
+												>
+											</div>
+										{:else}
+											<div class="flex w-full min-w-0 justify-between gap-2">
+												<span>Releases</span>
+												<span class="min-w-0 truncate text-right"
+													>{formatReleases(contractIteration.offert.numberOfReleases)}</span
+												>
+											</div>
+										{/if}
 										<div class="flex w-full min-w-0 flex-col gap-0.5">
 											<div class="flex justify-between gap-2">
 												<span>Signing bonus</span><span
@@ -136,24 +151,14 @@
 											<div class="flex justify-between gap-2">
 												<span>Advance</span><span>{contractIteration.offert.advance}$</span>
 											</div>
-											{#if contractIteration.offert.numberOfReleases}
-												<div class="flex w-full min-w-0 justify-between gap-2">
-													<span>Releases</span>
-													<span class="min-w-0 truncate text-right"
-														>{formatReleases(contractIteration.offert.numberOfReleases)}</span
-													>
-												</div>
-											{/if}
 										</div>
 									{:else}
 										<div class="text-gray-400">No offer terms</div>
 									{/if}
 
 									{#if contractIteration.response?.message}
-										<div class="w-full min-w-0">
-											<EllipsedTextWithQuote
-												>{contractIteration.response.message}</EllipsedTextWithQuote
-											>
+										<div class="w-full min-w-0 text-xs italic text-primary-600">
+											"{contractIteration.response.message}"
 										</div>
 									{/if}
 								</div>

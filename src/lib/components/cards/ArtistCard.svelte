@@ -40,21 +40,22 @@
 		<div class="relative flex flex-1 flex-col justify-between gap-2 py-4 pr-4">
 			<WatchlistButton {artist} class="absolute right-2 top-2" />
 			<div class="flex flex-1 justify-between">
-				<div class="">
-					<h2 class="text-3xl uppercase leading-none">
-						<span class="font-black">{artist.stageName}</span>
+				<div>
+					<h2 class="flex flex-nowrap items-center gap-2 text-3xl uppercase leading-none">
+						<span class="whitespace-nowrap break-keep font-black">{artist.stageName}</span>
 						{#if artist.$type === 'rapper'}
-							<RapperIcon class="relative bottom-2 top-auto inline-block size-4" />
+							<RapperIcon class=" inline-block size-4 self-start" />
 						{:else if artist.$type === 'beatmaker'}
-							<BeatmakerIcon class="relative bottom-2 top-auto inline-block size-4" />
+							<BeatmakerIcon class="inline-block size-4 self-start" />
 						{/if}
-						<Chip
-							class={getRarityClass(artist.rarity) +
-								' relative bottom-2 top-auto ml-2 inline-block'}
+						<Chip class={getRarityClass(artist.rarity) + '  ml-2 '}
 							>{getRarityLabel(artist.rarity)}</Chip
 						>
 					</h2>
-					<p class="text-2xl font-thin uppercase">{artist.lastName} {artist.firstName}</p>
+					<p class="whitespace-nowrap break-keep text-2xl font-thin uppercase">
+						{artist.lastName}
+						{artist.firstName}
+					</p>
 				</div>
 				<div class="vitality-infos flex w-24 flex-col gap-1 self-end">
 					<div class="flex gap-2">
