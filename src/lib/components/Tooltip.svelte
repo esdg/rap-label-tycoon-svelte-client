@@ -8,6 +8,9 @@
 	// Additional classes for the tooltip container
 	let className = '';
 	export { className as class };
+	// Additional classes for the trigger wrapper
+	let wrapperClassName = '';
+	export { wrapperClassName as wrapperClass };
 
 	let triggerEl: HTMLElement;
 	let tooltipEl: HTMLElement;
@@ -160,7 +163,7 @@
 <!-- Trigger wrapper -->
 <span
 	bind:this={triggerEl}
-	class="inline-flex"
+	class="inline-flex {wrapperClassName}"
 	on:mouseenter={showTooltip}
 	on:mouseleave={hideTooltip}
 	on:focusin={showTooltip}
@@ -175,14 +178,14 @@
 {#if visible}
 	<div
 		bind:this={tooltipEl}
-		class="fixed z-[9999] px-3 py-2 text-xs text-gray-400 border border-gray-700 rounded-md shadow-lg bg-primary-950 {className}"
+		class="fixed z-[9999] rounded-md border border-gray-700 bg-primary-950 px-3 py-2 text-xs text-gray-400 shadow-lg {className}"
 		class:invisible={!positioned}
 		class:visible={positioned}
 		style="{tooltipStyle} max-width: {maxWidth}px;"
 		role="tooltip"
 	>
 		<!-- Arrow -->
-		<div class="absolute w-0 h-0 {arrowClass}" style={arrowStyle} />
+		<div class="absolute h-0 w-0 {arrowClass}" style={arrowStyle} />
 		<!-- Content -->
 		<slot />
 	</div>
