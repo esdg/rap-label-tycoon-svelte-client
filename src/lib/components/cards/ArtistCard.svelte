@@ -5,10 +5,11 @@
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import type { ProducingBeatsTaskResponse, RecordingReleaseTaskResponse } from '$lib/types/task';
 	import { getRarityClass, getRarityLabel } from '$lib/utils';
-	import { BoltIcon, FaceSmileIcon } from 'heroicons-svelte/24/solid';
+	import { BoltIcon, FaceSmileIcon, StarIcon } from 'heroicons-svelte/24/solid';
 	import ArtistActivityPanel from '../ArtistActivityPanel.svelte';
 	import Chip from '../Chip.svelte';
 	import ProgressBar from '../progress-bars/ProgressBar.svelte';
+	import WatchlistButton from '../WatchlistButton.svelte';
 
 	export let artist: Artist;
 	export let beatProductionTask: ProducingBeatsTaskResponse | null = null;
@@ -36,9 +37,10 @@
 			/>
 			<div class="absolute inset-0 bg-gradient-to-r from-transparent to-primary-950"></div>
 		</div>
-		<div class="flex flex-1 flex-col justify-between gap-2 py-4 pr-4">
+		<div class="relative flex flex-1 flex-col justify-between gap-2 py-4 pr-4">
+			<WatchlistButton {artist} class="absolute right-2 top-2" />
 			<div class="flex flex-1 justify-between">
-				<div>
+				<div class="">
 					<h2 class="text-3xl uppercase leading-none">
 						<span class="font-black">{artist.stageName}</span>
 						{#if artist.$type === 'rapper'}

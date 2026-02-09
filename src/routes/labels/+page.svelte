@@ -248,7 +248,7 @@
 	<!-- 1 col -->
 	<div class="space-y-6 sm:space-y-8">
 		<div>
-			<h1 class="mb-1 text-2xl font-thin">Label Roster</h1>
+			<h1 class="mb-1 text-2xl font-thin">Roster Overview</h1>
 
 			<div class="flex flex-col gap-2">
 				<!-- Contract List -->
