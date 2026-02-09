@@ -46,7 +46,7 @@
 </script>
 
 <div
-	class=" min-h-screen overflow-x-hidden p-4 text-white sm:p-8"
+	class="talents-scouting-page min-h-screen overflow-x-hidden p-4 text-white sm:p-8"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
 	<div class="mb-6">

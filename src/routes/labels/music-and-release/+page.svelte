@@ -23,6 +23,7 @@
 	import { TaskCreationError, claimTask } from '$lib/api/tasks';
 	import { queryClient, queryKeys } from '$lib/queries/queryClient';
 	import { isTaskFinished } from '$lib/utils/taskUtils';
+	import bgImage from '$lib/assets/main-bg-discography.png';
 
 	// Tab management
 	let activeTabIndex = 0;
@@ -215,7 +216,10 @@
 	}
 </script>
 
-<div class="music-and-release-page p-4 md:p-6 lg:p-8">
+<div
+	class="music-and-release-page min-h-screen overflow-x-hidden p-4 text-white sm:p-8"
+	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
+>
 	<h1 class="mb-6 text-3xl font-bold text-primary-100">Music & Release</h1>
 
 	<!-- Tabs -->

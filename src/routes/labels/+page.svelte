@@ -3,7 +3,7 @@
 	import { modalStore } from '$lib/stores/modal';
 	import { currentLabel } from '$lib/stores/appState';
 	import Button from '$lib/components/Button.svelte';
-	import bgImage from '$lib/assets/main-bg-1.png';
+	import bgImage from '$lib/assets/main-bg-office.png';
 	import {
 		type TimedTask,
 		type ScoutingTaskResponse,
