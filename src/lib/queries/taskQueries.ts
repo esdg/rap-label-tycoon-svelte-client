@@ -32,10 +32,9 @@ import type {
 	ProducingBeatsTaskResponse,
 	RecordingReleaseTaskResponse,
 	RestingTaskResponse,
-	AnyTaskResponse,
-	TaskStatus
+	AnyTaskResponse
 } from '$lib/types/task';
-import { TaskType } from '$lib/types/task';
+import { TaskType, TaskStatus } from '$lib/types/task';
 import type { ScoutingTaskRequest, ScoutingScope } from '$lib/types/scoutingArtistsTask';
 import type { RestingType } from '$lib/types/resting';
 import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
@@ -146,7 +145,8 @@ export function createScoutingTaskMutation(labelId: string) {
 	return createMutation<
 		TimedTask,
 		Error,
-		ScoutingTaskRequest & { costPrediction?: TaskCostPrediction }
+		ScoutingTaskRequest & { costPrediction?: TaskCostPrediction },
+		{ previousTasks?: TimedTask[] }
 	>({
 		mutationFn: async (request) => {
 			// Remove costPrediction from the actual API request

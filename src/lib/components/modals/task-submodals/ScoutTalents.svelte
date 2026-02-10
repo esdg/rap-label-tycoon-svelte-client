@@ -2,9 +2,10 @@
 	import { onMount } from 'svelte';
 	import { modalStore } from '$lib/stores/modal';
 	import { appState, currentLabel, currentPlayer } from '$lib/stores/appState';
-	import { createScoutingTask, predictScoutingCost, TaskCreationError } from '$lib/api';
+	import { predictScoutingCost, TaskCreationError } from '$lib/api';
 	import { loadClientConfig } from '$lib/services/config';
 	import { queryKeys, queryClient } from '$lib/queries/queryClient';
+	import { createScoutingTaskMutation } from '$lib/queries/taskQueries';
 	import { RapMusicStyle, RapMusicStyleNames } from '$lib/types/musicStyles';
 	import {
 		ScoutingType,
@@ -40,9 +41,8 @@
 	const lastStepIndex = stepLabels.length - 1;
 	const prospectorOptions = [{ name: 'you', value: 1 }];
 
-	// Create mutation for scouting task - but we can't use reactive statement with createMutation
-	// So we'll call the API directly like the old code did
-	let mutationInProgress = false;
+	// Create the mutation (it's safe to create with null labelId initially)
+	$: scoutingMutation = $currentLabel ? createScoutingTaskMutation($currentLabel.id) : null;
 
 	// Computed choices
 	$: scoutingTypeChoices = [
@@ -113,9 +113,7 @@
 		}
 	}
 
-	async function handleStartScouting() {
-		console.log('handleStartScouting called');
-
+	function handleStartScouting() {
 		if (!$currentLabel) {
 			error = 'No label found';
 			return;
@@ -132,40 +130,32 @@
 			error = 'Please select at least one genre';
 			return;
 		}
+		if (!scoutingMutation) {
+			error = 'Mutation not ready';
+			return;
+		}
 
-		mutationInProgress = true;
 		error = null;
 
-		try {
-			const taskRequest = {
-				labelId: $currentLabel.id,
-				workerId: $currentPlayer.id,
-				scoutingType: scoutingType,
-				productionStyles: Array.from(selectedGenres),
-				scopeId: selectedScope
-			};
+		const taskRequest = {
+			labelId: $currentLabel.id,
+			workerId: $currentPlayer.id,
+			scoutingType: scoutingType,
+			productionStyles: Array.from(selectedGenres),
+			scopeId: selectedScope
+		};
 
-			console.log('Calling API with:', taskRequest);
-			const response = await createScoutingTask(taskRequest);
-			console.log('API response:', response);
-
-			// Update bankroll in appState
-			appState.updateCurrentLabelBankroll(-response.budgetRequired);
-
-			// Invalidate tasks query to refetch
-			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel($currentLabel.id) });
-
-			modalStore.close();
-		} catch (err) {
-			if (err instanceof TaskCreationError) {
-				error = getTaskErrorMessage(err.errorResponse.code, err.errorResponse.message);
-			} else {
-				error = 'Failed to create scouting task. Please try again.';
+		// Start the mutation (don't await it!)
+		$scoutingMutation!.mutate(taskRequest, {
+			onError: (err) => {
+				// Error is already handled by mutation's onError
+				// But we could show a toast notification here
+				console.error('Scouting task creation failed:', err);
 			}
-			console.error('Error creating task:', err);
-		} finally {
-			mutationInProgress = false;
-		}
+		});
+
+		// Close the modal immediately!
+		modalStore.close();
 	}
 
 	function handleCancel() {
@@ -310,10 +300,10 @@
 					color="secondary"
 					style="normal"
 					altText="Start scouting for talents"
-					loading={mutationInProgress}
+					loading={$scoutingMutation?.isPending ?? false}
 					on:clicked={handleStartScouting}
 				>
-					{mutationInProgress ? 'Starting...' : 'Start Scouting'}
+					{$scoutingMutation?.isPending ? 'Starting...' : 'Start Scouting'}
 				</Button>
 			</ContentPanelItem>
 		</ContentPanel>
