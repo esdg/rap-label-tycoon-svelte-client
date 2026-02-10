@@ -15,6 +15,11 @@
 	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
 	import { onMount } from 'svelte';
 
+	// Helper to check if a task is optimistic (has temporary ID and extra data)
+	function isOptimisticTask(task: any): boolean {
+		return task?._optimistic === true;
+	}
+
 	// Reactive label ID
 	$: labelId = $currentLabel?.id ?? null;
 	// Create the tasks query - automatically refetches when labelId changes
@@ -29,12 +34,18 @@
 	let currentTime = Date.now();
 
 	// Create reactive task data that depends on currentTime to ensure updates
-	$: taskCards = scoutingTasks.map((task) => ({
-		task,
-		state: getTaskStatus(task, $serverTimeOffset),
-		durationText: formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset),
-		taskProgress: getTaskProgress(task, $serverTimeOffset, currentTime)
-	}));
+	$: taskCards = scoutingTasks.map((task) => {
+		const isOptimistic = isOptimisticTask(task);
+		const state: 'loading' | 'in-progress' | 'failed' | 'succeeded' | 'error' = isOptimistic
+			? 'loading'
+			: getTaskStatus(task, $serverTimeOffset);
+		return {
+			task,
+			state,
+			durationText: formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset),
+			taskProgress: getTaskProgress(task, $serverTimeOffset, currentTime)
+		};
+	});
 
 	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist
