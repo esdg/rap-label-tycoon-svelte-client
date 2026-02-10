@@ -35,6 +35,7 @@ import type {
 } from '$lib/types/task';
 import { TaskType } from '$lib/types/task';
 import type { ScoutingTaskRequest, ScoutingScope } from '$lib/types/scoutingArtistsTask';
+import type { RestingType } from '$lib/types/resting';
 import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
 
 /**
@@ -99,6 +100,19 @@ export function createScoutingScopesQuery() {
 			return config.scoutingScopes;
 		},
 		// Reference data - cache for a long time
+		staleTime: 10 * 60 * 1000,
+		gcTime: 30 * 60 * 1000
+	});
+}
+
+// Query: Get resting types (static reference data)
+export function createRestingTypesQuery() {
+	return createQuery<RestingType[], Error>({
+		queryKey: queryKeys.restingTypes,
+		queryFn: async () => {
+			const config = await loadClientConfig();
+			return config.restingTypes;
+		},
 		staleTime: 10 * 60 * 1000,
 		gcTime: 30 * 60 * 1000
 	});

@@ -1,103 +1,53 @@
 import type { ScoutingScope } from './scoutingArtistsTask';
 import type { RapMusicStyle } from './musicStyles';
+import type { RestingType } from './resting';
 
-export interface SkillRange {
-    min: number;
-    max: number;
+export type ArtistArchetypeType = 'rapper-archetype' | 'beatmaker-archetype';
+
+interface ArtistArchetypeBase {
+	$type: ArtistArchetypeType;
+	id: string;
+	name: string;
+	description: string;
+	rarity: number;
+	rapMusicStyles: RapMusicStyle[];
 }
 
-interface BaseArchetype {
-    id: string;
-    name: string;
-    description: string;
-    rarity: number;
-    rapMusicStyles: RapMusicStyle[];
-    basePersonalSkills: {
-        charisma: SkillRange;
-        toughness: SkillRange;
-        stability: SkillRange;
-    };
-    personalSkillsByRank: {
-        charisma: SkillRange;
-        toughness: SkillRange;
-        stability: SkillRange;
-    };
+export interface RapperArchetype extends ArtistArchetypeBase {
+	$type: 'rapper-archetype';
 }
 
-export interface RapperArchetype extends BaseArchetype {
-    $type: 'rapper-archetype';
-    baseSongWritingSkills: {
-        storytelling: SkillRange;
-        rhymeScheme: SkillRange;
-        wordplay: SkillRange;
-        writingSpeed: SkillRange;
-        chorusCrafting: SkillRange;
-        verseStructure: SkillRange;
-    };
-    songWritingSkillsByRank: {
-        storytelling: SkillRange;
-        rhymeScheme: SkillRange;
-        wordplay: SkillRange;
-        writingSpeed: SkillRange;
-        chorusCrafting: SkillRange;
-        verseStructure: SkillRange;
-    };
-    baseInterpretationSkills: {
-        emotionalExpression: SkillRange;
-        stagePresence: SkillRange;
-        vocalControl: SkillRange;
-        improvisation: SkillRange;
-    };
-    interpretationSkillsByRank: {
-        emotionalExpression: SkillRange;
-        stagePresence: SkillRange;
-        vocalControl: SkillRange;
-        improvisation: SkillRange;
-    };
-}
-
-export interface BeatmakerArchetype extends BaseArchetype {
-    $type: 'beatmaker-archetype';
-    baseBeatmakingSkills: {
-        composing: SkillRange;
-        melody: SkillRange;
-        drumProgramming: SkillRange;
-        sampling: SkillRange;
-    };
-    beatmakingSkillsByRank: {
-        composing: SkillRange;
-        melody: SkillRange;
-        drumProgramming: SkillRange;
-        sampling: SkillRange;
-    };
+export interface BeatmakerArchetype extends ArtistArchetypeBase {
+	$type: 'beatmaker-archetype';
 }
 
 export type ArtistArchetype = RapperArchetype | BeatmakerArchetype;
 
 export interface ArtistRank {
-    id: string;
-    name: string;
-    description: string;
-    requiredXp: number;
-    additionalPerks: number;
+	id: string;
+	name: string;
+	description: string;
+	requiredXp: number;
+	additionalPerks: number;
 }
 
 export interface ReleaseType {
-    id: string;
-    name: string;
-    description: string;
-    minTracks: number;
-    maxTracks: number;
-    baseDurationMinutes: number;
-    baseBudget: number;
-    minTrackDurationSeconds: number;
-    maxTrackDurationSeconds: number;
+	id: string;
+	name: string;
+	description: string;
+	minTracks: number;
+	maxTracks: number;
+	baseDurationMinutes: number;
+	minTrackDurationSeconds: number;
+	maxTrackDurationSeconds: number;
+	baseBudget?: number;
 }
 
 export interface AppConfig {
-    apiBaseUrl: string;
-    artistArchetypes: ArtistArchetype[];
-    artistRanks: ArtistRank[];
-    releaseTypes: ReleaseType[];
-    scoutingScopes: ScoutingScope[];
+	apiBaseUrl: string;
+	artistArchetypes: ArtistArchetype[];
+	artistRanks: ArtistRank[];
+	releaseTypes: ReleaseType[];
+	scoutingScopes: ScoutingScope[];
+	restingTypes: RestingType[];
 }
