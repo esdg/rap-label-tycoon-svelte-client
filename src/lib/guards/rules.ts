@@ -1,21 +1,32 @@
 import type { GuardCheck } from './types';
 import { redirectResult, passResult } from './index';
 import { apiFetch } from '$lib/api/client';
+import { get } from 'svelte/store';
+import { appState } from '$lib/stores/appState';
 
 /**
- * Check if at least one label exists
+ * Check if the current player has at least one label
  */
 export const requireLabel: GuardCheck = async () => {
 	try {
-		const labels = await apiFetch<any[]>('/api/labels');
+		const state = get(appState);
+		const player = state.player;
 
-		if (!labels || labels.length === 0) {
-			return redirectResult('/labels/create', 'No label found, redirecting to creation');
+		if (!player) {
+			return redirectResult('/users/register', 'No player found, redirecting to registration');
 		}
 
-		return passResult('Label exists');
+		// Check both player.labelIds and state.labels for reliability
+		// (state.labels is more up-to-date when a label is just created)
+		const hasLabels = (player.labelIds && player.labelIds.length > 0) || state.labels.length > 0;
+
+		if (!hasLabels) {
+			return redirectResult('/labels/create', 'No label found for player, redirecting to creation');
+		}
+
+		return passResult('Player has label(s)');
 	} catch (error) {
-		console.error('Error checking labels:', error);
+		console.error('Error checking player labels:', error);
 		// On error, redirect to creation page as safe fallback
 		return redirectResult('/labels/create', 'Error checking labels, redirecting to creation');
 	}

@@ -125,7 +125,11 @@ function createAppState() {
 			update((state) => ({
 				...state,
 				labels: [...state.labels, label],
-				currentLabel: label
+				currentLabel: label,
+				// Also update player's labelIds array
+				player: state.player
+					? { ...state.player, labelIds: [...state.player.labelIds, label.id] }
+					: null
 			}));
 		}
 	};
