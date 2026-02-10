@@ -32,7 +32,8 @@ import type {
 	ProducingBeatsTaskResponse,
 	RecordingReleaseTaskResponse,
 	RestingTaskResponse,
-	AnyTaskResponse
+	AnyTaskResponse,
+	TaskStatus
 } from '$lib/types/task';
 import { TaskType } from '$lib/types/task';
 import type { ScoutingTaskRequest, ScoutingScope } from '$lib/types/scoutingArtistsTask';
@@ -138,23 +139,97 @@ export function createClaimTaskMutation(labelId: string) {
 	});
 }
 
-// Mutation: Create scouting task
+// Mutation: Create scouting task with optimistic updates
 export function createScoutingTaskMutation(labelId: string) {
 	const queryClient = useQueryClient();
 
-	return createMutation<TimedTask, Error, ScoutingTaskRequest>({
-		mutationFn: createScoutingTask,
-		onSuccess: (newTask) => {
-			// Add the new task to the cache
+	return createMutation<
+		TimedTask,
+		Error,
+		ScoutingTaskRequest & { costPrediction?: TaskCostPrediction }
+	>({
+		mutationFn: async (request) => {
+			// Remove costPrediction from the actual API request
+			const { costPrediction, ...apiRequest } = request;
+			return createScoutingTask(apiRequest);
+		},
+		onMutate: async (request) => {
+			// Cancel any outgoing refetches to prevent overwriting optimistic update
+			await queryClient.cancelQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
+
+			// Snapshot the previous value
+			const previousTasks = queryClient.getQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId));
+
+			// Create optimistic task
+			const now = new Date();
+			const estimatedDuration = request.costPrediction?.duration || '00:01:00:00'; // Default 1 hour
+			const endTime = new Date(now.getTime() + parseDuration(estimatedDuration));
+
+			const optimisticTask: ScoutingTaskResponse = {
+				id: `temp-${Date.now()}-${Math.random()}`,
+				labelId: request.labelId,
+				workerId: request.workerId,
+				taskType: TaskType.Scouting,
+				name: 'Scouting Task',
+				description: 'AI is generating your scouting task...',
+				budgetRequired: request.costPrediction?.budgetRequired ?? 0,
+				staminaCost: request.costPrediction?.staminaCost ?? 0,
+				startTime: now.toISOString(),
+				endTime: endTime.toISOString(),
+				claimedAt: null,
+				createdAt: now.toISOString(),
+				updatedAt: now.toISOString(),
+				status: TaskStatus.Pending,
+				results: null,
+				viewedAt: null,
+				scopeId: request.scopeId,
+				scoutingType: request.scoutingType,
+				// Store request data for display purposes (not part of API response)
+				_optimistic: true,
+				_requestData: request
+			} as any;
+
+			// Optimistically add the task to the cache
 			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) =>
-				old ? [...old, newTask] : [newTask]
+				old ? [...old, optimisticTask] : [optimisticTask]
 			);
+
+			// Return context for rollback
+			return { previousTasks };
+		},
+		onError: (err, request, context) => {
+			// Rollback to previous state on error
+			if (context?.previousTasks) {
+				queryClient.setQueryData<TimedTask[]>(
+					queryKeys.tasks.byLabel(labelId),
+					context.previousTasks
+				);
+			}
+		},
+		onSuccess: (newTask, request) => {
+			// Remove optimistic task and add real task
+			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) => {
+				if (!old) return [newTask];
+				// Filter out optimistic tasks and add the real one
+				return [...old.filter((t) => !(t as any)._optimistic), newTask];
+			});
 			// Invalidate to get fresh data
 			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
 			// Also invalidate label to get updated bankroll
 			queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(labelId) });
 		}
 	});
+}
+
+// Helper to parse duration string (format: "DD:HH:MM:SS")
+function parseDuration(duration: string): number {
+	const parts = duration.split(':').map(Number);
+	if (parts.length === 4) {
+		const [days, hours, minutes, seconds] = parts;
+		return ((days * 24 + hours) * 60 + minutes) * 60 * 1000 + seconds * 1000;
+	}
+	// Default to 1 hour if parsing fails
+	return 60 * 60 * 1000;
 }
 
 // Mutation: Create sign artist contract task

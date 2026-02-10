@@ -1,27 +1,75 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { XMarkIcon, CheckIcon, ArrowRightIcon } from 'heroicons-svelte/24/solid';
+	import { ArrowPathIcon } from 'heroicons-svelte/24/outline';
 	import RadialProgressBar from '../progress-bars/RadialProgressBar.svelte';
 	import { ScoutingType, ScoutingTypeNames } from '$lib/types/scoutingArtistsTask';
+	import { formatCurrency } from '$lib/utils';
 
 	export let state: 'loading' | 'in-progress' | 'failed' | 'succeeded' | 'error' = 'succeeded';
 	export let durationText: string = '6h 34m 45s';
 	export let inProgressDescription: string = 'Observing at open mic...';
 	export let scoutingType: ScoutingType = ScoutingType.Rappers;
-
 	export let taskProgress = 0;
+
+	// Props for loading state with detailed info
+	export let genreNames: string[] = [];
+	export let scopeName: string = '';
+	export let estimatedCost: number | null = null;
+	export let estimatedDuration: string = '';
 
 	const dispatch = createEventDispatcher();
 </script>
 
 <article
-	class="border border-gray-800 h-auto bg-primary-950 rounded-lg w-48 flex flex-col items-center gap-4 select-none"
+	class="flex h-auto w-48 select-none flex-col items-center gap-4 rounded-lg border border-gray-800 bg-primary-950"
 >
-	{#if state === 'in-progress'}
-		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
-			<div class="text-center mb-4">
-				<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
-				<p class="uppercase text-lg font-black leading-none">{ScoutingTypeNames[scoutingType]}</p>
+	{#if state === 'loading'}
+		<div class="relative flex h-64 w-48 flex-col items-center gap-3 overflow-hidden p-4">
+			<div class="mb-2 text-center">
+				<h4 class="text-sm font-thin uppercase leading-none">Scouting</h4>
+				<p class="text-lg font-black uppercase leading-none">{ScoutingTypeNames[scoutingType]}</p>
+			</div>
+
+			<div class="flex flex-1 flex-col items-center justify-center gap-2">
+				<ArrowPathIcon class="h-8 w-8 animate-spin text-primary-400" />
+				<p class="text-center text-xs font-semibold text-primary-300">
+					AI is generating your task...
+				</p>
+			</div>
+
+			<div class="w-full space-y-1 text-xs text-gray-400">
+				{#if scopeName}
+					<div class="flex justify-between">
+						<span class="text-gray-500">Scope:</span>
+						<span class="ml-2 truncate text-right">{scopeName}</span>
+					</div>
+				{/if}
+				{#if genreNames.length > 0}
+					<div class="flex justify-between">
+						<span class="text-gray-500">Genres:</span>
+						<span class="ml-2 truncate text-right">{genreNames.join(', ')}</span>
+					</div>
+				{/if}
+				{#if estimatedDuration}
+					<div class="flex justify-between">
+						<span class="text-gray-500">Duration:</span>
+						<span class="text-right">{estimatedDuration}</span>
+					</div>
+				{/if}
+				{#if estimatedCost !== null}
+					<div class="flex justify-between">
+						<span class="text-gray-500">Est. Cost:</span>
+						<span class="text-right">{formatCurrency(estimatedCost)}</span>
+					</div>
+				{/if}
+			</div>
+		</div>
+	{:else if state === 'in-progress'}
+		<div class="group relative flex h-64 w-48 flex-col items-center gap-4 overflow-hidden p-4">
+			<div class="mb-4 text-center">
+				<h4 class="text-sm font-thin uppercase leading-none">Scouting</h4>
+				<p class="text-lg font-black uppercase leading-none">{ScoutingTypeNames[scoutingType]}</p>
 			</div>
 
 			<RadialProgressBar
@@ -34,17 +82,17 @@
 			>
 				<div class="flex flex-col items-center">
 					<span class="text-xl font-thin">{durationText}</span>
-					<span class="text-sm font-light text-xs italic text-primary-400"
+					<span class="text-sm text-xs font-light italic text-primary-400"
 						>{inProgressDescription}</span
 					>
 				</div>
 			</RadialProgressBar>
 		</div>
 	{:else if state === 'failed'}
-		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
-			<div class="text-center mb-4">
-				<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
-				<p class="uppercase text-lg font-black leading-none">{ScoutingTypeNames[scoutingType]}</p>
+		<div class="group relative flex h-64 w-48 flex-col items-center gap-4 overflow-hidden p-4">
+			<div class="mb-4 text-center">
+				<h4 class="text-sm font-thin uppercase leading-none">Scouting</h4>
+				<p class="text-lg font-black uppercase leading-none">{ScoutingTypeNames[scoutingType]}</p>
 			</div>
 			<RadialProgressBar
 				value={taskProgress}
@@ -54,17 +102,17 @@
 			>
 				<div class="flex flex-col items-center">
 					<div class="flex flex-col items-center">
-						<XMarkIcon class="w-4 h-4 text-error-500 inline" />
-						<span class="text-error-500 text-lg uppercase">Failed</span>
+						<XMarkIcon class="inline h-4 w-4 text-error-500" />
+						<span class="text-lg uppercase text-error-500">Failed</span>
 					</div>
 				</div>
 			</RadialProgressBar>
 		</div>
 	{:else if state === 'succeeded'}
-		<div class="relative group p-4 w-48 h-64 overflow-hidden flex flex-col items-center gap-4">
-			<div class="text-center mb-4">
-				<h4 class="uppercase text-sm font-thin leading-none">Scouting</h4>
-				<p class="uppercase text-lg font-black leading-none">{ScoutingTypeNames[scoutingType]}</p>
+		<div class="group relative flex h-64 w-48 flex-col items-center gap-4 overflow-hidden p-4">
+			<div class="mb-4 text-center">
+				<h4 class="text-sm font-thin uppercase leading-none">Scouting</h4>
+				<p class="text-lg font-black uppercase leading-none">{ScoutingTypeNames[scoutingType]}</p>
 			</div>
 
 			<RadialProgressBar
@@ -75,8 +123,8 @@
 			>
 				<div class="flex flex-col items-center">
 					<div class="flex flex-col items-center">
-						<CheckIcon class="w-4 h-4 text-success-500" />
-						<span class="text-success-500 text-lg uppercase">Succeeded</span>
+						<CheckIcon class="h-4 w-4 text-success-500" />
+						<span class="text-lg uppercase text-success-500">Succeeded</span>
 					</div>
 				</div>
 			</RadialProgressBar>
@@ -84,17 +132,17 @@
 			<button
 				type="button"
 				class="
-				border border-primary-500
-				rounded-lg
 				absolute inset-0
-				bg-primary-950
-				opacity-0
-				group-hover:opacity-100
-				transition-opacity
-				flex flex-col items-center justify-center justify-between p-4 cursor-pointer"
+				flex
+				cursor-pointer flex-col
+				items-center
+				justify-center
+				justify-between
+				rounded-lg
+				border border-primary-500 bg-primary-950 p-4 opacity-0 transition-opacity group-hover:opacity-100"
 				on:click={() => dispatch('viewResults')}
 			>
-				<span class="text-primary-500 font-black uppercase">Results</span>
+				<span class="font-black uppercase text-primary-500">Results</span>
 				<svg
 					fill="text-primary-500"
 					id="Layer_1"
@@ -107,8 +155,8 @@
 					/></svg
 				>
 				<span
-					class="text-primary-500 text-xs border border-primary-500 pl-2 pr-2 pt-1 pb-1 rounded-full block mt-2"
-					>View details <ArrowRightIcon class="inline w-4 h-4 text-primary-500 " /></span
+					class="mt-2 block rounded-full border border-primary-500 pb-1 pl-2 pr-2 pt-1 text-xs text-primary-500"
+					>View details <ArrowRightIcon class="inline h-4 w-4 text-primary-500 " /></span
 				>
 			</button>
 		</div>

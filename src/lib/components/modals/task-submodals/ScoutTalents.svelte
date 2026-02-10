@@ -28,7 +28,6 @@
 	let selectedScope: string | null = null;
 	let selectedGenres: Set<RapMusicStyle> = new Set();
 	let scoutingScopes: ScoutingScope[] = [];
-	let loading = false;
 	let error: string | null = null;
 	let costPrediction: TaskCostPrediction | null = null;
 	let loadingCost = false;
@@ -40,6 +39,10 @@
 	const stepLabels = ['scouting parameters', 'review & start scouting'];
 	const lastStepIndex = stepLabels.length - 1;
 	const prospectorOptions = [{ name: 'you', value: 1 }];
+
+	// Create mutation for scouting task - but we can't use reactive statement with createMutation
+	// So we'll call the API directly like the old code did
+	let mutationInProgress = false;
 
 	// Computed choices
 	$: scoutingTypeChoices = [
@@ -111,6 +114,8 @@
 	}
 
 	async function handleStartScouting() {
+		console.log('handleStartScouting called');
+
 		if (!$currentLabel) {
 			error = 'No label found';
 			return;
@@ -128,7 +133,7 @@
 			return;
 		}
 
-		loading = true;
+		mutationInProgress = true;
 		error = null;
 
 		try {
@@ -140,7 +145,9 @@
 				scopeId: selectedScope
 			};
 
+			console.log('Calling API with:', taskRequest);
 			const response = await createScoutingTask(taskRequest);
+			console.log('API response:', response);
 
 			// Update bankroll in appState
 			appState.updateCurrentLabelBankroll(-response.budgetRequired);
@@ -155,9 +162,9 @@
 			} else {
 				error = 'Failed to create scouting task. Please try again.';
 			}
-			console.error(err);
+			console.error('Error creating task:', err);
 		} finally {
-			loading = false;
+			mutationInProgress = false;
 		}
 	}
 
@@ -303,12 +310,12 @@
 					color="secondary"
 					style="normal"
 					altText="Start scouting for talents"
-					{loading}
+					loading={mutationInProgress}
 					on:clicked={handleStartScouting}
 				>
-					{loading ? 'Starting...' : 'Start Scouting'}
+					{mutationInProgress ? 'Starting...' : 'Start Scouting'}
 				</Button>
 			</ContentPanelItem>
-		</ContentPanel></svelte:fragment
-	>
+		</ContentPanel>
+	</svelte:fragment>
 </ScrollableContainer>

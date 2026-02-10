@@ -14,6 +14,7 @@
 	import {
 		createLabelTasksQuery,
 		createTasksByType,
+		createScoutingScopesQuery,
 		serverTimeOffset
 	} from '$lib/queries/taskQueries';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
@@ -30,7 +31,8 @@
 		getTaskStatus,
 		isTaskFinished,
 		handleError,
-		getUserFriendlyError
+		getUserFriendlyError,
+		formatDuration
 	} from '$lib/utils';
 	import { getDateRange } from '$lib/utils/performanceUtils';
 	import { errorNotifications } from '$lib/stores/errorNotifications';
@@ -39,6 +41,22 @@
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
 	import { ContractStatus } from '$lib/types/contracts';
+	import { RapMusicStyleNames, type RapMusicStyle } from '$lib/types/musicStyles';
+
+	// Helper to check if a task is optimistic (has temporary ID and extra data)
+	function getOptimisticTaskData(task: any) {
+		const isOptimistic = task?._optimistic === true;
+		const requestData = isOptimistic ? task?._requestData : null;
+		const genreNames = requestData
+			? requestData.productionStyles.map((style: RapMusicStyle) => RapMusicStyleNames[style])
+			: [];
+		return { isOptimistic, requestData, genreNames };
+	}
+
+	function getScopeName(requestData: any, scopes: any[] | undefined) {
+		if (!requestData || !scopes) return '';
+		return scopes.find((s) => s.id === requestData.scopeId)?.displayName ?? '';
+	}
 
 	// Get query client for manual invalidation
 	const queryClient = useQueryClient();
@@ -46,6 +64,8 @@
 	// Reactive label ID
 	$: labelId = $currentLabel?.id ?? null;
 
+	// Create scouting scopes query for loading state display
+	$: scoutingScopesQuery = createScoutingScopesQuery();
 	// Create the tasks query - automatically refetches when labelId changes
 	$: tasksQuery = createLabelTasksQuery(labelId);
 
@@ -364,13 +384,21 @@
 				</div>
 			{:else}
 				{@const lastTask = scoutingTasks[scoutingTasks.length - 1]}
+				{@const { isOptimistic, requestData, genreNames } = getOptimisticTaskData(lastTask)}
+				{@const scopeName = getScopeName(requestData, $scoutingScopesQuery.data)}
 				<div class="flex flex-wrap gap-4">
 					<ScoutingTaskCard
-						state={getTaskStatus(lastTask, $serverTimeOffset)}
+						state={isOptimistic ? 'loading' : getTaskStatus(lastTask, $serverTimeOffset)}
 						durationText={formatTimeRemaining(lastTask.endTime, currentTime, $serverTimeOffset)}
 						inProgressDescription="Observing at open mic..."
 						scoutingType={lastTask.scoutingType}
 						taskProgress={getTaskProgress(lastTask, $serverTimeOffset)}
+						{genreNames}
+						{scopeName}
+						estimatedCost={requestData?.costPrediction?.budgetRequired ?? null}
+						estimatedDuration={requestData?.costPrediction?.duration
+							? formatDuration(requestData.costPrediction.duration)
+							: ''}
 						on:viewResults={() => handleOpenScoutResultsModal(lastTask)}
 					/>
 				</div>
