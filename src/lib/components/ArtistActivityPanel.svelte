@@ -20,7 +20,9 @@
 	$: beatTimeRemaining = beatProductionTask
 		? formatTimeRemaining(beatProductionTask.endTime, currentTime, serverTimeOffset)
 		: '';
-	$: beatProgress = beatProductionTask ? getTaskProgress(beatProductionTask, serverTimeOffset) : 0;
+	$: beatProgress = beatProductionTask
+		? getTaskProgress(beatProductionTask, serverTimeOffset, currentTime)
+		: 0;
 	$: numberOfBeats = beatProductionTask?.numberOfBeats || 1;
 
 	$: recordingTaskState = recordingReleaseTask
@@ -30,7 +32,7 @@
 		? formatTimeRemaining(recordingReleaseTask.endTime, currentTime, serverTimeOffset)
 		: '';
 	$: recordingProgress = recordingReleaseTask
-		? getTaskProgress(recordingReleaseTask, serverTimeOffset)
+		? getTaskProgress(recordingReleaseTask, serverTimeOffset, currentTime)
 		: 0;
 	$: numberOfTracks = recordingReleaseTask?.beatIds?.length || 1;
 
@@ -38,7 +40,9 @@
 	$: restingTimeRemaining = restingTask
 		? formatTimeRemaining(restingTask.endTime, currentTime, serverTimeOffset)
 		: '';
-	$: restingProgress = restingTask ? getTaskProgress(restingTask, serverTimeOffset) : 0;
+	$: restingProgress = restingTask
+		? getTaskProgress(restingTask, serverTimeOffset, currentTime)
+		: 0;
 
 	$: hasAnyTask = beatProductionTask || recordingReleaseTask || restingTask;
 </script>

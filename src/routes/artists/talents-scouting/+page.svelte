@@ -13,6 +13,7 @@
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import Button from '$lib/components/Button.svelte';
 	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
+	import { onMount } from 'svelte';
 
 	// Reactive label ID
 	$: labelId = $currentLabel?.id ?? null;
@@ -26,6 +27,14 @@
 
 	// Time tracking for progress bars
 	let currentTime = Date.now();
+
+	// Create reactive task data that depends on currentTime to ensure updates
+	$: taskCards = scoutingTasks.map((task) => ({
+		task,
+		state: getTaskStatus(task, $serverTimeOffset),
+		durationText: formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset),
+		taskProgress: getTaskProgress(task, $serverTimeOffset, currentTime)
+	}));
 
 	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist
@@ -43,6 +52,17 @@
 
 		openScoutResultsModal(scoutingTaskResponse);
 	}
+
+	onMount(() => {
+		// Update current time every second for countdown
+		const timeInterval = setInterval(() => {
+			currentTime = Date.now();
+		}, 1000);
+
+		return () => {
+			clearInterval(timeInterval);
+		};
+	});
 </script>
 
 <div
@@ -68,13 +88,13 @@
 			<p class="text-gray-400">No scouting tasks</p>
 		{:else}
 			<div class="flex flex-wrap gap-4">
-				{#each scoutingTasks as task}
+				{#each taskCards as { task, state, durationText, taskProgress } (task.id)}
 					<ScoutingTaskCard
-						state={getTaskStatus(task, $serverTimeOffset)}
-						durationText={formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)}
+						{state}
+						{durationText}
 						inProgressDescription="Observing at open mic..."
 						scoutingType={task.scoutingType}
-						taskProgress={getTaskProgress(task, $serverTimeOffset)}
+						{taskProgress}
 						on:viewResults={() => handleOpenScoutResultsModal(task)}
 					/>
 				{/each}

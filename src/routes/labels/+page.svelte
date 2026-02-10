@@ -392,7 +392,7 @@
 						durationText={formatTimeRemaining(lastTask.endTime, currentTime, $serverTimeOffset)}
 						inProgressDescription="Observing at open mic..."
 						scoutingType={lastTask.scoutingType}
-						taskProgress={getTaskProgress(lastTask, $serverTimeOffset)}
+						taskProgress={getTaskProgress(lastTask, $serverTimeOffset, currentTime)}
 						{genreNames}
 						{scopeName}
 						estimatedCost={requestData?.costPrediction?.budgetRequired ?? null}
