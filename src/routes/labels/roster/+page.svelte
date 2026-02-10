@@ -14,6 +14,7 @@
 	import type {
 		ProducingBeatsTaskResponse,
 		RecordingReleaseTaskResponse,
+		RestingTaskResponse,
 		SigningContractTaskResponse
 	} from '$lib/types/task';
 	import { currentLabel } from '$lib/stores/appState';
@@ -46,10 +47,17 @@
 	let contractTasks: SigningContractTaskResponse[] = [];
 	let beatProductionTasks: ProducingBeatsTaskResponse[] = [];
 	let recordingReleaseTasks: RecordingReleaseTaskResponse[] = [];
+	let restingTasks: RestingTaskResponse[] = [];
 	$: taskData = $tasksQuery.data
 		? createTasksByType($tasksQuery.data)
-		: { scoutingTasks: [], contractTasks: [], beatProductionTasks: [], recordingReleaseTasks: [] };
-	$: ({ contractTasks, beatProductionTasks, recordingReleaseTasks } = taskData);
+		: {
+				scoutingTasks: [],
+				contractTasks: [],
+				beatProductionTasks: [],
+				recordingReleaseTasks: [],
+				restingTasks: []
+			};
+	$: ({ contractTasks, beatProductionTasks, recordingReleaseTasks, restingTasks } = taskData);
 
 	// Contracts -> signed artist IDs
 	$: contractIds = contractTasks
@@ -144,6 +152,17 @@
 			}) ?? null
 		);
 	}
+	function getActiveRestingTask(artistId: string) {
+		const adjustedNow = currentTime + $serverTimeOffset;
+		return (
+			restingTasks.find((task) => {
+				if (task.workerId !== artistId) return false;
+				const startTime = new Date(task.startTime).getTime();
+				const endTime = new Date(task.endTime).getTime();
+				return startTime <= adjustedNow && endTime > adjustedNow;
+			}) ?? null
+		);
+	}
 
 	onMount(() => {
 		const interval = setInterval(() => {
@@ -201,6 +220,7 @@
 								{artist}
 								beatProductionTask={getActiveBeatTask(artist.id)}
 								recordingReleaseTask={getActiveRecordingTask(artist.id)}
+								restingTask={getActiveRestingTask(artist.id)}
 								{currentTime}
 								serverTimeOffset={$serverTimeOffset}
 							/>
@@ -218,6 +238,7 @@
 								{artist}
 								beatProductionTask={getActiveBeatTask(artist.id)}
 								recordingReleaseTask={getActiveRecordingTask(artist.id)}
+								restingTask={getActiveRestingTask(artist.id)}
 								{currentTime}
 								serverTimeOffset={$serverTimeOffset}
 							/>

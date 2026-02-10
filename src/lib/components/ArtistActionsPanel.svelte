@@ -1,10 +1,14 @@
 <script lang="ts">
 	import RecordIcon from '$lib/icons/RecordIcon.svelte';
+	import RestIcon from '$lib/icons/RestIcon.svelte';
 	import SoundWaveIcon from '$lib/icons/SoundWaveIcon.svelte';
 	import WorldIcon from '$lib/icons/WorldIcon.svelte';
-	import { openProducingBeatsModal, openRecordingReleaseModal } from '$lib/modals/helpers';
+	import {
+		openProducingBeatsModal,
+		openRecordingReleaseModal,
+		openRestingModal
+	} from '$lib/modals/helpers';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
-	import type { TimedTask } from '$lib/types/task';
 	import { isBeatmaker, isRapper } from '$lib/utils';
 
 	export let artist: Artist;
@@ -13,6 +17,14 @@
 </script>
 
 <div class="mb-6 flex justify-end gap-2 {className}">
+	<!-- Send artist on rest button -->
+	<button
+		on:click={() => openRestingModal()}
+		class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+	>
+		<RestIcon />
+		<div class="text-xs uppercase">Send Artist<br />To Rest</div>
+	</button>
 	<!-- Send artist on tour button -->
 	{#if isRapper(artist)}
 		<button

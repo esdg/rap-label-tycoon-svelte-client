@@ -3,17 +3,23 @@
 	import BeatmakerIcon from '$lib/icons/BeatmakerIcon.svelte';
 	import RapperIcon from '$lib/icons/RapperIcon.svelte';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
-	import type { ProducingBeatsTaskResponse, RecordingReleaseTaskResponse } from '$lib/types/task';
+	import type {
+		ProducingBeatsTaskResponse,
+		RecordingReleaseTaskResponse,
+		RestingTaskResponse
+	} from '$lib/types/task';
 	import { getRarityClass, getRarityLabel } from '$lib/utils';
 	import { BoltIcon, FaceSmileIcon, StarIcon } from 'heroicons-svelte/24/solid';
 	import ArtistActivityPanel from '../ArtistActivityPanel.svelte';
 	import Chip from '../Chip.svelte';
 	import ProgressBar from '../progress-bars/ProgressBar.svelte';
 	import WatchlistButton from '../WatchlistButton.svelte';
+	import Tooltip from '../Tooltip.svelte';
 
 	export let artist: Artist;
 	export let beatProductionTask: ProducingBeatsTaskResponse | null = null;
 	export let recordingReleaseTask: RecordingReleaseTaskResponse | null = null;
+	export let restingTask: RestingTaskResponse | null = null;
 	export let currentTime: number = Date.now();
 	export let serverTimeOffset: number = 0;
 
@@ -58,29 +64,42 @@
 					</p>
 				</div>
 				<div class="vitality-infos flex w-24 flex-col gap-1 self-end">
-					<div class="flex gap-2">
-						<FaceSmileIcon class="h-3 w-3 flex-none text-secondary-500" /><ProgressBar
-							thicknessClass="h-2"
-							value={artist.vitalityStats.happinessPercent}
-							useGradient={true}
-							gradientFromClass="from-secondary-600"
-							gradientToClass="to-secondary-400"
-						/>
+					<div class="flex">
+						<Tooltip position="right">
+							<span slot="trigger" class="flex w-24 gap-1">
+								<FaceSmileIcon class="h-3 w-3 flex-none text-secondary-500" />
+								<ProgressBar
+									thicknessClass="h-2"
+									value={artist.vitalityStats.happinessPercent}
+									useGradient={true}
+									gradientFromClass="from-secondary-600"
+									gradientToClass="to-secondary-400"
+								/>
+							</span>
+							<span>Happiness: {artist.vitalityStats.happinessPercent}%</span>
+						</Tooltip>
 					</div>
-					<div class="flex gap-2">
-						<BoltIcon class="h-3 w-3 flex-none text-primary-500" /><ProgressBar
-							thicknessClass="h-2"
-							value={artist.vitalityStats.staminaPercent}
-							useGradient={true}
-							gradientFromClass="from-primary-600"
-							gradientToClass="to-primary-400"
-						/>
+					<div class="flex">
+						<Tooltip position="right">
+							<span slot="trigger" class="flex w-24 gap-1">
+								<BoltIcon class="h-3 w-3 flex-none text-primary-500" />
+								<ProgressBar
+									thicknessClass="h-2"
+									value={artist.vitalityStats.staminaPercent}
+									useGradient={true}
+									gradientFromClass="from-primary-600"
+									gradientToClass="to-primary-400"
+								/>
+							</span>
+							<span>Stamina: {artist.vitalityStats.staminaPercent}%</span>
+						</Tooltip>
 					</div>
 				</div>
 			</div>
 			<ArtistActivityPanel
 				{beatProductionTask}
 				{recordingReleaseTask}
+				{restingTask}
 				{currentTime}
 				{serverTimeOffset}
 			/>

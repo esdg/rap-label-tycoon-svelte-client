@@ -90,3 +90,14 @@ export function openRecordingReleaseModal(options?: { title?: string; imageUrl?:
 		imageUrl: options?.imageUrl ?? MODAL_DEFAULTS.RECORDING_RELEASE.imageUrl
 	});
 }
+
+/**
+ * Open the resting task modal
+ */
+export function openRestingModal(options?: { title?: string; imageUrl?: string }) {
+	openOrTransition(MODAL_TYPES.TASK, {
+		subModal: TASK_SUB_MODALS.RESTING,
+		title: options?.title ?? MODAL_DEFAULTS.RESTING.title,
+		imageUrl: options?.imageUrl ?? MODAL_DEFAULTS.RESTING.imageUrl
+	});
+}

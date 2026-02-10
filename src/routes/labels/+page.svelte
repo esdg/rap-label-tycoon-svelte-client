@@ -8,6 +8,7 @@
 		type TimedTask,
 		type ScoutingTaskResponse,
 		type ScoutingTaskResults,
+		type RestingTaskResponse,
 		TaskType
 	} from '$lib/types/task';
 	import {
@@ -51,11 +52,18 @@
 	// Split tasks by type (derived from query data)
 	$: taskData = $tasksQuery.data
 		? createTasksByType($tasksQuery.data)
-		: { scoutingTasks: [], contractTasks: [], beatProductionTasks: [], recordingReleaseTasks: [] };
+		: {
+				scoutingTasks: [],
+				contractTasks: [],
+				beatProductionTasks: [],
+				recordingReleaseTasks: [],
+				restingTasks: []
+			};
 	$: scoutingTasks = taskData.scoutingTasks;
 	$: contractTasks = taskData.contractTasks;
 	$: beatProductionTasks = taskData.beatProductionTasks;
 	$: recordingReleaseTasks = taskData.recordingReleaseTasks;
+	$: restingTasks = taskData.restingTasks;
 
 	// Extract contract IDs directly from task.contractId (available on signing_contract_task)
 	$: contractIds = contractTasks
@@ -117,6 +125,7 @@
 
 	// Time tracking for progress bars
 	let currentTime = Date.now();
+	let restingTasks: RestingTaskResponse[] = [];
 
 	// Previous modal state for refresh on close
 	let previousModalState = $modalStore.isOpen;
@@ -289,10 +298,19 @@
 								const endTime = new Date(t.endTime).getTime();
 								return startTime <= adjustedNow && endTime > adjustedNow;
 							}) || null}
+						{@const artistRestingTask =
+							restingTasks.find((t) => {
+								if (t.workerId !== artist.id) return false;
+								const adjustedNow = currentTime + $serverTimeOffset;
+								const startTime = new Date(t.startTime).getTime();
+								const endTime = new Date(t.endTime).getTime();
+								return startTime <= adjustedNow && endTime > adjustedNow;
+							}) || null}
 						<ArtistCard
 							{artist}
 							beatProductionTask={artistBeatTask}
 							recordingReleaseTask={artistRecordingTask}
+							restingTask={artistRestingTask}
 							{currentTime}
 							serverTimeOffset={$serverTimeOffset}
 						/>

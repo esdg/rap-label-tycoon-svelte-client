@@ -23,6 +23,11 @@ export const MODAL_DEFAULTS = {
 		title: 'Recording Release',
 		imageUrl:
 			'https://res.cloudinary.com/dig430oem/image/upload/v1770582359/scouting-cover_puhh6v.png'
+	},
+	RESTING: {
+		title: 'Resting Session',
+		imageUrl:
+			'https://res.cloudinary.com/dig430oem/image/upload/v1770740559/resting-cover_rhzwnj.png'
 	}
 } as const;
 
@@ -35,5 +40,6 @@ export const TASK_SUB_MODALS = {
 	SCOUT_RESULTS: 'scout-results',
 	SIGN_CONTRACT: 'sign-contract',
 	PRODUCING_BEATS: 'producing-beats',
-	RECORDING_RELEASE: 'recording-release'
+	RECORDING_RELEASE: 'recording-release',
+	RESTING: 'resting'
 } as const;

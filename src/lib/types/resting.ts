@@ -8,3 +8,10 @@ export interface RestingType {
 	baseBudgetPerHour: number;
 	illustrationUrl: string | null;
 }
+
+export interface RestingTaskRequest {
+	labelId: string;
+	workerId: string;
+	duration: string;
+	restingTypeId: string;
+}

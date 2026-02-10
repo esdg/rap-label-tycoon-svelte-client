@@ -9,6 +9,8 @@ import {
 import type { TimedTask, TaskCostPrediction } from '$lib/types/task';
 import type { ScoutingTaskRequest, ScoutingScope } from '$lib/types/scoutingArtistsTask';
 import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
+import type { RestingTaskRequest } from '$lib/types/resting';
+export type { RestingTaskRequest } from '$lib/types/resting';
 
 // Re-export TaskCreationError for convenience
 export { TaskCreationError } from './client';
@@ -58,6 +60,20 @@ export async function createSignArtistContractTask(
 		'/api/v1/tasks/sign-artist-contract',
 		data
 	);
+}
+
+// Resting tasks
+export async function predictRestingTaskCost(
+	data: RestingTaskRequest
+): Promise<TaskCostPrediction> {
+	return apiFetch<TaskCostPrediction>('/api/v1/task-estimates/resting', {
+		method: 'POST',
+		body: JSON.stringify(data)
+	});
+}
+
+export async function createRestingTask(data: RestingTaskRequest): Promise<TimedTask> {
+	return apiPostTask<RestingTaskRequest, TimedTask>('/api/v1/tasks/resting', data);
 }
 
 // Producing beats tasks

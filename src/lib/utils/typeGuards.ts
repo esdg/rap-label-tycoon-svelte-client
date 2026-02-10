@@ -6,7 +6,8 @@ import type {
 	SigningContractTaskResponse,
 	ProducingBeatsTaskResponse,
 	RecordingReleaseTaskResponse,
-	PublishingReleaseTaskResponse
+	PublishingReleaseTaskResponse,
+	RestingTaskResponse
 } from '$lib/types/task';
 
 /**
@@ -42,6 +43,13 @@ export function isRecordingReleaseTask(task: TimedTask): task is RecordingReleas
  */
 export function isPublishingReleaseTask(task: TimedTask): task is PublishingReleaseTaskResponse {
 	return task.taskType === TaskType.PublishingRelease;
+}
+
+/**
+ * Type guard to check if a task is a resting task
+ */
+export function isRestingTask(task: TimedTask): task is RestingTaskResponse {
+	return task.taskType === TaskType.Resting || 'restingTypeId' in (task as RestingTaskResponse);
 }
 
 /**

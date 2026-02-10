@@ -2,6 +2,7 @@
 	import Hero from '../Hero.svelte';
 	import ProducingBeat from './task-submodals/ProducingBeat.svelte';
 	import RecordingRelease from './task-submodals/RecordingRelease.svelte';
+	import Resting from './task-submodals/Resting.svelte';
 	import ScoutTalents from './task-submodals/ScoutTalents.svelte';
 	import ScoutTalentsResults from './task-submodals/ScoutTalentsResults.svelte';
 	import SignContract from './task-submodals/SignContract.svelte';
@@ -16,7 +17,8 @@
 		'sign-contract',
 		'scout-results',
 		'producing-beats',
-		'recording-release'
+		'recording-release',
+		'resting'
 	]);
 
 	let imageOverride: string | null = null;
@@ -66,6 +68,8 @@
 			<ProducingBeat />
 		{:else if activeSubModal === 'recording-release'}
 			<RecordingRelease />
+		{:else if activeSubModal === 'resting'}
+			<Resting />
 		{:else}
 			<ScoutTalents />
 		{/if}

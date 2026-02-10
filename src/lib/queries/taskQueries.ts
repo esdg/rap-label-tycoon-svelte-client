@@ -31,6 +31,7 @@ import type {
 	SigningContractTaskResponse,
 	ProducingBeatsTaskResponse,
 	RecordingReleaseTaskResponse,
+	RestingTaskResponse,
 	AnyTaskResponse
 } from '$lib/types/task';
 import { TaskType } from '$lib/types/task';
@@ -87,6 +88,10 @@ export function createTasksByType(tasks: AnyTaskResponse[]) {
 		),
 		recordingReleaseTasks: tasks.filter(
 			(t): t is RecordingReleaseTaskResponse => t.taskType === TaskType.RecordingRelease
+		),
+		restingTasks: tasks.filter(
+			(t): t is RestingTaskResponse =>
+				t.taskType === TaskType.Resting || 'restingTypeId' in (t as RestingTaskResponse)
 		)
 	};
 }
