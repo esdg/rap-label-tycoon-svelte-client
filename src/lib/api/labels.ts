@@ -37,3 +37,7 @@ export async function removeArtistFromWatchlist(labelId: string, artistId: strin
 		method: 'DELETE'
 	});
 }
+
+export async function fetchAllLabels(): Promise<Label[]> {
+	return apiFetch<Label[]>('/api/v1/rap-labels');
+}

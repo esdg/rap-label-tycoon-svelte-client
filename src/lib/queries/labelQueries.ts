@@ -4,6 +4,7 @@ import { queryKeys } from './queryClient';
 import {
 	fetchLabelById,
 	fetchLabelsByIds,
+	fetchAllLabels,
 	createLabel,
 	addArtistToWatchlist,
 	removeArtistFromWatchlist,
@@ -30,6 +31,15 @@ export function createPlayerLabelsQuery(labelIds: string[] | null) {
 				: ['labels', 'none'],
 		queryFn: () => fetchLabelsByIds(labelIds!),
 		enabled: !!labelIds && labelIds.length > 0
+	});
+}
+
+// Query: Get all labels (for leaderboard)
+export function createAllLabelsQuery() {
+	return createQuery<Label[], Error>({
+		queryKey: queryKeys.labels.all,
+		queryFn: fetchAllLabels,
+		staleTime: 30000 // 30 seconds
 	});
 }
 

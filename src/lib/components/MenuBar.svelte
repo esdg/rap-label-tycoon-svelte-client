@@ -5,7 +5,8 @@
 		CalendarDaysIcon,
 		PowerIcon,
 		MegaphoneIcon,
-		MagnifyingGlassCircleIcon
+		MagnifyingGlassCircleIcon,
+		TrophyIcon
 	} from 'heroicons-svelte/24/solid';
 	import RecordIconSmall from '$lib/icons/RecordIconSmall.svelte';
 	import RosterIcon from '$lib/icons/RosterIcon.svelte';
@@ -17,22 +18,71 @@
 		path: string;
 		icon: any;
 		label: string;
+		description?: string;
 		disabled?: boolean;
 		exactMatch?: boolean;
 	}
 
 	const menuItems: MenuItem[] = [
-		{ path: '/labels', icon: HomeIcon, label: 'Label Dashboard', exactMatch: true },
-		{ path: '/labels/roster', icon: RosterIcon, label: 'Artist Roster' },
+		{
+			path: '/labels',
+			icon: HomeIcon,
+			label: 'Label Dashboard',
+			description:
+				'Your command center. Get a quick snapshot of your label’s health: money, reputation, active projects, and urgent tasks that need your attention.',
+			exactMatch: true
+		},
+		{
+			path: '/labels/roster',
+			icon: RosterIcon,
+			label: 'Artists',
+			description:
+				'Manage your signed artists. Check their stats, mood, contracts, and progress, and decide who to develop, push, or let go.'
+		},
 		{
 			path: '/artists/talents-scouting',
 			icon: MagnifyingGlassCircleIcon,
-			label: 'Scout New Talent'
+			label: 'Scout New Talent',
+			description:
+				'Discover the next big thing. Browse unsigned artists, listen to their demos, and decide who to sign to your label. The future of hip-hop is in your hands.'
 		},
-		{ path: '/labels/music-and-release', icon: RecordIconSmall, label: 'Music & Releases' },
-		{ path: '/labels/finances', icon: CurrencyDollarIcon, label: 'Financial Overview' },
-		{ path: '/marketing', icon: MegaphoneIcon, label: 'Marketing (Coming Soon)', disabled: true },
-		{ path: '/schedule', icon: CalendarDaysIcon, label: 'Schedule (Coming Soon)', disabled: true }
+		{
+			path: '/labels/music-and-release',
+			icon: RecordIconSmall,
+			label: 'Music & Releases',
+			description:
+				'Oversee your music projects. Track production stages, manage release schedules, and ensure every drop is a hit.'
+		},
+		{
+			path: '/labels/finances',
+			icon: CurrencyDollarIcon,
+			label: 'Financial Overview',
+			description:
+				'Keep your label profitable. Monitor income, expenses, and cash flow to make informed financial decisions and grow your empire.'
+		},
+		{
+			path: '/marketing',
+			icon: MegaphoneIcon,
+			label: 'Marketing (Coming Soon)',
+			description:
+				'Promote your label and artists. Plan campaigns, track engagement, and build your brand presence.',
+			disabled: true
+		},
+		{
+			path: '/schedule',
+			icon: CalendarDaysIcon,
+			label: 'Schedule (Coming Soon)',
+			description:
+				'Organize your label’s calendar. Manage events, deadlines, and important dates to keep everything on track.',
+			disabled: true
+		},
+		{
+			path: '/leaderboard',
+			icon: TrophyIcon,
+			label: 'Leaderboard',
+			description:
+				'See how your label stacks up against the competition. Compare ratings, reputation, and rankings with other labels.'
+		}
 	];
 
 	$: currentPath = $page.url.pathname;
@@ -56,14 +106,15 @@
 	}
 </script>
 
-<nav class="flex min-h-screen flex-col items-center gap-4 bg-black px-4 py-3 text-white">
+<nav class="flex min-h-screen flex-col items-center gap-2 bg-black px-4 py-3 text-white">
 	{#each menuItems as item, index (item.path)}
 		{#if item.disabled}
 			<Tooltip position="right">
 				<span slot="trigger" class="cursor-not-allowed opacity-50">
 					<svelte:component this={item.icon} class={getIconClass(item.path, true)} />
 				</span>
-				{item.label}
+				<p class="text-white">{item.label}</p>
+				<p>{item.description}</p>
 			</Tooltip>
 		{:else}
 			<Tooltip position="right">
@@ -78,7 +129,8 @@
 						class={getIconClass(item.path, false, item.exactMatch)}
 					/>
 				</a>
-				{item.label}
+				<p class="text-white">{item.label}</p>
+				<p>{item.description}</p>
 			</Tooltip>
 		{/if}
 	{/each}
