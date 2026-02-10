@@ -67,34 +67,34 @@
 		}));
 </script>
 
-<div class="flex md:flex-row flex-col-reverse h-full">
+<div class="flex h-full flex-col-reverse md:flex-row">
 	<Hero image={heroImage}>
-		<div class="max-w-112 mx-auto pb-24">
-			<h1 class="text-5xl font-black mb-4 text-center">Every legend starts with a name</h1>
-			<p class="max-w text-lg text-center">
+		<div class="mx-auto max-w-112 pb-24">
+			<h1 class="mb-4 text-center text-5xl font-black">Every legend starts with a name</h1>
+			<p class="max-w text-center text-lg">
 				Build your brand, sign talent, and take over the game.
 			</p>
-			<p class="max-w text-4xl font-black text-center mt-6 text-primary-500">
+			<p class="max-w mt-6 text-center text-4xl font-black text-primary-500">
 				Name it. Own it. Run it.
 			</p>
 		</div>
 	</Hero>
 	<section class="md:basis-3/5">
-		<div class="min-h-screen text-white p-8">
-			<div class="max-w-2xl mx-auto">
-				<h1 class="flex flex-col uppercase font-thin select-none mb-16">
+		<div class="min-h-screen p-8 text-white">
+			<div class="mx-auto max-w-2xl">
+				<h1 class="mb-16 flex select-none flex-col font-thin uppercase">
 					<span class="text-3xl/6 font-thin">Create</span>
 					<span class="text-6xl font-black">your label</span>
 				</h1>
 
 				{#if error}
-					<div class="mb-4 p-4 bg-red-900/50 border border-red-500 rounded text-red-200">
+					<div class="mb-4 rounded border border-red-500 bg-red-900/50 p-4 text-red-200">
 						{error}
 					</div>
 				{/if}
 
 				{#if !$currentPlayer}
-					<div class="p-4 bg-yellow-900/50 border border-yellow-500 rounded text-yellow-200">
+					<div class="rounded border border-yellow-500 bg-yellow-900/50 p-4 text-yellow-200">
 						Please <a href="/users/login" class="underline">sign in</a> or
 						<a href="/users/register" class="underline">create an account</a> before creating a label.
 					</div>
@@ -107,6 +107,7 @@
 							bind:value={name}
 							disabled={isLoading}
 							placeholder="Enter your label name"
+							maxlength={50}
 						/>
 
 						<TextField

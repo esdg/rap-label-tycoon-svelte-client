@@ -125,7 +125,6 @@
 
 	// Time tracking for progress bars
 	let currentTime = Date.now();
-	let restingTasks: RestingTaskResponse[] = [];
 
 	// Previous modal state for refresh on close
 	let previousModalState = $modalStore.isOpen;

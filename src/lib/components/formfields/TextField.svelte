@@ -10,6 +10,7 @@
 	export let required: boolean = false;
 	export let autocomplete: string | undefined = undefined;
 	export let rows: number = 4;
+	export let maxlength: number | undefined = undefined;
 </script>
 
 <div class="relative">
@@ -22,7 +23,8 @@
 			{placeholder}
 			{required}
 			{rows}
-			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black focus:ring-2 focus:ring-secondary-500"
+			{maxlength}
+			class="w-full rounded-md border border-primary-200 bg-primary-950 px-4 py-2 focus:border-secondary-500 focus:bg-black focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50"
 		/>
 	{:else if inputType === 'email'}
 		<input
@@ -33,7 +35,8 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black focus:ring-2 focus:ring-secondary-500"
+			{maxlength}
+			class="w-full rounded-md border border-primary-200 bg-primary-950 px-4 py-2 focus:border-secondary-500 focus:bg-black focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50"
 		/>
 	{:else if inputType === 'password'}
 		<input
@@ -44,7 +47,8 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black focus:ring-2 focus:ring-secondary-500"
+			{maxlength}
+			class="w-full rounded-md border border-primary-200 bg-primary-950 px-4 py-2 focus:border-secondary-500 focus:bg-black focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50"
 		/>
 	{:else}
 		<input
@@ -55,7 +59,8 @@
 			{placeholder}
 			{required}
 			{autocomplete}
-			class="w-full px-4 py-2 bg-primary-950 border border-primary-200 rounded-md focus:outline-none focus:border-secondary-500 disabled:opacity-50 focus:bg-black focus:ring-2 focus:ring-secondary-500"
+			{maxlength}
+			class="w-full rounded-md border border-primary-200 bg-primary-950 px-4 py-2 focus:border-secondary-500 focus:bg-black focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50"
 		/>
 	{/if}
 </div>
