@@ -5,7 +5,12 @@
 	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { serverTimeOffset } from '$lib/queries/taskQueries';
 	import ProgressBar from '../progress-bars/ProgressBar.svelte';
-	import { getProgressPercent, formatTimeRemaining, formatDuration } from '$lib/utils';
+	import {
+		getProgressPercent,
+		formatTimeRemaining,
+		formatDuration,
+		formatCurrency
+	} from '$lib/utils';
 	import Tooltip from '../Tooltip.svelte';
 	import EllipsedTextWithQuote from '../EllipsedTextWithQuote.svelte';
 
@@ -140,7 +145,7 @@
 										<div class="flex w-full min-w-0 flex-col gap-0.5">
 											<div class="flex justify-between gap-2">
 												<span>Signing bonus</span><span
-													>{contractIteration.offert.signingBonus}$</span
+													>{formatCurrency(contractIteration.offert.signingBonus)}</span
 												>
 											</div>
 											<div class="flex justify-between gap-2">
@@ -149,7 +154,9 @@
 												>
 											</div>
 											<div class="flex justify-between gap-2">
-												<span>Advance</span><span>{contractIteration.offert.advance}$</span>
+												<span>Advance</span><span
+													>{formatCurrency(contractIteration.offert.advance)}</span
+												>
 											</div>
 										</div>
 									{:else}
