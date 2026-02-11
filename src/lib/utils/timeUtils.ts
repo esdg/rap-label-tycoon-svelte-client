@@ -2,58 +2,69 @@
  * Time and duration utility functions
  */
 
-
 /**
  * Formats a .NET TimeSpan string (e.g., "9.07:59:59.9999999") into a human-readable duration.
  *
  * @param duration - The duration string in format: [days.]hours:minutes:seconds[.fractional]
- * @returns A formatted string like "9d 7h 59m" or "2h 30m" or "45m"
+ * @returns A formatted string like "2y 3mo 15d 5h" or "9d 7h 59m" or "2h 30m" or "45m"
  */
 export function formatDuration(duration: string): string {
-    if (!duration) return '';
+	if (!duration) return '';
 
-    // Parse the TimeSpan format: [days.]hours:minutes:seconds[.fractional]
-    const parts = duration.split('.');
-    let timePart: string;
-    let days = 0;
+	// Parse the TimeSpan format: [days.]hours:minutes:seconds[.fractional]
+	const parts = duration.split('.');
+	let timePart: string;
+	let totalDays = 0;
 
-    // Check if there are days (format: days.hours:minutes:seconds)
-    if (parts.length >= 2 && parts[0].indexOf(':') === -1) {
-        days = parseInt(parts[0], 10);
-        timePart = parts[1];
-    } else {
-        timePart = parts[0];
-    }
+	// Check if there are days (format: days.hours:minutes:seconds)
+	if (parts.length >= 2 && parts[0].indexOf(':') === -1) {
+		totalDays = parseInt(parts[0], 10);
+		timePart = parts[1];
+	} else {
+		timePart = parts[0];
+	}
 
-    // Parse hours:minutes:seconds
-    const timeComponents = timePart.split(':');
-    const hours = parseInt(timeComponents[0], 10) || 0;
-    const minutes = parseInt(timeComponents[1], 10) || 0;
-    const seconds = parseInt(timeComponents[2], 10) || 0;
+	// Parse hours:minutes:seconds
+	const timeComponents = timePart.split(':');
+	const hours = parseInt(timeComponents[0], 10) || 0;
+	const minutes = parseInt(timeComponents[1], 10) || 0;
+	const seconds = parseInt(timeComponents[2], 10) || 0;
 
-    // Build the formatted string
-    const segments: string[] = [];
+	// Convert days to years, months, and remaining days
+	const years = Math.floor(totalDays / 365);
+	const remainingDaysAfterYears = totalDays % 365;
+	const months = Math.floor(remainingDaysAfterYears / 30);
+	const days = remainingDaysAfterYears % 30;
 
-    if (days > 0) {
-        segments.push(`${days}d`);
-    }
-    if (hours > 0) {
-        segments.push(`${hours}h`);
-    }
-    if (minutes > 0) {
-        segments.push(`${minutes}m`);
-    }
-    // Only show seconds if there are no larger units or if seconds is the only non-zero value
-    if (segments.length === 0 && seconds > 0) {
-        segments.push(`${seconds}s`);
-    }
+	// Build the formatted string
+	const segments: string[] = [];
 
-    return segments.length > 0 ? segments.join(' ') : '0m';
+	if (years > 0) {
+		segments.push(`${years}y`);
+	}
+	if (months > 0) {
+		segments.push(`${months}mo`);
+	}
+	if (days > 0) {
+		segments.push(`${days}d`);
+	}
+	if (hours > 0) {
+		segments.push(`${hours}h`);
+	}
+	if (minutes > 0) {
+		segments.push(`${minutes}m`);
+	}
+	// Only show seconds if there are no larger units or if seconds is the only non-zero value
+	if (segments.length === 0 && seconds > 0) {
+		segments.push(`${seconds}s`);
+	}
+
+	return segments.length > 0 ? segments.join(' ') : '0m';
 }
 
 export function yearsToTimeSpan(years: number): string {
-    const days = Math.max(0, years) * 365;
-    return `${days}.00:00:00`;
+	const days = Math.max(0, years) * 365;
+	return `${days}.00:00:00`;
 }
 
 /**
@@ -64,11 +75,11 @@ export function yearsToTimeSpan(years: number): string {
  * @returns The current timestamp adjusted for server time
  */
 export function getServerAdjustedTime(offset: number): number {
-    return Date.now() + offset;
+	return Date.now() + offset;
 }
 
 export function getCurrentServerTime(offset: number = 0): number {
-    return getServerAdjustedTime(offset);
+	return getServerAdjustedTime(offset);
 }
 
 /**
@@ -78,7 +89,7 @@ export function getCurrentServerTime(offset: number = 0): number {
  * @returns ISO 8601 formatted date string
  */
 export function nowISO(): string {
-    return new Date().toISOString();
+	return new Date().toISOString();
 }
 
 /**
@@ -89,29 +100,29 @@ export function nowISO(): string {
  * @returns Formatted countdown string
  */
 export function formatCountdown(ms: number, includeSeconds: boolean = true): string {
-    if (ms <= 0) return '0s';
+	if (ms <= 0) return '0s';
 
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+	const seconds = Math.floor(ms / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
+	const days = Math.floor(hours / 24);
 
-    const segments: string[] = [];
+	const segments: string[] = [];
 
-    if (days > 0) {
-        segments.push(`${days}d`);
-    }
-    if (hours % 24 > 0) {
-        segments.push(`${hours % 24}h`);
-    }
-    if (minutes % 60 > 0) {
-        segments.push(`${minutes % 60}m`);
-    }
-    if (includeSeconds && seconds % 60 > 0) {
-        segments.push(`${seconds % 60}s`);
-    }
+	if (days > 0) {
+		segments.push(`${days}d`);
+	}
+	if (hours % 24 > 0) {
+		segments.push(`${hours % 24}h`);
+	}
+	if (minutes % 60 > 0) {
+		segments.push(`${minutes % 60}m`);
+	}
+	if (includeSeconds && seconds % 60 > 0) {
+		segments.push(`${seconds % 60}s`);
+	}
 
-    return segments.length > 0 ? segments.join(' ') : '0s';
+	return segments.length > 0 ? segments.join(' ') : '0s';
 }
 
 /**
@@ -122,13 +133,13 @@ export function formatCountdown(ms: number, includeSeconds: boolean = true): str
  * @returns Remaining time in milliseconds (0 if already passed)
  */
 export function getTimeRemaining(
-    targetDate: Date | string,
-    serverOffset: number = 0,
-    currentTime?: number
+	targetDate: Date | string,
+	serverOffset: number = 0,
+	currentTime?: number
 ): number {
-    const target = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
-    const now = (currentTime ?? Date.now()) + serverOffset;
-    return Math.max(0, target.getTime() - now);
+	const target = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
+	const now = (currentTime ?? Date.now()) + serverOffset;
+	return Math.max(0, target.getTime() - now);
 }
 
 /**
@@ -136,46 +147,46 @@ export function getTimeRemaining(
  * Useful for feeding progress bars with time-based tasks.
  */
 export function getProgressPercent(
-    startDate: Date | string,
-    endDate: Date | string,
-    serverOffset: number = 0,
-    currentTime?: number
+	startDate: Date | string,
+	endDate: Date | string,
+	serverOffset: number = 0,
+	currentTime?: number
 ): number {
-    const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
-    const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
+	const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
+	const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
 
-    const total = end.getTime() - start.getTime();
-    if (total <= 0) return 100;
+	const total = end.getTime() - start.getTime();
+	if (total <= 0) return 100;
 
-    const remaining = getTimeRemaining(end, serverOffset, currentTime);
-    const elapsed = total - remaining;
-    const percent = (elapsed / total) * 100;
+	const remaining = getTimeRemaining(end, serverOffset, currentTime);
+	const elapsed = total - remaining;
+	const percent = (elapsed / total) * 100;
 
-    return Math.max(0, Math.min(100, percent));
+	return Math.max(0, Math.min(100, percent));
 }
 
 export function formatTimeRemaining(
-    endTime: string,
-    currentTime: number = Date.now(),
-    serverOffset: number = 0
+	endTime: string,
+	currentTime: number = Date.now(),
+	serverOffset: number = 0
 ): string {
-    const end = new Date(endTime).getTime();
-    const diff = end - (currentTime + serverOffset);
+	const end = new Date(endTime).getTime();
+	const diff = end - (currentTime + serverOffset);
 
-    if (diff <= 0) return 'Finished';
+	if (diff <= 0) return 'Finished';
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+	const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+	const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+	const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+	const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    if (days > 0) {
-        return `${days}d ${hours}h ${minutes}m`;
-    }
-    return `${hours}h ${minutes}m ${seconds}s`;
+	if (days > 0) {
+		return `${days}d ${hours}h ${minutes}m`;
+	}
+	return `${hours}h ${minutes}m ${seconds}s`;
 }
 
 // Helper to get current server-adjusted time (re-export for convenience)
 export function getServerTime(offset: number = 0): number {
-    return getServerAdjustedTime(offset);
+	return getServerAdjustedTime(offset);
 }
