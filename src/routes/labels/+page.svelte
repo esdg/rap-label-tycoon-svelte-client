@@ -23,7 +23,6 @@
 	import { queryKeys } from '$lib/queries/queryClient';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { fetchArtistsByIds } from '$lib/api/artists';
-	import { claimTask } from '$lib/api/tasks';
 	import {
 		formatCurrency,
 		formatTimeRemaining,
@@ -143,7 +142,8 @@
 	$: trendIndicator =
 		monthlyRevenue > yesterdayRevenue ? '▲' : monthlyRevenue < yesterdayRevenue ? '▼' : '-';
 
-	// Time tracking for progress bars
+	// Time tracking for UI updates (progress bars, countdowns)
+	// Note: Task claiming is now handled globally by taskClaimingService
 	let currentTime = Date.now();
 
 	// Previous modal state for refresh on close
@@ -158,86 +158,7 @@
 		previousModalState = $modalStore.isOpen;
 	}
 
-	// Auto-claim finished tasks; include currentTime so this re-runs when timers tick
-	$: if ($tasksQuery.data && labelId && currentTime) {
-		autoClaimFinishedTasks($tasksQuery.data, labelId);
-	}
-
-	// Track which tasks we've already started claiming to avoid duplicates
-	let claimingTaskIds = new Set<string>();
-
-	async function autoClaimFinishedTasks(tasks: TimedTask[], currentLabelId: string) {
-		const finishedUnclaimed = tasks.filter(
-			(task) =>
-				!task.claimedAt && isTaskFinished(task, $serverTimeOffset) && !claimingTaskIds.has(task.id)
-		);
-
-		const contractIdsToRefresh = new Set<string>();
-		let hasPublishingTask = false;
-		let hasBeatProductionTask = false;
-
-		finishedUnclaimed.forEach((task) => {
-			if ('contractId' in task && typeof task.contractId === 'string' && task.contractId) {
-				contractIdsToRefresh.add(task.contractId);
-			}
-			if (task.taskType === TaskType.PublishingRelease) {
-				hasPublishingTask = true;
-			}
-			if (task.taskType === TaskType.ProducingBeats) {
-				hasBeatProductionTask = true;
-			}
-		});
-
-		if (finishedUnclaimed.length === 0) return;
-
-		// Mark tasks as being claimed
-		finishedUnclaimed.forEach((task) => claimingTaskIds.add(task.id));
-
-		// Claim all finished tasks in parallel
-		const claimPromises = finishedUnclaimed.map(async (task) => {
-			try {
-				const claimedTask = await claimTask(task.id);
-
-				// Fetch and store discovered artists if this is a scouting task
-				if (claimedTask.results && 'discoveredArtistsIds' in claimedTask.results) {
-					const scoutingResults = claimedTask.results as ScoutingTaskResults;
-					if (scoutingResults.discoveredArtistsIds?.length > 0) {
-						const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
-						addDiscoveredArtists(artists, false);
-					}
-				}
-
-				return { success: true, taskId: task.id };
-			} catch (err) {
-				handleError('ClaimTask', err);
-				errorNotifications.add('Task Claim Failed', getUserFriendlyError(err).message);
-				claimingTaskIds.delete(task.id); // Allow retry
-				return { success: false, taskId: task.id, error: err };
-			}
-		});
-
-		await Promise.all(claimPromises);
-
-		// Refetch tasks to get updated state
-		queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(currentLabelId) });
-		queryClient.invalidateQueries({ queryKey: queryKeys.contracts.byLabel(currentLabelId) });
-
-		if (contractIdsToRefresh.size > 0) {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.contracts.byIds([...contractIdsToRefresh])
-			});
-		}
-
-		// If any publishing tasks were claimed, invalidate releases cache
-		if (hasPublishingTask) {
-			queryClient.invalidateQueries({ queryKey: queryKeys.releases.byLabel(currentLabelId) });
-		}
-
-		// If any beat production tasks were claimed, invalidate beats cache
-		if (hasBeatProductionTask) {
-			queryClient.invalidateQueries({ queryKey: queryKeys.beats.byLabel(currentLabelId) });
-		}
-	}
+	// Note: Task auto-claiming is now handled globally by taskClaimingService in +layout.svelte
 
 	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist

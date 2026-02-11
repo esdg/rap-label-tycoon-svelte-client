@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
@@ -9,9 +9,16 @@
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import { onFirebaseAuthStateChanged } from '$lib/firebase';
 	import { initializeAuthState } from '$lib/services/auth';
-	import { appState, currentPlayer, isAuthenticated, isAuthLoading } from '$lib/stores/appState';
+	import {
+		appState,
+		currentPlayer,
+		currentLabel,
+		isAuthenticated,
+		isAuthLoading
+	} from '$lib/stores/appState';
 	import MenuBar from '$lib/components/MenuBar.svelte';
 	import { VERSION, GIT_HASH } from '$lib/version';
+	import { taskClaimingService } from '$lib/services/taskClaimingService';
 
 	let initializingPlayer = false;
 
@@ -20,6 +27,15 @@
 
 	// Check if current route is public
 	$: isPublicRoute = publicRoutes.some((route) => $page.url.pathname.startsWith(route));
+
+	// Start/stop task claiming service based on auth and label state
+	$: if ($isAuthenticated && $currentLabel?.id) {
+		// User is authenticated and has a label - start the service
+		taskClaimingService.start($currentLabel.id);
+	} else {
+		// User is not authenticated or has no label - stop the service
+		taskClaimingService.stop();
+	}
 
 	onMount(() => {
 		// Listen for Firebase auth state changes
@@ -51,6 +67,11 @@
 		});
 
 		return () => unsubscribe();
+	});
+
+	onDestroy(() => {
+		// Clean up task claiming service on unmount
+		taskClaimingService.stop();
 	});
 </script>
 
