@@ -70,11 +70,16 @@ export function openSignContractModal(
  *
  * @param options - Optional overrides for title and image
  */
-export function openProducingBeatsModal(options?: { title?: string; imageUrl?: string }) {
+export function openProducingBeatsModal(options?: {
+	title?: string;
+	imageUrl?: string;
+	workerId?: string;
+}) {
 	openOrTransition(MODAL_TYPES.TASK, {
 		subModal: TASK_SUB_MODALS.PRODUCING_BEATS,
 		title: options?.title ?? MODAL_DEFAULTS.PRODUCING_BEATS.title,
-		imageUrl: options?.imageUrl ?? MODAL_DEFAULTS.PRODUCING_BEATS.imageUrl
+		imageUrl: options?.imageUrl ?? MODAL_DEFAULTS.PRODUCING_BEATS.imageUrl,
+		workerId: options?.workerId ?? 'artist-id-here'
 	});
 }
 
@@ -83,21 +88,31 @@ export function openProducingBeatsModal(options?: { title?: string; imageUrl?: s
  *
  * @param options - Optional overrides for title and image
  */
-export function openRecordingReleaseModal(options?: { title?: string; imageUrl?: string }) {
+export function openRecordingReleaseModal(options?: {
+	title?: string;
+	imageUrl?: string;
+	workerId?: string;
+}) {
 	openOrTransition(MODAL_TYPES.TASK, {
 		subModal: TASK_SUB_MODALS.RECORDING_RELEASE,
 		title: options?.title ?? MODAL_DEFAULTS.RECORDING_RELEASE.title,
-		imageUrl: options?.imageUrl ?? MODAL_DEFAULTS.RECORDING_RELEASE.imageUrl
+		imageUrl: options?.imageUrl ?? MODAL_DEFAULTS.RECORDING_RELEASE.imageUrl,
+		workerId: options?.workerId ?? 'artist-id-here' // Replace with actual worker ID when available
 	});
 }
 
 /**
  * Open the resting task modal
  */
-export function openRestingModal(options?: { title?: string; imageUrl?: string }) {
+export function openRestingModal(options?: {
+	title?: string;
+	imageUrl?: string;
+	workerId?: string;
+}) {
 	openOrTransition(MODAL_TYPES.TASK, {
 		subModal: TASK_SUB_MODALS.RESTING,
 		title: options?.title ?? MODAL_DEFAULTS.RESTING.title,
-		imageUrl: options?.imageUrl ?? MODAL_DEFAULTS.RESTING.imageUrl
+		imageUrl: options?.imageUrl ?? MODAL_DEFAULTS.RESTING.imageUrl,
+		workerId: options?.workerId ?? 'artist-id-here' // Replace with actual worker ID when available
 	});
 }

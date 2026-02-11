@@ -33,6 +33,9 @@
 	import CostEstimation from './CostEstimation.svelte';
 	import Chip from '$lib/components/Chip.svelte';
 
+	// Props
+	export let preselectedWorkerId: string | undefined = undefined;
+
 	// State
 	let activeStepIndex = 0;
 	let totalSteps = 3;
@@ -101,9 +104,14 @@
 		value: rapper.id
 	}));
 
-	// Auto-select if only one rapper available
+	// Auto-select if only one rapper available, or preselect if provided
 	$: if (rappersSelection.length === 1 && !selectedRapperId) {
 		selectedRapperId = rappersSelection[0].value;
+	} else if (preselectedWorkerId && !selectedRapperId && rappersSelection.length > 0) {
+		const preselected = rappersSelection.find((r) => r.value === preselectedWorkerId);
+		if (preselected) {
+			selectedRapperId = preselected.value;
+		}
 	}
 
 	// Release type choices for dropdown
@@ -326,15 +334,15 @@
 	</svelte:fragment>
 	<svelte:fragment>
 		<ContentPanel
-			class="pt-0 p-4 max-w-xl lg:max-w-3xl xl:max-w-4xl mx-auto h-full"
+			class="mx-auto h-full max-w-xl p-4 pt-0 lg:max-w-3xl xl:max-w-4xl"
 			{activeStepIndex}
 			transition="slide"
 			duration={300}
 		>
 			<!-- Step 1: Release Configuration -->
-			<ContentPanelItem class="space-y-8 text-white pb-8">
+			<ContentPanelItem class="space-y-8 pb-8 text-white">
 				<div class="space-y-4">
-					<p class="text-sm sm:text-base text-gray-300 leading-relaxed max-w-3xl">
+					<p class="max-w-3xl text-sm leading-relaxed text-gray-300 sm:text-base">
 						Configure your release by selecting the release type (single, album, EP, mixtape), the
 						music style, and the artist who will record it. Each release type has different track
 						requirements and will affect production costs and duration.
@@ -344,7 +352,7 @@
 						<!-- Release Type Selection -->
 						<div class="space-y-2">
 							<label
-								class="text-xs lg:text-sm xl:text-base font-semibold text-gray-400 uppercase tracking-wider"
+								class="text-xs font-semibold uppercase tracking-wider text-gray-400 lg:text-sm xl:text-base"
 								for="release-type-btn"
 							>
 								Release Type
@@ -357,7 +365,7 @@
 								direction="down"
 							/>
 							{#if selectedReleaseType}
-								<p class="text-xs text-gray-400 mt-1">
+								<p class="mt-1 text-xs text-gray-400">
 									{selectedReleaseType.description} (Requires {selectedReleaseType.minTracks}-{selectedReleaseType.maxTracks}
 									tracks)
 								</p>
@@ -377,9 +385,9 @@
 			</ContentPanelItem>
 
 			<!-- Step 2: Beats Selection -->
-			<ContentPanelItem class="space-y-6 text-white pb-8">
+			<ContentPanelItem class="space-y-6 pb-8 text-white">
 				<div class="space-y-4">
-					<p class="text-sm sm:text-base text-gray-300 leading-relaxed max-w-3xl">
+					<p class="max-w-3xl text-sm leading-relaxed text-gray-300 sm:text-base">
 						Select the beats for your release. Only beats matching the chosen genre and that are not
 						already sold are available. You must select at least {minTracksRequired}
 						{minTracksRequired === 1 ? 'beat' : 'beats'}
@@ -402,18 +410,18 @@
 					</div>
 
 					{#if filteredBeats.length === 0}
-						<div class="text-center py-8">
+						<div class="py-8 text-center">
 							<p class="text-gray-400">
 								No beats available for the selected genre. Please produce some beats first or choose
 								a different genre.
 							</p>
 						</div>
 					{:else}
-						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 							{#each filteredBeats as beat (beat.id)}
 								<button
 									type="button"
-									class="p-4 rounded-lg border-2 transition-all text-left {selectedBeatIds.has(
+									class="rounded-lg border-2 p-4 text-left transition-all {selectedBeatIds.has(
 										beat.id
 									)
 										? 'border-purple-500 bg-purple-500/10'
@@ -421,9 +429,9 @@
 									on:click={() => toggleBeatSelection(beat.id)}
 								>
 									<div class="flex items-start justify-between gap-2">
-										<div class="flex-1 min-w-0">
-											<h4 class="font-semibold text-white truncate">{beat.title}</h4>
-											<p class="text-xs text-gray-400 mt-1">
+										<div class="min-w-0 flex-1">
+											<h4 class="truncate font-semibold text-white">{beat.title}</h4>
+											<p class="mt-1 text-xs text-gray-400">
 												BPM: {beat.bpm} • Rating: {beat.rating}/100
 											</p>
 										</div>
@@ -441,7 +449,7 @@
 			<!-- Step 3: Review & Cost -->
 			<ContentPanelItem class="pb-8">
 				<div class="space-y-4 sm:space-y-6 lg:space-y-8">
-					<p class="text-sm sm:text-base text-gray-300 leading-relaxed max-w-3xl">
+					<p class="max-w-3xl text-sm leading-relaxed text-gray-300 sm:text-base">
 						Review the estimated costs for your release. Once you start recording, the selected
 						beats will be used and the budget will be deducted from your label's bankroll.
 					</p>
@@ -453,14 +461,15 @@
 
 	<svelte:fragment slot="footer">
 		<!-- Rapper Selection in Footer -->
-		<div class="flex gap-3 lg:gap-4 items-center sm:mr-auto">
+		<div class="flex items-center gap-3 sm:mr-auto lg:gap-4">
 			<label
-				class="text-xs lg:text-sm xl:text-base font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap"
+				class="whitespace-nowrap text-xs font-semibold uppercase tracking-wider text-gray-600 lg:text-sm xl:text-base"
 				for="rapper-btn"
 			>
 				Rapper
 			</label>
 			<Dropdown
+				label="Artist"
 				options={rappersSelection}
 				disabled={rappersSelection.length <= 1}
 				bind:value={selectedRapperId}
@@ -472,7 +481,7 @@
 		<!-- Action Buttons -->
 		<ContentPanel {activeStepIndex} class="w-full sm:w-auto">
 			<!-- Step 1 Actions -->
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"
@@ -494,7 +503,7 @@
 			</ContentPanelItem>
 
 			<!-- Step 2 Actions -->
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"
@@ -524,7 +533,7 @@
 			</ContentPanelItem>
 
 			<!-- Step 3 Actions -->
-			<ContentPanelItem class="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-end">
+			<ContentPanelItem class="flex flex-col justify-end gap-2 sm:flex-row sm:gap-3 lg:gap-4">
 				<Button
 					class="w-full sm:w-auto sm:min-w-32 lg:min-w-40 xl:min-w-44"
 					color="primary"

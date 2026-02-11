@@ -67,7 +67,7 @@
 	{#if artistHasActiveContractWithCurrentLabel}
 		<!-- Send artist on rest button -->
 		<button
-			on:click={() => openRestingModal()}
+			on:click={() => openRestingModal({ workerId: artist.id })}
 			class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
 		>
 			<RestIcon />
@@ -86,7 +86,7 @@
 		<!-- Produce record Buttons -->
 		{#if isRapper(artist)}
 			<button
-				on:click={() => openRecordingReleaseModal()}
+				on:click={() => openRecordingReleaseModal({ workerId: artist.id })}
 				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
 			>
 				<RecordIcon />
@@ -97,7 +97,7 @@
 		<!-- Produce beat(s) button -->
 		{#if isBeatmaker(artist)}
 			<button
-				on:click={() => openProducingBeatsModal()}
+				on:click={() => openProducingBeatsModal({ workerId: artist.id })}
 				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
 			>
 				<SoundWaveIcon />
