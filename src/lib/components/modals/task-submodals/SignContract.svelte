@@ -20,7 +20,7 @@
 	} from '$lib/api';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import Dropdown from '$lib/components/Dropdown.svelte';
-	import type { TaskCostPrediction } from '$lib/types/task';
+	import type { TaskCostPrediction, SigningContractTaskResponse } from '$lib/types/task';
 	import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
 	import { getTaskErrorMessage, yearsToTimeSpan } from '$lib/utils';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
@@ -94,9 +94,18 @@
 			// Update bankroll in appState
 			appState.updateCurrentLabelBankroll(-response.budgetRequired);
 
-			// Invalidate tasks query to refetch
+			// Invalidate tasks and contracts queries to refetch
 			if ($currentLabel) {
 				queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel($currentLabel.id) });
+				queryClient.invalidateQueries({ queryKey: queryKeys.contracts.byLabel($currentLabel.id) });
+
+				// Also invalidate specific contract if we have the contractId
+				const contractTask = response as SigningContractTaskResponse;
+				if (contractTask.contractId) {
+					queryClient.invalidateQueries({
+						queryKey: queryKeys.contracts.byIds([contractTask.contractId])
+					});
+				}
 			}
 
 			modalStore.close();
