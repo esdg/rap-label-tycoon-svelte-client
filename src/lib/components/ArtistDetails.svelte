@@ -29,7 +29,7 @@
 </script>
 
 <div
-	class="pointer-events-none flex flex-col border-b border-white/5 pb-12 last:border-none last:pb-0 {className}"
+	class="flex select-none flex-col border-b border-white/5 pb-12 last:border-none last:pb-0 {className}"
 >
 	<div class="mb-4">
 		<Chip class={getRarityClass(artist.rarity)}>{getRarityLabel(artist.rarity)}</Chip>

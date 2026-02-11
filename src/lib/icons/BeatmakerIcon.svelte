@@ -1,17 +1,21 @@
 <script lang="ts">
+	import Tooltip from '$lib/components/Tooltip.svelte';
+
 	let className = '';
 	export { className as class };
 </script>
 
-<svg
-	xmlns="http://www.w3.org/2000/svg"
-	fill="currentColor"
-	viewBox="0 0 357.81 384.3"
-	class={className}
->
-	<g>
-		<path
-			d="M357.47,86.23c-1.36-48-39.62-85.52-87.68-85.73C203.6,1.43,136.97-2.05,70.97,2.04C27.98,10.83-0.54,45.54-0.62,89.46
+<Tooltip position="right">
+	<svg
+		slot="trigger"
+		xmlns="http://www.w3.org/2000/svg"
+		fill="currentColor"
+		viewBox="0 0 357.81 384.3"
+		class={className}
+	>
+		<g>
+			<path
+				d="M357.47,86.23c-1.36-48-39.62-85.52-87.68-85.73C203.6,1.43,136.97-2.05,70.97,2.04C27.98,10.83-0.54,45.54-0.62,89.46
 		c1.81,75.91-4.13,152.69,2.7,228.19c10.05,40.57,43.77,66.33,87.41,66.51c59.15,0.25,118.31,0.09,177.46,0.04
 		c11.73-0.01,23.22-1.75,34.24-6.02c33.74-13.07,55.68-43.7,56.2-80.01C357.88,262.85,357.97,103.87,357.47,86.23z M238.3,81.61
 		c0.08-5.29,2.71-8.24,7.81-8.31c10.97-0.15,21.95-0.16,32.92-0.02c12.28,0.39,7.41,15.96,8.2,24.04c0,13.01-15.91,8.18-24.44,9.04
@@ -35,6 +39,13 @@
 		C306.45,177.88,295.89,163.61,296.52,225.08z M304.71,145.26c-42.13,0.01-210.34,0-252.31-0.02c-6.41,0-8.08-1.43-8.21-6.64
 		c-0.16-6.88,0.97-8.05,8.08-8.05c84.1-0.02,168.21-0.04,252.31-0.04c6.45,0,7.94,1.44,7.93,7.36
 		C312.52,143.99,311.2,145.26,304.71,145.26z"
-		/>
-	</g>
-</svg>
+			/>
+		</g>
+	</svg>
+	<p class="mb-1 font-bold text-white">🎧 Beatmaker</p>
+	<p class="text-xs font-light normal-case">
+		Produces instrumentals and shapes the sound of releases. Beatmakers create beats for your
+		artists, influence track quality, and define your label’s musical identity. A strong beatmaker
+		boosts song performance and overall production value.
+	</p>
+</Tooltip>
