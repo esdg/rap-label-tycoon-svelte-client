@@ -172,3 +172,23 @@ export function getCurrentPlayerId(): string | null {
 export function getClientConfig(): AppConfig | null {
 	return get(appState).clientConfig;
 }
+
+// Helper to wait for auth to be initialized
+export function waitForAuthInitialization(): Promise<void> {
+	return new Promise((resolve) => {
+		const state = get(appState);
+		// If already initialized, resolve immediately
+		if (state.authInitialized) {
+			resolve();
+			return;
+		}
+
+		// Otherwise, wait for authInitialized to become true
+		const unsubscribe = appState.subscribe(($state) => {
+			if ($state.authInitialized) {
+				unsubscribe();
+				resolve();
+			}
+		});
+	});
+}

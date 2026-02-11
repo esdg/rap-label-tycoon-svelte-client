@@ -23,6 +23,7 @@
 	import { globalTime } from '$lib/stores/globalTime';
 
 	let initializingPlayer = false;
+	let firstAuthCheckComplete = false;
 
 	// Public routes that don't require authentication
 	const publicRoutes = ['/users/login', '/users/register', '/template', '/labels/create'];
@@ -45,6 +46,11 @@
 
 		// Listen for Firebase auth state changes
 		const unsubscribe = onFirebaseAuthStateChanged(async (user) => {
+			// Mark that first auth check is complete
+			if (!firstAuthCheckComplete) {
+				firstAuthCheckComplete = true;
+			}
+
 			if (user && !$currentPlayer && !initializingPlayer) {
 				initializingPlayer = true;
 				// Keep loading state active while fetching player data
@@ -59,8 +65,8 @@
 					appState.setFirebaseUser(null);
 					appState.setAuthLoading(false);
 					await goto('/users/login');
-				} else if (result.success && isPublicRoute) {
-					// User is authenticated and on public route, redirect appropriately
+				} else if (result.success && isPublicRoute && $page.url.pathname !== '/labels/create') {
+					// User is authenticated and on public route (except label creation), redirect appropriately
 					appState.setFirebaseUser(user);
 					if (result.labels && result.labels.length > 0) {
 						await goto('/labels');
@@ -72,15 +78,18 @@
 					appState.setFirebaseUser(user);
 				}
 			} else if (user && $currentPlayer) {
-				// User is already loaded, just update auth state
+				// User is already loaded, just update auth state and clear loading
 				appState.setFirebaseUser(user);
-			} else if (!user && !isPublicRoute) {
+				appState.setAuthLoading(false);
+			} else if (!user && !isPublicRoute && firstAuthCheckComplete) {
 				// User is signed out and on protected route, redirect to login
+				// Only redirect after first auth check to avoid flash on page load
 				appState.reset();
 				await goto('/users/login');
 			} else if (!user) {
-				// User is signed out but on public route, just update state
+				// User is signed out but on public route, just update state and clear loading
 				appState.setFirebaseUser(null);
+				appState.setAuthLoading(false);
 			}
 		});
 

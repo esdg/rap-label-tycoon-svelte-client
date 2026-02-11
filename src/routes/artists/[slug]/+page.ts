@@ -1,12 +1,7 @@
-import { executeGuards } from '$lib/guards';
-import { requireLabel } from '$lib/guards/rules';
 import type { PageLoad } from './$types';
 
+// Auth and label requirement checks are handled by +layout.svelte
 export const load: PageLoad = async ({ params }) => {
-	await executeGuards({
-		rules: [{ name: 'require-label', check: requireLabel }]
-	});
-
 	return {
 		artistId: params.slug
 	};
