@@ -97,9 +97,13 @@
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true" />
 <link
-	href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
+	href="https://fonts.googleapis.com/css2?family=Roboto:ital,wdth,wght@0,75,100..900;1,75,100..900&display=swap"
+	rel="stylesheet"
+/>
+<link
+	href="https://fonts.googleapis.com/css2?family=Roboto:ital,wdth,wght@0,75..100,100..900;1,75..100,100..900&display=swap"
 	rel="stylesheet"
 />
 
@@ -115,10 +119,7 @@
 			{#if $isAuthenticated && !isPublicRoute && $currentPlayer}
 				<MenuBar />
 			{/if}
-			<main
-				class="min-h-screen flex-grow bg-primary-950 text-white"
-				style="font-family: 'Roboto', sans-serif;"
-			>
+			<main class="font-roboto min-h-screen flex-grow bg-primary-950 text-white">
 				<slot />
 			</main>
 		{/if}

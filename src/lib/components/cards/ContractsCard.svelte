@@ -66,7 +66,7 @@
 </script>
 
 <article class="select-none overflow-hidden rounded-lg border border-gray-700 bg-primary-950">
-	<div class="px-4 py-2">Currently negotiating {contractTaskGroups.length} contract(s)</div>
+	<div class="px-4 py-2">{contractTaskGroups.length} contract(s)</div>
 	<div>
 		{#each contractTaskGroups as { contractId, contract, task }}
 			{@const artist = contract ? getArtistById(contract.artistId) : undefined}
@@ -87,7 +87,7 @@
 						}
 					}}
 				>
-					<div class="font-stretch-condensed truncate text-right">
+					<div class="font-condensed truncate text-right font-light">
 						{artist.stageName}
 					</div>
 					<div>

@@ -5,10 +5,11 @@
 
 <div
 	class="
-    lowercase
-    rounded
-    px-2 py-0 min-w-12 w-fit text-center
+    w-fit
+    min-w-12 rounded px-2 py-0 text-center
     text-xs
+    font-light
+    lowercase
     {className}"
 >
 	<slot />

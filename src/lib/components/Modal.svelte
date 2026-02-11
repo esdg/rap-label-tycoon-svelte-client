@@ -51,15 +51,12 @@
 	/>
 
 	<!-- Modal container -->
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4"
-		style="font-family: 'Roboto', sans-serif;"
-	>
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4">
 		{#if modalState.type === 'task-modal'}
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<div
-				class="task-modal-shell relative bg-primary-950 shadow-lg transition-all duration-300 animate-in fade-in zoom-in-95"
+				class="task-modal-shell animate-in fade-in zoom-in-95 relative bg-primary-950 shadow-lg transition-all duration-300"
 				role="dialog"
 				aria-modal="true"
 				aria-label="Task modal"
@@ -72,7 +69,7 @@
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 			<div
-				class="relative w-full max-w-md rounded-lg bg-white shadow-lg transition-all duration-300 animate-in fade-in zoom-in-95"
+				class="animate-in fade-in zoom-in-95 relative w-full max-w-md rounded-lg bg-white shadow-lg transition-all duration-300"
 				role="dialog"
 				aria-modal="true"
 				aria-label="Application modal"
@@ -88,7 +85,7 @@
 					</h2>
 					<button
 						on:click={() => modalStore.close()}
-						class="text-gray-400 hover:text-gray-600 transition-colors"
+						class="text-gray-400 transition-colors hover:text-gray-600"
 						aria-label="Close modal"
 					>
 						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
