@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import bgImage from '$lib/assets/main-bg-office.png';
+	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { createArtistsByIdsQuery, discoveredArtistsList } from '$lib/queries/artistQueries';
 	import {
@@ -36,7 +36,6 @@
 	};
 
 	let activeView: ViewMode = 'roster';
-	let currentTime = Date.now();
 
 	$: labelId = $currentLabel?.id ?? null;
 	$: labelQuery = createLabelByIdQuery(labelId);
@@ -130,7 +129,7 @@
 	}
 
 	function getActiveBeatTask(artistId: string) {
-		const adjustedNow = currentTime + $serverTimeOffset;
+		const adjustedNow = $serverAdjustedTime;
 		return (
 			beatProductionTasks.find((task) => {
 				if (task.workerId !== artistId) return false;
@@ -142,7 +141,7 @@
 	}
 
 	function getActiveRecordingTask(artistId: string) {
-		const adjustedNow = currentTime + $serverTimeOffset;
+		const adjustedNow = $serverAdjustedTime;
 		return (
 			recordingReleaseTasks.find((task) => {
 				if (task.workerId !== artistId) return false;
@@ -153,7 +152,7 @@
 		);
 	}
 	function getActiveRestingTask(artistId: string) {
-		const adjustedNow = currentTime + $serverTimeOffset;
+		const adjustedNow = $serverAdjustedTime;
 		return (
 			restingTasks.find((task) => {
 				if (task.workerId !== artistId) return false;
@@ -163,14 +162,6 @@
 			}) ?? null
 		);
 	}
-
-	onMount(() => {
-		const interval = setInterval(() => {
-			currentTime = Date.now();
-		}, 1000);
-
-		return () => clearInterval(interval);
-	});
 </script>
 
 <div
@@ -221,7 +212,7 @@
 								beatProductionTask={getActiveBeatTask(artist.id)}
 								recordingReleaseTask={getActiveRecordingTask(artist.id)}
 								restingTask={getActiveRestingTask(artist.id)}
-								{currentTime}
+								currentTime={$currentTime}
 								serverTimeOffset={$serverTimeOffset}
 							/>
 						{/each}
@@ -239,7 +230,7 @@
 								beatProductionTask={getActiveBeatTask(artist.id)}
 								recordingReleaseTask={getActiveRecordingTask(artist.id)}
 								restingTask={getActiveRestingTask(artist.id)}
-								{currentTime}
+								currentTime={$currentTime}
 								serverTimeOffset={$serverTimeOffset}
 							/>
 						{/each}

@@ -5,7 +5,7 @@
  * Discovered artists are stored locally with bookmark status that persists across sessions.
  */
 
-import { createQuery, useQueryClient } from '@tanstack/svelte-query';
+import { createQuery } from '@tanstack/svelte-query';
 import { writable, derived, get } from 'svelte/store';
 import { queryKeys } from './queryClient';
 import { fetchArtistsByIds, fetchArtistById, type AnyArtist } from '$lib/api/artists';

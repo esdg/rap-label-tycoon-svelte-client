@@ -65,11 +65,11 @@
 				on:imageChange={handleImageChange}
 			/>
 		{:else if activeSubModal === 'producing-beats'}
-			<ProducingBeat />
+			<ProducingBeat preselectedWorkerId={data?.workerId} />
 		{:else if activeSubModal === 'recording-release'}
-			<RecordingRelease />
+			<RecordingRelease preselectedWorkerId={data?.workerId} />
 		{:else if activeSubModal === 'resting'}
-			<Resting />
+			<Resting preselectedWorkerId={data?.workerId} />
 		{:else}
 			<ScoutTalents />
 		{/if}

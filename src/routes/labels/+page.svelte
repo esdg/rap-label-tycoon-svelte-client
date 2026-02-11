@@ -1,37 +1,28 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { modalStore } from '$lib/stores/modal';
 	import { currentLabel } from '$lib/stores/appState';
+	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
 	import Button from '$lib/components/Button.svelte';
 	import bgImage from '$lib/assets/main-bg-office.png';
-	import {
-		type TimedTask,
-		type ScoutingTaskResponse,
-		type ScoutingTaskResults,
-		type RestingTaskResponse,
-		TaskType
-	} from '$lib/types/task';
+	import { type ScoutingTaskResponse, type ScoutingTaskResults } from '$lib/types/task';
 	import {
 		createLabelTasksQuery,
 		createTasksByType,
 		createScoutingScopesQuery,
 		serverTimeOffset
 	} from '$lib/queries/taskQueries';
-	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
+	import { createLabelContractsQuery } from '$lib/queries/contractQueries';
 	import { addDiscoveredArtists, createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { createPerformanceReportsByLabelQuery } from '$lib/queries/performanceReportQueries';
 	import { queryKeys } from '$lib/queries/queryClient';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { fetchArtistsByIds } from '$lib/api/artists';
-	import { claimTask } from '$lib/api/tasks';
 	import {
 		formatCurrency,
 		formatTimeRemaining,
 		getTaskProgress,
 		getTaskStatus,
-		isTaskFinished,
 		handleError,
-		getUserFriendlyError,
 		formatDuration
 	} from '$lib/utils';
 	import { getDateRange } from '$lib/utils/performanceUtils';
@@ -56,6 +47,14 @@
 	function getScopeName(requestData: any, scopes: any[] | undefined) {
 		if (!requestData || !scopes) return '';
 		return scopes.find((s) => s.id === requestData.scopeId)?.displayName ?? '';
+	}
+
+	function getScopeMessages(task: any, scopes: any[] | undefined): string[] {
+		if (!task?.scopeId || !scopes) {
+			return ['Searching for talent...'];
+		}
+		const scope = scopes.find((s) => s.id === task.scopeId);
+		return scope?.messages?.length > 0 ? scope.messages : ['Searching for talent...'];
 	}
 
 	// Get query client for manual invalidation
@@ -85,16 +84,8 @@
 	$: recordingReleaseTasks = taskData.recordingReleaseTasks;
 	$: restingTasks = taskData.restingTasks;
 
-	// Extract contract IDs directly from task.contractId (available on signing_contract_task)
-	$: contractIds = contractTasks
-		.map((task) => task.contractId)
-		.filter((id): id is string => typeof id === 'string' && id.length > 0);
-
-	// Deduplicate contract IDs (same contract can have multiple negotiation tasks)
-	$: uniqueContractIds = [...new Set(contractIds)];
-
-	// Create contracts query based on unique IDs
-	$: contractsQuery = createContractsByIdsQuery(uniqueContractIds);
+	// Fetch all contracts for the current label
+	$: contractsQuery = createLabelContractsQuery(labelId);
 
 	// Filter for valid signed contracts (status = signed, end date not passed)
 	// Note: Don't use currentTime here to avoid recreating queries every second
@@ -143,8 +134,9 @@
 	$: trendIndicator =
 		monthlyRevenue > yesterdayRevenue ? '▲' : monthlyRevenue < yesterdayRevenue ? '▼' : '-';
 
-	// Time tracking for progress bars
-	let currentTime = Date.now();
+	// Time tracking for UI updates (progress bars, countdowns)
+	// Note: Using global time store - no local timer needed!
+	// Task claiming is now handled globally by taskClaimingService
 
 	// Previous modal state for refresh on close
 	let previousModalState = $modalStore.isOpen;
@@ -158,86 +150,7 @@
 		previousModalState = $modalStore.isOpen;
 	}
 
-	// Auto-claim finished tasks; include currentTime so this re-runs when timers tick
-	$: if ($tasksQuery.data && labelId && currentTime) {
-		autoClaimFinishedTasks($tasksQuery.data, labelId);
-	}
-
-	// Track which tasks we've already started claiming to avoid duplicates
-	let claimingTaskIds = new Set<string>();
-
-	async function autoClaimFinishedTasks(tasks: TimedTask[], currentLabelId: string) {
-		const finishedUnclaimed = tasks.filter(
-			(task) =>
-				!task.claimedAt && isTaskFinished(task, $serverTimeOffset) && !claimingTaskIds.has(task.id)
-		);
-
-		const contractIdsToRefresh = new Set<string>();
-		let hasPublishingTask = false;
-		let hasBeatProductionTask = false;
-
-		finishedUnclaimed.forEach((task) => {
-			if ('contractId' in task && typeof task.contractId === 'string' && task.contractId) {
-				contractIdsToRefresh.add(task.contractId);
-			}
-			if (task.taskType === TaskType.PublishingRelease) {
-				hasPublishingTask = true;
-			}
-			if (task.taskType === TaskType.ProducingBeats) {
-				hasBeatProductionTask = true;
-			}
-		});
-
-		if (finishedUnclaimed.length === 0) return;
-
-		// Mark tasks as being claimed
-		finishedUnclaimed.forEach((task) => claimingTaskIds.add(task.id));
-
-		// Claim all finished tasks in parallel
-		const claimPromises = finishedUnclaimed.map(async (task) => {
-			try {
-				const claimedTask = await claimTask(task.id);
-
-				// Fetch and store discovered artists if this is a scouting task
-				if (claimedTask.results && 'discoveredArtistsIds' in claimedTask.results) {
-					const scoutingResults = claimedTask.results as ScoutingTaskResults;
-					if (scoutingResults.discoveredArtistsIds?.length > 0) {
-						const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
-						addDiscoveredArtists(artists, false);
-					}
-				}
-
-				return { success: true, taskId: task.id };
-			} catch (err) {
-				handleError('ClaimTask', err);
-				errorNotifications.add('Task Claim Failed', getUserFriendlyError(err).message);
-				claimingTaskIds.delete(task.id); // Allow retry
-				return { success: false, taskId: task.id, error: err };
-			}
-		});
-
-		await Promise.all(claimPromises);
-
-		// Refetch tasks to get updated state
-		queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(currentLabelId) });
-		queryClient.invalidateQueries({ queryKey: queryKeys.contracts.byLabel(currentLabelId) });
-
-		if (contractIdsToRefresh.size > 0) {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.contracts.byIds([...contractIdsToRefresh])
-			});
-		}
-
-		// If any publishing tasks were claimed, invalidate releases cache
-		if (hasPublishingTask) {
-			queryClient.invalidateQueries({ queryKey: queryKeys.releases.byLabel(currentLabelId) });
-		}
-
-		// If any beat production tasks were claimed, invalidate beats cache
-		if (hasBeatProductionTask) {
-			queryClient.invalidateQueries({ queryKey: queryKeys.beats.byLabel(currentLabelId) });
-		}
-	}
+	// Note: Task auto-claiming is now handled globally by taskClaimingService in +layout.svelte
 
 	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist
@@ -256,17 +169,6 @@
 
 		openScoutResultsModal(scoutingTaskResponse);
 	}
-
-	onMount(() => {
-		// Update current time every second for countdown
-		const timeInterval = setInterval(() => {
-			currentTime = Date.now();
-		}, 1000);
-
-		return () => {
-			clearInterval(timeInterval);
-		};
-	});
 </script>
 
 <div
@@ -290,7 +192,7 @@
 					<ContractsCard
 						contractsTaskResponse={contractTasks}
 						contracts={$contractsQuery.data ?? []}
-						{currentTime}
+						currentTime={$currentTime}
 					/>
 				{/if}
 
@@ -304,7 +206,7 @@
 						{@const artistBeatTask =
 							beatProductionTasks.find((t) => {
 								if (t.workerId !== artist.id) return false;
-								const adjustedNow = currentTime + $serverTimeOffset;
+								const adjustedNow = $serverAdjustedTime;
 								const startTime = new Date(t.startTime).getTime();
 								const endTime = new Date(t.endTime).getTime();
 								return startTime <= adjustedNow && endTime > adjustedNow;
@@ -312,7 +214,7 @@
 						{@const artistRecordingTask =
 							recordingReleaseTasks.find((t) => {
 								if (t.workerId !== artist.id) return false;
-								const adjustedNow = currentTime + $serverTimeOffset;
+								const adjustedNow = $serverAdjustedTime;
 								const startTime = new Date(t.startTime).getTime();
 								const endTime = new Date(t.endTime).getTime();
 								return startTime <= adjustedNow && endTime > adjustedNow;
@@ -320,7 +222,7 @@
 						{@const artistRestingTask =
 							restingTasks.find((t) => {
 								if (t.workerId !== artist.id) return false;
-								const adjustedNow = currentTime + $serverTimeOffset;
+								const adjustedNow = $serverAdjustedTime;
 								const startTime = new Date(t.startTime).getTime();
 								const endTime = new Date(t.endTime).getTime();
 								return startTime <= adjustedNow && endTime > adjustedNow;
@@ -330,7 +232,7 @@
 							beatProductionTask={artistBeatTask}
 							recordingReleaseTask={artistRecordingTask}
 							restingTask={artistRestingTask}
-							{currentTime}
+							currentTime={$currentTime}
 							serverTimeOffset={$serverTimeOffset}
 						/>
 					{/each}
@@ -386,13 +288,14 @@
 				{@const lastTask = scoutingTasks[scoutingTasks.length - 1]}
 				{@const { isOptimistic, requestData, genreNames } = getOptimisticTaskData(lastTask)}
 				{@const scopeName = getScopeName(requestData, $scoutingScopesQuery.data)}
+				{@const messages = getScopeMessages(lastTask, $scoutingScopesQuery.data)}
 				<div class="flex flex-wrap gap-4">
 					<ScoutingTaskCard
 						state={isOptimistic ? 'loading' : getTaskStatus(lastTask, $serverTimeOffset)}
-						durationText={formatTimeRemaining(lastTask.endTime, currentTime, $serverTimeOffset)}
-						inProgressDescription="Observing at open mic..."
+						durationText={formatTimeRemaining(lastTask.endTime, $currentTime, $serverTimeOffset)}
+						{messages}
 						scoutingType={lastTask.scoutingType}
-						taskProgress={getTaskProgress(lastTask, $serverTimeOffset)}
+						taskProgress={getTaskProgress(lastTask, $serverTimeOffset, $currentTime)}
 						{genreNames}
 						{scopeName}
 						estimatedCost={requestData?.costPrediction?.budgetRequired ?? null}

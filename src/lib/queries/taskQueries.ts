@@ -10,8 +10,8 @@
  */
 
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { derived, writable, type Readable } from 'svelte/store';
-import { queryKeys } from './queryClient';
+import { writable } from 'svelte/store';
+import { queryKeys, taskQueryConfig } from './queryClient';
 import {
 	fetchLabelTasks,
 	claimTask,
@@ -23,7 +23,6 @@ import {
 	type PublishingReleaseRequest
 } from '$lib/api/tasks';
 import { loadClientConfig } from '$lib/services/config';
-import { getServerAdjustedTime } from '$lib/utils/timeUtils';
 import type {
 	TimedTask,
 	TaskCostPrediction,
@@ -71,8 +70,8 @@ export function createLabelTasksQuery(labelId: string | null) {
 			return result.data;
 		},
 		enabled: !!labelId,
-		// Tasks should refresh more frequently
-		staleTime: 10 * 1000
+		// Apply task-specific query configuration for frequent updates
+		...taskQueryConfig
 	});
 }
 
@@ -171,7 +170,7 @@ export function createScoutingTaskMutation(labelId: string) {
 				workerId: request.workerId,
 				taskType: TaskType.Scouting,
 				name: 'Scouting Task',
-				description: 'AI is generating your scouting task...',
+				description: 'Scouting is starting, be ready...',
 				budgetRequired: request.costPrediction?.budgetRequired ?? 0,
 				staminaCost: request.costPrediction?.staminaCost ?? 0,
 				startTime: now.toISOString(),

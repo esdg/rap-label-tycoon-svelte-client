@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { currentLabel } from '$lib/stores/appState';
+	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
 	import { loadClientConfig } from '$lib/services/config';
 	import { createLabelBeatsQuery } from '$lib/queries/beatQueries';
 	import { createLabelReleasesQuery, createLabelTracksQuery } from '$lib/queries/releaseQueries';
@@ -11,7 +12,6 @@
 	} from '$lib/queries/taskQueries';
 	import { RapMusicStyleNames } from '$lib/types/musicStyles';
 	import type { ReleaseType } from '$lib/types/config';
-	import { TaskType, TaskStatus } from '$lib/types/task';
 	import type { TimedTask } from '$lib/types/task';
 	import { formatTimeRemaining } from '$lib/utils/timeUtils';
 	import { isPublishingReleaseTask } from '$lib/utils/typeGuards';
@@ -19,10 +19,8 @@
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { onMount, onDestroy } from 'svelte';
-	import { TaskCreationError, claimTask } from '$lib/api/tasks';
-	import { queryClient, queryKeys } from '$lib/queries/queryClient';
-	import { isTaskFinished } from '$lib/utils/taskUtils';
+	import { onMount } from 'svelte';
+	import { TaskCreationError } from '$lib/api/tasks';
 	import bgImage from '$lib/assets/main-bg-discography.png';
 
 	// Tab management
@@ -36,9 +34,8 @@
 	// Release types from config
 	let releaseTypes: ReleaseType[] = [];
 
-	// Timer for updating remaining time
-	let currentTime = Date.now();
-	let timerInterval: ReturnType<typeof setInterval>;
+	// Note: Time tracking is now handled by global time store
+	// Task claiming is handled globally by taskClaimingService
 
 	onMount(async () => {
 		try {
@@ -46,17 +43,6 @@
 			releaseTypes = config.releaseTypes;
 		} catch (err) {
 			console.error('Failed to load config:', err);
-		}
-
-		// Update timer every second
-		timerInterval = setInterval(() => {
-			currentTime = Date.now();
-		}, 1000);
-	});
-
-	onDestroy(() => {
-		if (timerInterval) {
-			clearInterval(timerInterval);
 		}
 	});
 
@@ -93,42 +79,7 @@
 			.map((task) => [task.releaseId, task])
 	);
 
-	// Auto-claim finished publishing tasks
-	let claimingTaskIds = new Set<string>();
-
-	$: if (tasks.length > 0 && labelId && currentTime) {
-		autoClaimFinishedPublishingTasks(tasks, labelId);
-	}
-
-	async function autoClaimFinishedPublishingTasks(allTasks: TimedTask[], currentLabelId: string) {
-		const finishedPublishing = allTasks.filter(
-			(task) =>
-				task.taskType === TaskType.PublishingRelease &&
-				!task.claimedAt &&
-				isTaskFinished(task, $serverTimeOffset) &&
-				!claimingTaskIds.has(task.id)
-		);
-
-		if (finishedPublishing.length === 0) return;
-
-		// Mark tasks as being claimed
-		finishedPublishing.forEach((task) => claimingTaskIds.add(task.id));
-
-		// Claim all finished tasks
-		for (const task of finishedPublishing) {
-			try {
-				await claimTask(task.id);
-			} catch (err) {
-				console.error(`Failed to claim publishing task ${task.id}:`, err);
-				claimingTaskIds.delete(task.id);
-			}
-		}
-
-		// Invalidate queries to refresh data
-		queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(currentLabelId) });
-		queryClient.invalidateQueries({ queryKey: queryKeys.releases.byLabel(currentLabelId) });
-		queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(currentLabelId) });
-	}
+	// Note: Task auto-claiming is now handled globally by taskClaimingService in +layout.svelte
 
 	$: isLoadingBeats = $beatsQuery.isLoading;
 	$: isLoadingReleases = $releasesQuery.isLoading;
@@ -292,7 +243,7 @@
 										{@const task = publishingTaskMap.get(release.id)}
 										<span class="rounded bg-yellow-600 px-2 py-1 text-xs text-white">
 											Publishing... {task
-												? formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)
+												? formatTimeRemaining(task.endTime, $currentTime, $serverTimeOffset)
 												: ''}
 										</span>
 									{:else if isUnpublished(release.releaseDate)}

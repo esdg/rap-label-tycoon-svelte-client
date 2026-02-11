@@ -28,6 +28,9 @@
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import CostEstimation from './CostEstimation.svelte';
 
+	// Props
+	export let preselectedWorkerId: string | undefined = undefined;
+
 	// State
 	let activeStepIndex = 0;
 	const totalSteps = 2;
@@ -98,6 +101,11 @@
 	}));
 	$: if (workerOptions.length === 1 && !selectedWorkerId) {
 		selectedWorkerId = workerOptions[0].value;
+	} else if (preselectedWorkerId && !selectedWorkerId && workerOptions.length > 0) {
+		const preselected = workerOptions.find((w) => w.value === preselectedWorkerId);
+		if (preselected) {
+			selectedWorkerId = preselected.value;
+		}
 	} else if (
 		selectedWorkerId &&
 		!workerOptions.some((option) => option.value === selectedWorkerId)

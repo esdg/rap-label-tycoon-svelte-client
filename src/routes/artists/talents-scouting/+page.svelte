@@ -5,18 +5,34 @@
 		addDiscoveredArtists,
 		createLabelTasksQuery,
 		createTasksByType,
+		createScoutingScopesQuery,
 		serverTimeOffset
 	} from '$lib/queries';
 	import { currentLabel } from '$lib/stores/appState';
+	import { currentTime } from '$lib/stores/globalTime';
 	import type { ScoutingTaskResponse, ScoutingTaskResults } from '$lib/types/task';
 	import { formatTimeRemaining, getTaskProgress, getTaskStatus } from '$lib/utils';
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import Button from '$lib/components/Button.svelte';
 	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
 
+	// Helper to check if a task is optimistic (has temporary ID and extra data)
+	function isOptimisticTask(task: any): boolean {
+		return task?._optimistic === true;
+	}
+
+	function getScopeMessages(task: any, scopes: any[] | undefined): string[] {
+		if (!task?.scopeId || !scopes) {
+			return ['Searching for talent...'];
+		}
+		const scope = scopes.find((s: any) => s.id === task.scopeId);
+		return scope?.messages?.length > 0 ? scope.messages : ['Searching for talent...'];
+	}
+
 	// Reactive label ID
 	$: labelId = $currentLabel?.id ?? null;
-	// Create the tasks query - automatically refetches when labelId changes
+	// Create queries
+	$: scoutingScopesQuery = createScoutingScopesQuery();
 	$: tasksQuery = createLabelTasksQuery(labelId);
 
 	$: taskData = $tasksQuery.data
@@ -24,8 +40,21 @@
 		: { scoutingTasks: [], contractTasks: [], beatProductionTasks: [], recordingReleaseTasks: [] };
 	$: scoutingTasks = taskData.scoutingTasks;
 
-	// Time tracking for progress bars
-	let currentTime = Date.now();
+	// Note: Time tracking is now handled by global time store (no local timer needed)
+
+	// Create reactive task data that depends on currentTime to ensure updates
+	$: taskCards = scoutingTasks.map((task) => {
+		const isOptimistic = isOptimisticTask(task);
+		const state: 'loading' | 'in-progress' | 'failed' | 'succeeded' | 'error' = isOptimistic
+			? 'loading'
+			: getTaskStatus(task, $serverTimeOffset);
+		return {
+			task,
+			state,
+			durationText: formatTimeRemaining(task.endTime, $currentTime, $serverTimeOffset),
+			taskProgress: getTaskProgress(task, $serverTimeOffset, $currentTime)
+		};
+	});
 
 	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
 		// Fetch and add discovered artists to store if they exist
@@ -68,13 +97,14 @@
 			<p class="text-gray-400">No scouting tasks</p>
 		{:else}
 			<div class="flex flex-wrap gap-4">
-				{#each scoutingTasks as task}
+				{#each taskCards as { task, state, durationText, taskProgress } (task.id)}
+					{@const messages = getScopeMessages(task, $scoutingScopesQuery.data)}
 					<ScoutingTaskCard
-						state={getTaskStatus(task, $serverTimeOffset)}
-						durationText={formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)}
-						inProgressDescription="Observing at open mic..."
+						{state}
+						{durationText}
+						{messages}
 						scoutingType={task.scoutingType}
-						taskProgress={getTaskProgress(task, $serverTimeOffset)}
+						{taskProgress}
 						on:viewResults={() => handleOpenScoutResultsModal(task)}
 					/>
 				{/each}

@@ -12,7 +12,8 @@
 		formatCurrency
 	} from '$lib/utils';
 	import Tooltip from '../Tooltip.svelte';
-	import EllipsedTextWithQuote from '../EllipsedTextWithQuote.svelte';
+	import { ArrowRightIcon } from 'heroicons-svelte/24/solid';
+	import { openScoutResultsModal, openSignContractModal } from '$lib/modals/helpers';
 
 	export let contractsTaskResponse: SigningContractTaskResponse[] = [];
 	export let contracts: Contract[] = [];
@@ -69,11 +70,26 @@
 	<div>
 		{#each contractTaskGroups as { contractId, contract, task }}
 			{@const artist = contract ? getArtistById(contract.artistId) : undefined}
-			<div
-				class="grid grid-cols-[60px,190px,1fr,1fr,5fr] items-center gap-4 border-t border-gray-700 bg-black px-4 py-1 text-sm"
-			>
-				{#if contract && artist}
-					<div class="font-stretch-condensed text-right">{artist.stageName}</div>
+			{@const isFinished = task.results && new Date(task.endTime).getTime() < currentTime}
+			{@const isFailed = isFinished && task.results && !task.results.success}
+			{@const finishedClass = isFinished
+				? 'hover:border hover:border-primary-500 cursor-pointer'
+				: ''}
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+
+			{#if contract && artist}
+				<div
+					class="grid grid-cols-[95px,190px,1fr,1fr,5px] items-center gap-4 border-t border-gray-700 bg-black px-4 py-1 text-sm last:rounded-b-lg {finishedClass}"
+					on:click={() => {
+						if (isFinished) {
+							openSignContractModal(artist);
+						}
+					}}
+				>
+					<div class="font-stretch-condensed truncate text-right">
+						{artist.stageName}
+					</div>
 					<div>
 						<ProgressBar
 							value={getProgressPercent(
@@ -96,13 +112,18 @@
 					</div>
 					<div class="flex">
 						{#each contract.iterations ?? [] as contractIteration}
+							{@const hasResponse = !!contractIteration.response}
+							{@const isAccepted = hasResponse && contractIteration.response?.accepted === true}
+							{@const isRejected = hasResponse
+								? contractIteration.response?.accepted === false
+								: isFailed}
 							<Tooltip position="bottom">
 								<div slot="trigger" class="flex size-4 items-center justify-center">
 									<span
 										class="block h-2 w-2 rounded-full"
-										class:bg-green-500={contractIteration.response?.accepted}
-										class:bg-red-500={contractIteration.response?.accepted === false}
-										class:bg-gray-600={!contractIteration.response}
+										class:bg-green-500={isAccepted}
+										class:bg-red-500={isRejected}
+										class:bg-gray-600={!hasResponse && !isFailed}
 										title={contractIteration.iterationNumber
 											? `Iteration ${contractIteration.iterationNumber}`
 											: 'Pending'}
@@ -115,12 +136,14 @@
 										<span class="font-semibold"
 											>Iteration {contractIteration.iterationNumber ?? '—'}</span
 										>
-										{#if contractIteration.response}
+										{#if hasResponse}
 											<span
 												class="text-green-400"
-												class:text-red-400={!contractIteration.response.accepted}
-												>{contractIteration.response.accepted ? 'Accepted' : 'Rejected'}</span
+												class:text-red-400={contractIteration.response?.accepted === false}
+												>{contractIteration.response?.accepted ? 'Accepted' : 'Rejected'}</span
 											>
+										{:else if isFailed}
+											<span class="text-red-400">Rejected</span>
 										{:else}
 											<span class="text-gray-400">Awaiting response</span>
 										{/if}
@@ -172,14 +195,17 @@
 							</Tooltip>
 						{/each}
 					</div>
-				{:else if contract && $artistsQuery.isLoading}
-					<div class="col-span-5 text-gray-400">Loading artist...</div>
-				{:else if contract}
-					<div class="col-span-5 text-gray-400">Artist data unavailable</div>
-				{:else}
-					<div class="col-span-5 text-gray-400">Contract {contractId}</div>
-				{/if}
-			</div>
+					{#if task.results}
+						<ArrowRightIcon class="inline h-4 w-4 text-[10px] text-primary-500 " />
+					{/if}
+				</div>
+			{:else if contract && $artistsQuery.isLoading}
+				<div class="col-span-5 text-gray-400">Loading artist...</div>
+			{:else if contract}
+				<div class="col-span-5 text-gray-400">Artist data unavailable</div>
+			{:else}
+				<div class="col-span-5 text-gray-400">Contract {contractId}</div>
+			{/if}
 		{/each}
 	</div>
 </article>

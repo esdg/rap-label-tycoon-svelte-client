@@ -8,10 +8,11 @@ export const queryClient = new QueryClient({
 			staleTime: 30 * 1000,
 			// Cache data for 5 minutes
 			gcTime: 5 * 60 * 1000,
-			// Retry failed requests up to 2 times
-			retry: 2,
-			// Don't refetch on window focus for game data (user controls refresh)
-			refetchOnWindowFocus: false,
+			// Retry failed requests up to 3 times with exponential backoff
+			retry: 3,
+			retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+			// Refetch on window focus for data consistency
+			refetchOnWindowFocus: true,
 			// Refetch on reconnect
 			refetchOnReconnect: true
 		},
@@ -21,6 +22,16 @@ export const queryClient = new QueryClient({
 		}
 	}
 });
+
+/**
+ * Query configuration for task-related queries
+ * Tasks need more frequent updates due to time-sensitive nature
+ */
+export const taskQueryConfig = {
+	staleTime: 5 * 1000, // 5 seconds - tasks change frequently
+	gcTime: 2 * 60 * 1000, // 2 minutes cache
+	refetchInterval: 30 * 1000 // Auto-refetch every 30 seconds for task updates
+};
 
 // Query key factory for consistent key management
 export const queryKeys = {

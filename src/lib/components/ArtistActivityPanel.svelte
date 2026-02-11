@@ -20,7 +20,9 @@
 	$: beatTimeRemaining = beatProductionTask
 		? formatTimeRemaining(beatProductionTask.endTime, currentTime, serverTimeOffset)
 		: '';
-	$: beatProgress = beatProductionTask ? getTaskProgress(beatProductionTask, serverTimeOffset) : 0;
+	$: beatProgress = beatProductionTask
+		? getTaskProgress(beatProductionTask, serverTimeOffset, currentTime)
+		: 0;
 	$: numberOfBeats = beatProductionTask?.numberOfBeats || 1;
 
 	$: recordingTaskState = recordingReleaseTask
@@ -30,7 +32,7 @@
 		? formatTimeRemaining(recordingReleaseTask.endTime, currentTime, serverTimeOffset)
 		: '';
 	$: recordingProgress = recordingReleaseTask
-		? getTaskProgress(recordingReleaseTask, serverTimeOffset)
+		? getTaskProgress(recordingReleaseTask, serverTimeOffset, currentTime)
 		: 0;
 	$: numberOfTracks = recordingReleaseTask?.beatIds?.length || 1;
 
@@ -38,7 +40,9 @@
 	$: restingTimeRemaining = restingTask
 		? formatTimeRemaining(restingTask.endTime, currentTime, serverTimeOffset)
 		: '';
-	$: restingProgress = restingTask ? getTaskProgress(restingTask, serverTimeOffset) : 0;
+	$: restingProgress = restingTask
+		? getTaskProgress(restingTask, serverTimeOffset, currentTime)
+		: 0;
 
 	$: hasAnyTask = beatProductionTask || recordingReleaseTask || restingTask;
 </script>
@@ -63,7 +67,7 @@
 
 <!-- Resting Task Progress -->
 {#if restingTask}
-	<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 		<div class="flex items-center justify-between text-xs">
 			<span class="text-gray-400">Resting</span>
 			{#if restingTaskState === 'in-progress'}
@@ -94,7 +98,7 @@
 
 <!-- Beat Production Task Progress -->
 {#if beatProductionTask}
-	<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 		<div class="flex items-center justify-between text-xs">
 			<span class="text-gray-400"
 				>Producing {numberOfBeats} beat{numberOfBeats !== 1 ? 's' : ''}</span
@@ -127,7 +131,7 @@
 
 <!-- Recording Release Task Progress -->
 {#if recordingReleaseTask}
-	<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 		<div class="flex items-center justify-between text-xs">
 			<span class="text-gray-400"
 				>Recording {numberOfTracks} track{numberOfTracks !== 1 ? 's' : ''}</span

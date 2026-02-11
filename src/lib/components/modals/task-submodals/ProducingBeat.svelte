@@ -27,6 +27,9 @@
 	import type { TaskCostPrediction } from '$lib/types/task';
 	import { getTaskErrorMessage } from '$lib/utils';
 
+	// Props
+	export let preselectedWorkerId: string | undefined = undefined;
+
 	// State
 	let activeStepIndex = 0;
 	let totalSteps = 2;
@@ -87,9 +90,14 @@
 		value: beatmaker.id
 	}));
 
-	// Auto-select if only one beatmaker available
+	// Auto-select if only one beatmaker available, or preselect if provided
 	$: if (beatmakersSelection.length === 1 && !selectedBeatmakerId) {
 		selectedBeatmakerId = beatmakersSelection[0].value;
+	} else if (preselectedWorkerId && !selectedBeatmakerId && beatmakersSelection.length > 0) {
+		const preselected = beatmakersSelection.find((b) => b.value === preselectedWorkerId);
+		if (preselected) {
+			selectedBeatmakerId = preselected.value;
+		}
 	}
 
 	// Genre choices for the beat
@@ -292,6 +300,7 @@
 				Beatmaker
 			</label>
 			<Dropdown
+				label="Artist"
 				options={beatmakersSelection}
 				disabled={beatmakersSelection.length <= 1}
 				bind:value={selectedBeatmakerId}

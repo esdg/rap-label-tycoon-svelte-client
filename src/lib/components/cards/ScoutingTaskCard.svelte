@@ -5,10 +5,11 @@
 	import RadialProgressBar from '../progress-bars/RadialProgressBar.svelte';
 	import { ScoutingType, ScoutingTypeNames } from '$lib/types/scoutingArtistsTask';
 	import { formatCurrency } from '$lib/utils';
+	import Tooltip from '../Tooltip.svelte';
 
 	export let state: 'loading' | 'in-progress' | 'failed' | 'succeeded' | 'error' = 'succeeded';
 	export let durationText: string = '6h 34m 45s';
-	export let inProgressDescription: string = 'Observing at open mic...';
+	export let messages: string[] = ['Observing at open mic...'];
 	export let scoutingType: ScoutingType = ScoutingType.Rappers;
 	export let taskProgress = 0;
 
@@ -19,6 +20,12 @@
 	export let estimatedDuration: string = '';
 
 	const dispatch = createEventDispatcher();
+
+	// Select message based on progress, changing every 20%
+	// Cycle through messages in order for consistency across all pages
+	$: messageSegment = Math.floor(taskProgress / 20);
+	$: currentMessage =
+		messages.length > 0 ? messages[messageSegment % messages.length] : 'Searching for talent...';
 </script>
 
 <article
@@ -34,7 +41,7 @@
 			<div class="flex flex-1 flex-col items-center justify-center gap-2">
 				<ArrowPathIcon class="h-8 w-8 animate-spin text-primary-400" />
 				<p class="text-center text-xs font-semibold text-primary-300">
-					AI is generating your task...
+					Scouting is starting, be ready...
 				</p>
 			</div>
 
@@ -82,9 +89,14 @@
 			>
 				<div class="flex flex-col items-center">
 					<span class="text-xl font-thin">{durationText}</span>
-					<span class="text-sm text-xs font-light italic text-primary-400"
-						>{inProgressDescription}</span
-					>
+					<Tooltip position="bottom">
+						<span
+							slot="trigger"
+							class="w-32 truncate text-sm text-xs font-light italic text-primary-400"
+							>{currentMessage}</span
+						>
+						<span class="text-center font-light italic text-primary-400">{currentMessage}</span>
+					</Tooltip>
 				</div>
 			</RadialProgressBar>
 		</div>
