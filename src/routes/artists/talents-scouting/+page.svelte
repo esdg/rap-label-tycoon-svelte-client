@@ -8,12 +8,12 @@
 		serverTimeOffset
 	} from '$lib/queries';
 	import { currentLabel } from '$lib/stores/appState';
+	import { currentTime } from '$lib/stores/globalTime';
 	import type { ScoutingTaskResponse, ScoutingTaskResults } from '$lib/types/task';
 	import { formatTimeRemaining, getTaskProgress, getTaskStatus } from '$lib/utils';
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import Button from '$lib/components/Button.svelte';
 	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
-	import { onMount } from 'svelte';
 
 	// Helper to check if a task is optimistic (has temporary ID and extra data)
 	function isOptimisticTask(task: any): boolean {
@@ -30,8 +30,7 @@
 		: { scoutingTasks: [], contractTasks: [], beatProductionTasks: [], recordingReleaseTasks: [] };
 	$: scoutingTasks = taskData.scoutingTasks;
 
-	// Time tracking for progress bars
-	let currentTime = Date.now();
+	// Note: Time tracking is now handled by global time store (no local timer needed)
 
 	// Create reactive task data that depends on currentTime to ensure updates
 	$: taskCards = scoutingTasks.map((task) => {
@@ -42,8 +41,8 @@
 		return {
 			task,
 			state,
-			durationText: formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset),
-			taskProgress: getTaskProgress(task, $serverTimeOffset, currentTime)
+			durationText: formatTimeRemaining(task.endTime, $currentTime, $serverTimeOffset),
+			taskProgress: getTaskProgress(task, $serverTimeOffset, $currentTime)
 		};
 	});
 
@@ -63,17 +62,6 @@
 
 		openScoutResultsModal(scoutingTaskResponse);
 	}
-
-	onMount(() => {
-		// Update current time every second for countdown
-		const timeInterval = setInterval(() => {
-			currentTime = Date.now();
-		}, 1000);
-
-		return () => {
-			clearInterval(timeInterval);
-		};
-	});
 </script>
 
 <div

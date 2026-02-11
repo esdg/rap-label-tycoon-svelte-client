@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { currentLabel } from '$lib/stores/appState';
+	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
 	import { loadClientConfig } from '$lib/services/config';
 	import { createLabelBeatsQuery } from '$lib/queries/beatQueries';
 	import { createLabelReleasesQuery, createLabelTracksQuery } from '$lib/queries/releaseQueries';
@@ -18,7 +19,7 @@
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { TaskCreationError } from '$lib/api/tasks';
 	import bgImage from '$lib/assets/main-bg-discography.png';
 
@@ -33,10 +34,8 @@
 	// Release types from config
 	let releaseTypes: ReleaseType[] = [];
 
-	// Timer for updating remaining time displays (UI only)
-	// Note: Task claiming is now handled globally by taskClaimingService
-	let currentTime = Date.now();
-	let timerInterval: ReturnType<typeof setInterval>;
+	// Note: Time tracking is now handled by global time store
+	// Task claiming is handled globally by taskClaimingService
 
 	onMount(async () => {
 		try {
@@ -44,17 +43,6 @@
 			releaseTypes = config.releaseTypes;
 		} catch (err) {
 			console.error('Failed to load config:', err);
-		}
-
-		// Update timer every second
-		timerInterval = setInterval(() => {
-			currentTime = Date.now();
-		}, 1000);
-	});
-
-	onDestroy(() => {
-		if (timerInterval) {
-			clearInterval(timerInterval);
 		}
 	});
 
@@ -255,7 +243,7 @@
 										{@const task = publishingTaskMap.get(release.id)}
 										<span class="rounded bg-yellow-600 px-2 py-1 text-xs text-white">
 											Publishing... {task
-												? formatTimeRemaining(task.endTime, currentTime, $serverTimeOffset)
+												? formatTimeRemaining(task.endTime, $currentTime, $serverTimeOffset)
 												: ''}
 										</span>
 									{:else if isUnpublished(release.releaseDate)}

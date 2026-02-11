@@ -11,7 +11,7 @@
 
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { writable } from 'svelte/store';
-import { queryKeys } from './queryClient';
+import { queryKeys, taskQueryConfig } from './queryClient';
 import {
 	fetchLabelTasks,
 	claimTask,
@@ -70,8 +70,8 @@ export function createLabelTasksQuery(labelId: string | null) {
 			return result.data;
 		},
 		enabled: !!labelId,
-		// Tasks should refresh more frequently
-		staleTime: 10 * 1000
+		// Apply task-specific query configuration for frequent updates
+		...taskQueryConfig
 	});
 }
 

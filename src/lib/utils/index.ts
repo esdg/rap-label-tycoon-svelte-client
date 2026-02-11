@@ -12,6 +12,7 @@ export * from './taskUtils';
 export * from './performanceUtils';
 export * from './typeGuards';
 export * from './errorHandling';
+export * from './performance';
 
 // Re-export formatDuration from timeUtils for backward compatibility
 // (in case old imports still reference formatDuration.ts)
