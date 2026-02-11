@@ -19,6 +19,7 @@
 	import MenuBar from '$lib/components/MenuBar.svelte';
 	import { VERSION, GIT_HASH } from '$lib/version';
 	import { taskClaimingService } from '$lib/services/taskClaimingService';
+	import { globalTime } from '$lib/stores/globalTime';
 
 	let initializingPlayer = false;
 
@@ -38,6 +39,9 @@
 	}
 
 	onMount(() => {
+		// Start global timer for synchronized time across all components
+		globalTime.start();
+
 		// Listen for Firebase auth state changes
 		const unsubscribe = onFirebaseAuthStateChanged(async (user) => {
 			appState.setFirebaseUser(user);
@@ -69,6 +73,8 @@
 		return () => unsubscribe();
 	});
 
+	// Stop global timer
+	globalTime.stop();
 	onDestroy(() => {
 		// Clean up task claiming service on unmount
 		taskClaimingService.stop();

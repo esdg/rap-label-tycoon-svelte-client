@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { modalStore } from '$lib/stores/modal';
 	import { currentLabel } from '$lib/stores/appState';
+	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
 	import Button from '$lib/components/Button.svelte';
 	import bgImage from '$lib/assets/main-bg-office.png';
 	import { type ScoutingTaskResponse, type ScoutingTaskResults } from '$lib/types/task';
@@ -135,8 +135,8 @@
 		monthlyRevenue > yesterdayRevenue ? '▲' : monthlyRevenue < yesterdayRevenue ? '▼' : '-';
 
 	// Time tracking for UI updates (progress bars, countdowns)
-	// Note: Task claiming is now handled globally by taskClaimingService
-	let currentTime = Date.now();
+	// Note: Using global time store - no local timer needed!
+	// Task claiming is now handled globally by taskClaimingService
 
 	// Previous modal state for refresh on close
 	let previousModalState = $modalStore.isOpen;
@@ -169,17 +169,6 @@
 
 		openScoutResultsModal(scoutingTaskResponse);
 	}
-
-	onMount(() => {
-		// Update current time every second for countdown
-		const timeInterval = setInterval(() => {
-			currentTime = Date.now();
-		}, 1000);
-
-		return () => {
-			clearInterval(timeInterval);
-		};
-	});
 </script>
 
 <div
@@ -203,7 +192,7 @@
 					<ContractsCard
 						contractsTaskResponse={contractTasks}
 						contracts={$contractsQuery.data ?? []}
-						{currentTime}
+						currentTime={$currentTime}
 					/>
 				{/if}
 
@@ -217,7 +206,7 @@
 						{@const artistBeatTask =
 							beatProductionTasks.find((t) => {
 								if (t.workerId !== artist.id) return false;
-								const adjustedNow = currentTime + $serverTimeOffset;
+								const adjustedNow = $serverAdjustedTime;
 								const startTime = new Date(t.startTime).getTime();
 								const endTime = new Date(t.endTime).getTime();
 								return startTime <= adjustedNow && endTime > adjustedNow;
@@ -225,7 +214,7 @@
 						{@const artistRecordingTask =
 							recordingReleaseTasks.find((t) => {
 								if (t.workerId !== artist.id) return false;
-								const adjustedNow = currentTime + $serverTimeOffset;
+								const adjustedNow = $serverAdjustedTime;
 								const startTime = new Date(t.startTime).getTime();
 								const endTime = new Date(t.endTime).getTime();
 								return startTime <= adjustedNow && endTime > adjustedNow;
@@ -233,7 +222,7 @@
 						{@const artistRestingTask =
 							restingTasks.find((t) => {
 								if (t.workerId !== artist.id) return false;
-								const adjustedNow = currentTime + $serverTimeOffset;
+								const adjustedNow = $serverAdjustedTime;
 								const startTime = new Date(t.startTime).getTime();
 								const endTime = new Date(t.endTime).getTime();
 								return startTime <= adjustedNow && endTime > adjustedNow;
@@ -243,7 +232,7 @@
 							beatProductionTask={artistBeatTask}
 							recordingReleaseTask={artistRecordingTask}
 							restingTask={artistRestingTask}
-							{currentTime}
+							currentTime={$currentTime}
 							serverTimeOffset={$serverTimeOffset}
 						/>
 					{/each}
@@ -302,10 +291,10 @@
 				<div class="flex flex-wrap gap-4">
 					<ScoutingTaskCard
 						state={isOptimistic ? 'loading' : getTaskStatus(lastTask, $serverTimeOffset)}
-						durationText={formatTimeRemaining(lastTask.endTime, currentTime, $serverTimeOffset)}
+						durationText={formatTimeRemaining(lastTask.endTime, $currentTime, $serverTimeOffset)}
 						inProgressDescription="Observing at open mic..."
 						scoutingType={lastTask.scoutingType}
-						taskProgress={getTaskProgress(lastTask, $serverTimeOffset, currentTime)}
+						taskProgress={getTaskProgress(lastTask, $serverTimeOffset, $currentTime)}
 						{genreNames}
 						{scopeName}
 						estimatedCost={requestData?.costPrediction?.budgetRequired ?? null}

@@ -1,26 +1,34 @@
 /**
- * Global Task Claiming Service
+ * Global Task Claiming Service (Enhanced v2)
  *
  * Manages automatic claiming of finished tasks at the app level.
- * Runs a global timer that checks for finished tasks and claims them automatically,
- * regardless of which page the user is currently on.
+ * Uses reactive stores to automatically detect finished tasks,
+ * ensuring consistency across all pages.
+ *
+ * Improvements over v1:
+ * - Uses global time and task state stores for automatic reactivity
+ * - No independent timer - leverages the global time system
+ * - More efficient - only processes when tasks actually finish
  */
 
 import { get } from 'svelte/store';
 import { queryClient, queryKeys } from '$lib/queries/queryClient';
 import { serverTimeOffset } from '$lib/queries/taskQueries';
+import { createUnclaimedFinishedTasksStore } from '$lib/stores/taskState';
 import { claimTask } from '$lib/api/tasks';
 import { fetchArtistsByIds } from '$lib/api/artists';
 import { addDiscoveredArtists } from '$lib/queries/artistQueries';
 import { errorNotifications } from '$lib/stores/errorNotifications';
-import { isTaskFinished, handleError, getUserFriendlyError } from '$lib/utils';
+import { handleError, getUserFriendlyError } from '$lib/utils';
 import { TaskType, type TimedTask, type ScoutingTaskResults } from '$lib/types/task';
 
 class TaskClaimingService {
-	private timerInterval: ReturnType<typeof setInterval> | null = null;
+	private unsubscribe: (() => void) | null = null;
 	private claimingTaskIds = new Set<string>();
 	private currentLabelId: string | null = null;
 	private isActive = false;
+	private lastCheckTime = 0;
+	private readonly CHECK_THROTTLE = 1000; // Throttle to once per second
 
 	/**
 	 * Start the global task claiming service for a specific label
@@ -29,7 +37,7 @@ class TaskClaimingService {
 		// Don't restart if already running for this label
 		if (this.isActive && this.currentLabelId === labelId) return;
 
-		// Stop any existing timer
+		// Stop any existing subscription
 		this.stop();
 
 		this.currentLabelId = labelId;
@@ -38,22 +46,32 @@ class TaskClaimingService {
 
 		console.log(`[TaskClaimingService] Started for label: ${labelId}`);
 
-		// Start the timer (check every second)
-		this.timerInterval = setInterval(() => {
-			this.checkAndClaimFinishedTasks();
-		}, 1000);
+		// Create a reactive store that watches for finished, unclaimed tasks
+		const finishedTasksStore = createUnclaimedFinishedTasksStore(labelId);
 
-		// Run immediately on start
-		this.checkAndClaimFinishedTasks();
+		// Subscribe to the store - it will automatically update with global time
+		this.unsubscribe = finishedTasksStore.subscribe((finishedTasks) => {
+			// Throttle checks to avoid excessive processing
+			const now = Date.now();
+			if (now - this.lastCheckTime < this.CHECK_THROTTLE) {
+				return;
+			}
+			this.lastCheckTime = now;
+
+			// Only process if there are actually finished tasks
+			if (finishedTasks.length > 0) {
+				this.claimFinishedTasks(finishedTasks);
+			}
+		});
 	}
 
 	/**
 	 * Stop the global task claiming service
 	 */
 	stop() {
-		if (this.timerInterval) {
-			clearInterval(this.timerInterval);
-			this.timerInterval = null;
+		if (this.unsubscribe) {
+			this.unsubscribe();
+			this.unsubscribe = null;
 		}
 		this.isActive = false;
 		this.claimingTaskIds.clear();
@@ -62,34 +80,20 @@ class TaskClaimingService {
 	}
 
 	/**
-	 * Check for finished tasks and claim them automatically
+	 * Claim finished tasks
 	 */
-	private async checkAndClaimFinishedTasks() {
-		if (!this.currentLabelId) return;
+	private async claimFinishedTasks(tasks: TimedTask[]) {
+		// Filter out tasks that are already being claimed
+		const unclaimed = tasks.filter((t) => !this.claimingTaskIds.has(t.id));
 
-		// Get current tasks from cache
-		const tasks = queryClient.getQueryData<TimedTask[]>(
-			queryKeys.tasks.byLabel(this.currentLabelId)
-		);
-
-		if (!tasks || tasks.length === 0) return;
-
-		const offset = get(serverTimeOffset);
-
-		// Find finished but unclaimed tasks
-		const finishedUnclaimed = tasks.filter(
-			(task) =>
-				!task.claimedAt && isTaskFinished(task, offset) && !this.claimingTaskIds.has(task.id)
-		);
-
-		if (finishedUnclaimed.length === 0) return;
+		if (unclaimed.length === 0) return;
 
 		// Track which resources need to be refreshed
 		const contractIdsToRefresh = new Set<string>();
 		let hasPublishingTask = false;
 		let hasBeatProductionTask = false;
 
-		finishedUnclaimed.forEach((task) => {
+		unclaimed.forEach((task) => {
 			if ('contractId' in task && typeof task.contractId === 'string' && task.contractId) {
 				contractIdsToRefresh.add(task.contractId);
 			}
@@ -102,12 +106,12 @@ class TaskClaimingService {
 		});
 
 		// Mark tasks as being claimed
-		finishedUnclaimed.forEach((task) => this.claimingTaskIds.add(task.id));
+		unclaimed.forEach((task) => this.claimingTaskIds.add(task.id));
 
-		console.log(`[TaskClaimingService] Claiming ${finishedUnclaimed.length} finished task(s)`);
+		console.log(`[TaskClaimingService] Claiming ${unclaimed.length} finished task(s)`);
 
 		// Claim all finished tasks in parallel
-		const claimPromises = finishedUnclaimed.map(async (task) => {
+		const claimPromises = unclaimed.map(async (task) => {
 			try {
 				const claimedTask = await claimTask(task.id);
 
