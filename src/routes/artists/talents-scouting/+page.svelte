@@ -5,6 +5,7 @@
 		addDiscoveredArtists,
 		createLabelTasksQuery,
 		createTasksByType,
+		createScoutingScopesQuery,
 		serverTimeOffset
 	} from '$lib/queries';
 	import { currentLabel } from '$lib/stores/appState';
@@ -20,9 +21,18 @@
 		return task?._optimistic === true;
 	}
 
+	function getScopeMessages(task: any, scopes: any[] | undefined): string[] {
+		if (!task?.scopeId || !scopes) {
+			return ['Searching for talent...'];
+		}
+		const scope = scopes.find((s: any) => s.id === task.scopeId);
+		return scope?.messages?.length > 0 ? scope.messages : ['Searching for talent...'];
+	}
+
 	// Reactive label ID
 	$: labelId = $currentLabel?.id ?? null;
-	// Create the tasks query - automatically refetches when labelId changes
+	// Create queries
+	$: scoutingScopesQuery = createScoutingScopesQuery();
 	$: tasksQuery = createLabelTasksQuery(labelId);
 
 	$: taskData = $tasksQuery.data
@@ -88,10 +98,11 @@
 		{:else}
 			<div class="flex flex-wrap gap-4">
 				{#each taskCards as { task, state, durationText, taskProgress } (task.id)}
+					{@const messages = getScopeMessages(task, $scoutingScopesQuery.data)}
 					<ScoutingTaskCard
 						{state}
 						{durationText}
-						inProgressDescription="Observing at open mic..."
+						{messages}
 						scoutingType={task.scoutingType}
 						{taskProgress}
 						on:viewResults={() => handleOpenScoutResultsModal(task)}

@@ -24,7 +24,7 @@ export interface ScoutingScope {
 	isActive: boolean;
 	createdAt: string;
 	updatedAt: string;
-	message: string[];
+	messages: string[];
 }
 
 export interface ScoutingTaskRequest {

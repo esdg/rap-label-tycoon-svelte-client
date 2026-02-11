@@ -49,6 +49,14 @@
 		return scopes.find((s) => s.id === requestData.scopeId)?.displayName ?? '';
 	}
 
+	function getScopeMessages(task: any, scopes: any[] | undefined): string[] {
+		if (!task?.scopeId || !scopes) {
+			return ['Searching for talent...'];
+		}
+		const scope = scopes.find((s) => s.id === task.scopeId);
+		return scope?.messages?.length > 0 ? scope.messages : ['Searching for talent...'];
+	}
+
 	// Get query client for manual invalidation
 	const queryClient = useQueryClient();
 
@@ -280,11 +288,12 @@
 				{@const lastTask = scoutingTasks[scoutingTasks.length - 1]}
 				{@const { isOptimistic, requestData, genreNames } = getOptimisticTaskData(lastTask)}
 				{@const scopeName = getScopeName(requestData, $scoutingScopesQuery.data)}
+				{@const messages = getScopeMessages(lastTask, $scoutingScopesQuery.data)}
 				<div class="flex flex-wrap gap-4">
 					<ScoutingTaskCard
 						state={isOptimistic ? 'loading' : getTaskStatus(lastTask, $serverTimeOffset)}
 						durationText={formatTimeRemaining(lastTask.endTime, $currentTime, $serverTimeOffset)}
-						inProgressDescription="Observing at open mic..."
+						{messages}
 						scoutingType={lastTask.scoutingType}
 						taskProgress={getTaskProgress(lastTask, $serverTimeOffset, $currentTime)}
 						{genreNames}
