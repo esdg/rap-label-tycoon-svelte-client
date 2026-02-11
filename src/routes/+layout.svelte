@@ -57,6 +57,7 @@
 				if (!result.success && !isPublicRoute) {
 					// Failed to get player data, redirect to login
 					appState.setFirebaseUser(null);
+					appState.setAuthLoading(false);
 					await goto('/users/login');
 				} else if (result.success && isPublicRoute) {
 					// User is authenticated and on public route, redirect appropriately
@@ -75,10 +76,8 @@
 				appState.setFirebaseUser(user);
 			} else if (!user && !isPublicRoute) {
 				// User is signed out and on protected route, redirect to login
-				// Keep loading state active during redirect
 				appState.reset();
 				await goto('/users/login');
-				appState.setAuthLoading(false);
 			} else if (!user) {
 				// User is signed out but on public route, just update state
 				appState.setFirebaseUser(null);

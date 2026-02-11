@@ -105,7 +105,13 @@ function createAppState() {
 		reset: () => {
 			clearAllQueries();
 			clearDiscoveredArtists();
-			set(initialState);
+			set({
+				...initialState,
+				// Keep auth initialized and not loading after reset
+				// The auth listener will handle further updates
+				authLoading: false,
+				authInitialized: true
+			});
 		},
 
 		// Initialize with full data (after login)
@@ -116,7 +122,9 @@ function createAppState() {
 				...state,
 				player: data.player,
 				labels: data.labels,
-				currentLabel
+				currentLabel,
+				authLoading: false,
+				authInitialized: true
 			}));
 		},
 
