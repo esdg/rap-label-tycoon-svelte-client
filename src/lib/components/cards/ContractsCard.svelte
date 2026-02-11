@@ -12,7 +12,6 @@
 		formatCurrency
 	} from '$lib/utils';
 	import Tooltip from '../Tooltip.svelte';
-	import EllipsedTextWithQuote from '../EllipsedTextWithQuote.svelte';
 
 	export let contractsTaskResponse: SigningContractTaskResponse[] = [];
 	export let contracts: Contract[] = [];
