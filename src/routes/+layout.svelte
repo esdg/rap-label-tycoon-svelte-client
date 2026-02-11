@@ -17,6 +17,7 @@
 		isAuthLoading
 	} from '$lib/stores/appState';
 	import MenuBar from '$lib/components/MenuBar.svelte';
+	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import { VERSION, GIT_HASH } from '$lib/version';
 	import { taskClaimingService } from '$lib/services/taskClaimingService';
 	import { globalTime } from '$lib/stores/globalTime';
@@ -44,38 +45,52 @@
 
 		// Listen for Firebase auth state changes
 		const unsubscribe = onFirebaseAuthStateChanged(async (user) => {
-			appState.setFirebaseUser(user);
-
 			if (user && !$currentPlayer && !initializingPlayer) {
 				initializingPlayer = true;
+				// Keep loading state active while fetching player data
+				appState.setAuthLoading(true);
+
 				// User is signed in, initialize player data
 				const result = await initializeAuthState(user.uid);
 				initializingPlayer = false;
 
 				if (!result.success && !isPublicRoute) {
 					// Failed to get player data, redirect to login
+					appState.setFirebaseUser(null);
 					await goto('/users/login');
 				} else if (result.success && isPublicRoute) {
 					// User is authenticated and on public route, redirect appropriately
+					appState.setFirebaseUser(user);
 					if (result.labels && result.labels.length > 0) {
 						await goto('/labels');
 					} else {
 						await goto('/labels/create');
 					}
+				} else if (result.success) {
+					// User is authenticated and on protected route - all good
+					appState.setFirebaseUser(user);
 				}
+			} else if (user && $currentPlayer) {
+				// User is already loaded, just update auth state
+				appState.setFirebaseUser(user);
 			} else if (!user && !isPublicRoute) {
 				// User is signed out and on protected route, redirect to login
+				// Keep loading state active during redirect
 				appState.reset();
 				await goto('/users/login');
+				appState.setAuthLoading(false);
+			} else if (!user) {
+				// User is signed out but on public route, just update state
+				appState.setFirebaseUser(null);
 			}
 		});
 
 		return () => unsubscribe();
 	});
 
-	// Stop global timer
-	globalTime.stop();
 	onDestroy(() => {
+		// Stop global timer
+		globalTime.stop();
 		// Clean up task claiming service on unmount
 		taskClaimingService.stop();
 	});
@@ -93,10 +108,9 @@
 	<ErrorAlert />
 
 	<div class="flex flex-row antialiased">
-		{#if $isAuthLoading && !isPublicRoute}
-			<div class="flex min-h-screen w-full items-center justify-center bg-gray-900">
-				<div class="text-xl text-white">Loading...</div>
-			</div>
+		{#if $isAuthLoading}
+			<!-- Show loading screen only during initial auth check -->
+			<LoadingScreen />
 		{:else}
 			{#if $isAuthenticated && !isPublicRoute && $currentPlayer}
 				<MenuBar />
