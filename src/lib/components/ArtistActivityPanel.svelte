@@ -67,7 +67,7 @@
 
 <!-- Resting Task Progress -->
 {#if restingTask}
-	<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 		<div class="flex items-center justify-between text-xs">
 			<span class="text-gray-400">Resting</span>
 			{#if restingTaskState === 'in-progress'}
@@ -98,7 +98,7 @@
 
 <!-- Beat Production Task Progress -->
 {#if beatProductionTask}
-	<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 		<div class="flex items-center justify-between text-xs">
 			<span class="text-gray-400"
 				>Producing {numberOfBeats} beat{numberOfBeats !== 1 ? 's' : ''}</span
@@ -131,7 +131,7 @@
 
 <!-- Recording Release Task Progress -->
 {#if recordingReleaseTask}
-	<div class="mt-3 space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 		<div class="flex items-center justify-between text-xs">
 			<span class="text-gray-400"
 				>Recording {numberOfTracks} track{numberOfTracks !== 1 ? 's' : ''}</span

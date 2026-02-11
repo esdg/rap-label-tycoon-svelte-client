@@ -54,14 +54,12 @@
 						{:else if artist.$type === 'beatmaker'}
 							<BeatmakerIcon class="inline-block size-4 self-start" />
 						{/if}
-						<Chip class={getRarityClass(artist.rarity) + '  ml-2 '}
-							>{getRarityLabel(artist.rarity)}</Chip
-						>
 					</h2>
 					<p class="whitespace-nowrap break-keep text-2xl font-thin uppercase">
 						{artist.lastName}
 						{artist.firstName}
 					</p>
+					<Chip class={getRarityClass(artist.rarity)}>{getRarityLabel(artist.rarity)}</Chip>
 				</div>
 				<div class="vitality-infos flex w-24 flex-col gap-1 self-end">
 					<div class="flex">
