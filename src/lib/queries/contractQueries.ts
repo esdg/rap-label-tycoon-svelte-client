@@ -1,7 +1,7 @@
 // Contracts query hooks
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { queryKeys } from './queryClient';
-import { fetchContractsByIds } from '$lib/api/contracts';
+import { fetchContractsByIds, fetchContractsByLabelId } from '$lib/api/contracts';
 import type { Contract } from '$lib/types/contracts';
 import { ContractStatus } from '$lib/types/contracts';
 
@@ -14,8 +14,14 @@ export function createContractsByIdsQuery(ids: string[]) {
 	});
 }
 
-// Note: No direct label->contracts endpoint exists on the backend yet
-// Contracts are fetched by IDs extracted from task results
+// Query: Fetch all contracts for a label
+export function createLabelContractsQuery(labelId: string | null) {
+	return createQuery<Contract[], Error>({
+		queryKey: labelId ? queryKeys.contracts.byLabel(labelId) : ['contracts', 'none'],
+		queryFn: () => fetchContractsByLabelId(labelId!),
+		enabled: !!labelId
+	});
+}
 
 // Helper: Filter contracts by status (use with query results)
 export function filterContractsByStatus(contracts: Contract[], status: ContractStatus): Contract[] {

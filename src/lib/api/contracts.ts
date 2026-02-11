@@ -16,5 +16,6 @@ export async function fetchContractsByArtistId(artistId: string): Promise<Contra
 	return apiFetch<Contract[]>(`/api/v1/contracts/by-artist/${artistId}`);
 }
 
-// Note: No direct label->contracts endpoint exists yet
-// Contracts are fetched by IDs from task results
+export async function fetchContractsByLabelId(labelId: string): Promise<Contract[]> {
+	return apiFetch<Contract[]>(`/api/v1/contracts/by-label/${labelId}`);
+}

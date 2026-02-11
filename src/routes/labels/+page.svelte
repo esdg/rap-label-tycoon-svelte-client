@@ -11,7 +11,7 @@
 		createScoutingScopesQuery,
 		serverTimeOffset
 	} from '$lib/queries/taskQueries';
-	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
+	import { createLabelContractsQuery } from '$lib/queries/contractQueries';
 	import { addDiscoveredArtists, createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { createPerformanceReportsByLabelQuery } from '$lib/queries/performanceReportQueries';
 	import { queryKeys } from '$lib/queries/queryClient';
@@ -76,16 +76,8 @@
 	$: recordingReleaseTasks = taskData.recordingReleaseTasks;
 	$: restingTasks = taskData.restingTasks;
 
-	// Extract contract IDs directly from task.contractId (available on signing_contract_task)
-	$: contractIds = contractTasks
-		.map((task) => task.contractId)
-		.filter((id): id is string => typeof id === 'string' && id.length > 0);
-
-	// Deduplicate contract IDs (same contract can have multiple negotiation tasks)
-	$: uniqueContractIds = [...new Set(contractIds)];
-
-	// Create contracts query based on unique IDs
-	$: contractsQuery = createContractsByIdsQuery(uniqueContractIds);
+	// Fetch all contracts for the current label
+	$: contractsQuery = createLabelContractsQuery(labelId);
 
 	// Filter for valid signed contracts (status = signed, end date not passed)
 	// Note: Don't use currentTime here to avoid recreating queries every second
