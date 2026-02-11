@@ -4,13 +4,7 @@
 	import { currentLabel } from '$lib/stores/appState';
 	import Button from '$lib/components/Button.svelte';
 	import bgImage from '$lib/assets/main-bg-office.png';
-	import {
-		type TimedTask,
-		type ScoutingTaskResponse,
-		type ScoutingTaskResults,
-		type RestingTaskResponse,
-		TaskType
-	} from '$lib/types/task';
+	import { type ScoutingTaskResponse, type ScoutingTaskResults } from '$lib/types/task';
 	import {
 		createLabelTasksQuery,
 		createTasksByType,
@@ -28,9 +22,7 @@
 		formatTimeRemaining,
 		getTaskProgress,
 		getTaskStatus,
-		isTaskFinished,
 		handleError,
-		getUserFriendlyError,
 		formatDuration
 	} from '$lib/utils';
 	import { getDateRange } from '$lib/utils/performanceUtils';

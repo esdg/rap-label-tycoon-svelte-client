@@ -34,7 +34,7 @@
 			<div class="flex flex-1 flex-col items-center justify-center gap-2">
 				<ArrowPathIcon class="h-8 w-8 animate-spin text-primary-400" />
 				<p class="text-center text-xs font-semibold text-primary-300">
-					AI is generating your task...
+					Scouting is starting, be ready...
 				</p>
 			</div>
 

@@ -11,7 +11,6 @@
 	} from '$lib/queries/taskQueries';
 	import { RapMusicStyleNames } from '$lib/types/musicStyles';
 	import type { ReleaseType } from '$lib/types/config';
-	import { TaskType, TaskStatus } from '$lib/types/task';
 	import type { TimedTask } from '$lib/types/task';
 	import { formatTimeRemaining } from '$lib/utils/timeUtils';
 	import { isPublishingReleaseTask } from '$lib/utils/typeGuards';
@@ -21,7 +20,6 @@
 	import Button from '$lib/components/Button.svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { TaskCreationError } from '$lib/api/tasks';
-	import { queryClient, queryKeys } from '$lib/queries/queryClient';
 	import bgImage from '$lib/assets/main-bg-discography.png';
 
 	// Tab management
