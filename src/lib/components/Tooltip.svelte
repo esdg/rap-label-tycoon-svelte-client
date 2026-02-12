@@ -178,7 +178,7 @@
 {#if visible}
 	<div
 		bind:this={tooltipEl}
-		class="fixed z-[9999] rounded-md border border-gray-700 bg-primary-950 px-3 py-2 text-xs text-gray-400 shadow-lg {className}"
+		class="fixed z-[9999] select-none rounded-md border border-gray-700 bg-primary-950 px-3 py-2 text-xs text-gray-400 shadow-lg {className}"
 		class:invisible={!positioned}
 		class:visible={positioned}
 		style="{tooltipStyle} max-width: {maxWidth}px;"

@@ -35,14 +35,14 @@
 		{
 			path: '/labels/roster',
 			icon: RosterIcon,
-			label: 'Artists',
+			label: 'Label Roster',
 			description:
 				'Manage your signed artists. Check their stats, mood, contracts, and progress, and decide who to develop, push, or let go.'
 		},
 		{
 			path: '/artists/talents-scouting',
 			icon: MagnifyingGlassCircleIcon,
-			label: 'Scout New Talent',
+			label: 'Artist Finder',
 			description:
 				'Discover the next big thing. Browse unsigned artists, listen to their demos, and decide who to sign to your label. The future of hip-hop is in your hands.'
 		},

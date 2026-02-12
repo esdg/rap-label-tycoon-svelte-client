@@ -22,6 +22,7 @@
 	import { onMount } from 'svelte';
 	import { TaskCreationError } from '$lib/api/tasks';
 	import bgImage from '$lib/assets/main-bg-discography.png';
+	import PageContentWithScroll from '$lib/components/PageContentWithScroll.svelte';
 
 	// Tab management
 	let activeTabIndex = 0;
@@ -167,11 +168,13 @@
 	}
 </script>
 
-<div
-	class="music-and-release-page min-h-screen overflow-x-hidden p-4 text-white sm:p-8"
-	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
->
-	<h1 class="mb-6 text-3xl font-bold text-primary-100">Music & Release</h1>
+<PageContentWithScroll>
+	<div class="mb-10 flex select-none flex-wrap items-start justify-between gap-4">
+		<div>
+			<h1 class="text-7xl font-thin uppercase leading-none">Music catalog</h1>
+			<p class="text-sm text-gray-300">Manage your label's music releases and tracks.</p>
+		</div>
+	</div>
 
 	<!-- Tabs -->
 	<div class="mb-6">
@@ -223,8 +226,13 @@
 						<!-- Releases List -->
 						{#each releases as release (release.id)}
 							<div
-								class="grid grid-cols-[2fr_120px_120px_120px_80px_120px] items-center gap-4 border-b border-primary-800 px-4 py-3 text-sm transition-colors hover:bg-primary-900"
+								class="grid grid-cols-[120px_2fr_120px_120px_120px_80px_120px] items-center gap-4 border-b border-primary-800 px-4 py-3 text-sm transition-colors hover:bg-primary-900"
 							>
+								<div>
+									{#if release.albumCoverUrl}
+										<img src={release.albumCoverUrl} alt="Cover" class="object-cover" />
+									{/if}
+								</div>
 								<div class="truncate font-medium text-primary-100">{release.title}</div>
 								<div class="text-center text-primary-200">
 									{getReleaseTypeName(release.releaseTypeId)}
@@ -389,4 +397,4 @@
 			</div>
 		</ContentPanelItem>
 	</ContentPanel>
-</div>
+</PageContentWithScroll>

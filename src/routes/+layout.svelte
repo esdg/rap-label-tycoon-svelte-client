@@ -16,7 +16,7 @@
 		isAuthenticated,
 		isAuthLoading
 	} from '$lib/stores/appState';
-	import MenuBar from '$lib/components/MenuBar.svelte';
+	import MenuBar from '$lib/components/navigation/MenuBar.svelte';
 	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import { VERSION, GIT_HASH } from '$lib/version';
 	import { taskClaimingService } from '$lib/services/taskClaimingService';
@@ -127,7 +127,7 @@
 			{#if $isAuthenticated && !isPublicRoute && $currentPlayer}
 				<MenuBar />
 			{/if}
-			<main class="font-roboto min-h-screen flex-grow bg-primary-950 text-white">
+			<main class="min-h-screen flex-grow bg-primary-950 font-roboto text-white">
 				<slot />
 			</main>
 		{/if}

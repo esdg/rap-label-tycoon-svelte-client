@@ -13,11 +13,11 @@
 	$: artistQuery = createArtistByIdQuery(data?.artistId ?? '');
 </script>
 
-<div class="h-screen bg-gray-900 text-white overflow-hidden">
+<div class="h-screen overflow-hidden bg-gray-900 text-white">
 	<div class="">
 		<!-- Loading State -->
 		{#if $artistQuery.isLoading}
-			<div class="flex justify-center items-center min-h-[400px]">
+			<div class="flex min-h-[400px] items-center justify-center">
 				<div class="text-center">
 					<div
 						class="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary-500 border-r-transparent"
@@ -28,26 +28,26 @@
 
 			<!-- Error State -->
 		{:else if $artistQuery.error}
-			<div class="flex justify-center items-center min-h-[400px]">
-				<div class="text-center max-w-md">
-					<div class="text-red-500 text-5xl mb-4">⚠️</div>
-					<h2 class="text-2xl font-bold mb-2">Error Loading Artist</h2>
-					<p class="text-gray-400 mb-6">{$artistQuery.error.message}</p>
+			<div class="flex min-h-[400px] items-center justify-center">
+				<div class="max-w-md text-center">
+					<div class="mb-4 text-5xl text-red-500">⚠️</div>
+					<h2 class="mb-2 text-2xl font-bold">Error Loading Artist</h2>
+					<p class="mb-6 text-gray-400">{$artistQuery.error.message}</p>
 					<Button on:clicked={() => goto('/labels')}>Back to Labels</Button>
 				</div>
 			</div>
 
 			<!-- Success State -->
 		{:else if $artistQuery.data}
-			<div class="flex md:flex-row flex-col-reverse h-full">
+			<div class="flex h-full flex-col-reverse md:flex-row">
 				<Hero
 					image={$artistQuery.data.profileImage ??
 						`/artists/profiles/default/artist-default-${$artistQuery.data.sex === 'Male' ? 'm' : 'f'}-1.png`}
 				/>
-				<div class="md:basis-3/5 h-screen overflow-y-auto">
-					<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
+				<div class="h-screen overflow-y-auto md:basis-3/5">
+					<div class="mx-auto max-w-7xl overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
 						<ArtistActionsPanel artist={$artistQuery.data} />
-						<ArtistDetails class="-mt-24 " artist={$artistQuery.data} />
+						<ArtistDetails class="pointer-events-none -mt-24" artist={$artistQuery.data} />
 					</div>
 				</div>
 			</div>

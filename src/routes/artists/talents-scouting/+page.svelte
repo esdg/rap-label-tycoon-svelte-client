@@ -15,6 +15,10 @@
 	import bgImage from '$lib/assets/main-bg-1.png';
 	import Button from '$lib/components/Button.svelte';
 	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
+	import ButtonsGroup from '$lib/components/ButtonsGroup.svelte';
+	import { goto } from '$app/navigation';
+	import ArtistFinderSubNavigationBar from '$lib/components/navigation/ArtistFinderSubNavigationBar.svelte';
+	import PageContentWithScroll from '$lib/components/PageContentWithScroll.svelte';
 
 	// Helper to check if a task is optimistic (has temporary ID and extra data)
 	function isOptimisticTask(task: any): boolean {
@@ -74,10 +78,15 @@
 	}
 </script>
 
-<div
-	class="talents-scouting-page min-h-screen overflow-x-hidden p-4 text-white sm:p-8"
-	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
->
+<PageContentWithScroll>
+	<div class="mb-10 flex select-none flex-wrap items-start justify-between gap-4">
+		<div>
+			<h1 class="text-7xl font-thin uppercase leading-none">Artists finder</h1>
+			<p class="text-sm text-gray-300">Discover and scout new talents for your label.</p>
+		</div>
+		<ArtistFinderSubNavigationBar />
+	</div>
+
 	<div class="mb-6">
 		<Button
 			color="primary"
@@ -85,10 +94,11 @@
 			altText="Open scout talents modal"
 			on:clicked={openScoutingModal}
 		>
-			Scout Talents
+			Scout New Talents
 		</Button>
 	</div>
-	<div class="grid grid-cols-[1fr_1fr_max-content]">
+
+	<div>
 		{#if $tasksQuery.isLoading}
 			<p class="text-gray-400">Loading scouting tasks...</p>
 		{:else if $tasksQuery.isError}
@@ -111,4 +121,4 @@
 			</div>
 		{/if}
 	</div>
-</div>
+</PageContentWithScroll>

@@ -39,9 +39,9 @@
 	<h3 class="text-3xl font-black uppercase leading-tight text-white sm:text-5xl lg:text-6xl">
 		{artist.stageName}
 		{#if artist.$type === 'rapper'}
-			<RapperIcon class="relative bottom-2 top-auto inline-block size-8" />
+			<RapperIcon class="pointer-events-auto relative bottom-2 top-auto inline-block size-8" />
 		{:else if artist.$type === 'beatmaker'}
-			<BeatmakerIcon class="relative bottom-2 top-auto inline-block size-8" />
+			<BeatmakerIcon class="pointer-events-auto relative bottom-2 top-auto inline-block size-8" />
 		{/if}
 	</h3>
 	<p class="text-xl font-thin uppercase text-gray-400 sm:text-3xl lg:text-4xl">

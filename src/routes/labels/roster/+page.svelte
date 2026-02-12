@@ -21,18 +21,21 @@
 	import { ContractStatus } from '$lib/types/contracts';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import { createLabelByIdQuery } from '$lib/queries/labelQueries';
+	import ButtonsGroup from '$lib/components/ButtonsGroup.svelte';
+	import { goto } from '$app/navigation';
+	import RosterSubNaviationBar from '$lib/components/navigation/RosterSubNaviationBar.svelte';
+	import PageContentWithScroll from '$lib/components/PageContentWithScroll.svelte';
 
-	type ViewMode = 'roster' | 'watchlist' | 'discovered';
-	const viewOptions: { key: ViewMode; label: string }[] = [
-		{ key: 'roster', label: 'Roster' },
-		{ key: 'watchlist', label: 'Watchlist' },
-		{ key: 'discovered', label: 'Discovered' }
+	type ViewMode = 'roster' | 'contracts';
+	const viewOptions: { key: ViewMode; label: string; path?: string }[] = [
+		{ key: 'roster', label: 'Roster', path: '/labels/roster' },
+		{ key: 'contracts', label: 'Contracts', path: '/labels/contracts' }
 	];
 
 	const viewDescriptions: Record<ViewMode, string> = {
 		roster: 'Signed artists with active contracts; progress shows their current tasks.',
-		watchlist: 'Artists you bookmarked to track before signing; timers show any ongoing work.',
-		discovered: 'Talents found via scouting or label records; use this to decide who to sign next.'
+		contracts:
+			'A list of all your contracts, including unsigned ones; use this to track potential signings and scouting targets.'
 	};
 
 	let activeView: ViewMode = 'roster';
@@ -74,54 +77,21 @@
 		.filter((id): id is string => typeof id === 'string' && id.length > 0);
 	$: rosterArtistsQuery = createArtistsByIdsQuery(rosterArtistIds);
 
-	// Watchlist artists
-	$: watchlistArtistIds = labelData?.artistsWatchlistIds ?? [];
-	$: watchlistArtistsQuery = createArtistsByIdsQuery(watchlistArtistIds);
-
-	// Discovered artists (persisted on label + locally stored discoveries)
-	$: labelDiscoveredIds = labelData?.discoveredArtistsIds ?? [];
-	$: labelDiscoveredArtistsQuery = createArtistsByIdsQuery(labelDiscoveredIds);
-	$: discoveredFromStore = $discoveredArtistsList.map((entry) => entry.artist);
-	$: discoveredFromLabel = $labelDiscoveredArtistsQuery.data ?? [];
-	$: discoveredArtists = Array.from(
-		new Map<string, Artist>(
-			[...discoveredFromLabel, ...discoveredFromStore].map((artist) => [artist.id, artist])
-		).values()
-	);
-
 	// Active dataset based on selected view
 	$: rosterArtists = $rosterArtistsQuery.data ?? [];
-	$: watchlistArtists = $watchlistArtistsQuery.data ?? [];
-	$: activeArtists =
-		activeView === 'roster'
-			? rosterArtists
-			: activeView === 'watchlist'
-				? watchlistArtists
-				: discoveredArtists;
 
 	// Split by role
 	const isRapper = (artist: Artist) => 'songWritingSkills' in artist;
 	const isBeatmaker = (artist: Artist) => 'beatmakingSkills' in artist;
-	$: rappers = activeArtists.filter(isRapper);
-	$: beatmakers = activeArtists.filter(isBeatmaker);
+	$: rappers = rosterArtists.filter(isRapper);
+	$: beatmakers = rosterArtists.filter(isBeatmaker);
 
 	// Loading/error helpers
 	$: isRosterLoading =
 		$tasksQuery.isLoading || $contractsQuery.isLoading || $rosterArtistsQuery.isLoading;
-	$: isWatchlistLoading = $watchlistArtistsQuery.isLoading;
-	$: isDiscoveredLoading = $labelDiscoveredArtistsQuery.isLoading && labelDiscoveredIds.length > 0;
-	$: activeLoading =
-		activeView === 'roster'
-			? isRosterLoading
-			: activeView === 'watchlist'
-				? isWatchlistLoading
-				: isDiscoveredLoading;
-	$: activeError =
-		activeView === 'roster'
-			? $tasksQuery.error || $contractsQuery.error || $rosterArtistsQuery.error
-			: activeView === 'watchlist'
-				? $watchlistArtistsQuery.error
-				: $labelDiscoveredArtistsQuery.error;
+	$: activeLoading = isRosterLoading;
+
+	$: activeError = $tasksQuery.error || $contractsQuery.error || $rosterArtistsQuery.error;
 
 	function getErrorMessage(err: unknown): string {
 		if (!err) return '';
@@ -164,40 +134,22 @@
 	}
 </script>
 
-<div
-	class="min-h-screen overflow-x-hidden bg-cover bg-center p-4 text-white sm:p-8"
-	style="background-image: url({bgImage});"
->
-	<div class="mx-auto flex max-w-7xl flex-col gap-6">
-		<div class="flex select-none flex-wrap items-center justify-between gap-4">
+<!-- Page content -->
+<PageContentWithScroll>
+	<div>
+		<div class="mb-10 flex select-none flex-wrap items-start justify-between gap-4">
 			<div>
-				<h1 class="text-7xl font-thin uppercase leading-none">Artists</h1>
-				<p class="text-sm text-gray-300">Switch between roster, watchlist, and discoveries.</p>
+				<h1 class="text-7xl font-thin uppercase leading-none">Roster</h1>
+				<p class="text-sm text-gray-300">Your label's roster of artists.</p>
 			</div>
-			<div class="flex flex-wrap gap-2">
-				{#each viewOptions as option}
-					<Tooltip position="bottom" maxWidth={260}>
-						<svelte:fragment slot="trigger">
-							<Button
-								color="primary"
-								style={activeView === option.key ? 'normal' : 'hollow'}
-								altText={`Show ${option.label.toLowerCase()} artists`}
-								on:clicked={() => (activeView = option.key)}
-							>
-								{option.label}
-							</Button>
-						</svelte:fragment>
-						{viewDescriptions[option.key]}
-					</Tooltip>
-				{/each}
-			</div>
+			<RosterSubNaviationBar />
 		</div>
 
 		{#if activeLoading}
 			<p class="text-gray-300">Loading artists...</p>
 		{:else if activeError}
 			<p class="text-red-400">Error loading artists: {getErrorMessage(activeError)}</p>
-		{:else if activeArtists.length === 0}
+		{:else if rosterArtists.length === 0}
 			<p class="text-gray-300">No artists to display for this view yet.</p>
 		{:else}
 			<div class="grid gap-6 lg:grid-cols-2">
@@ -239,4 +191,4 @@
 			</div>
 		{/if}
 	</div>
-</div>
+</PageContentWithScroll>

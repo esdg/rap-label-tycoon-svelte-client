@@ -20,6 +20,7 @@
 	import PerformanceChart from '$lib/components/PerformanceChart.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import { goto } from '$app/navigation';
+	import PageContentWithScroll from '$lib/components/PageContentWithScroll.svelte';
 
 	let selectedMetric: SortMetric = 'revenue';
 	let dateRangeDays = 30;
@@ -102,12 +103,12 @@
 	}
 </script>
 
-<div
-	class="finances-page min-h-screen overflow-x-hidden p-4 text-white sm:p-8"
-	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
->
-	<div class="page-header">
-		<h1>Financial Dashboard</h1>
+<PageContentWithScroll>
+	<div class="mb-10 flex select-none flex-wrap items-start justify-between gap-4">
+		<div>
+			<h1 class="text-7xl font-thin uppercase leading-none">Financial Dashboard</h1>
+			<p class="text-sm text-gray-300">View and analyze your label's financial performance.</p>
+		</div>
 		<div class="header-controls">
 			<select bind:value={dateRangeDays} class="date-range-select">
 				<option value={7}>Last 7 days</option>
@@ -300,7 +301,7 @@
 			{/if}
 		</section>
 	{/if}
-</div>
+</PageContentWithScroll>
 
 <style>
 	.page-header {
