@@ -19,6 +19,7 @@
 	import { createLabelByIdQuery } from '$lib/queries/labelQueries';
 	import PageContentWithScroll from '$lib/components/PageContentWithScroll.svelte';
 	import ArtistFinderSubNavigationBar from '$lib/components/navigation/ArtistFinderSubNavigationBar.svelte';
+	import { getActiveBeatTask, getActiveRecordingTask, getActiveRestingTask } from '$lib/utils';
 
 	$: labelId = $currentLabel?.id ?? null;
 	$: labelQuery = createLabelByIdQuery(labelId);
@@ -70,41 +71,6 @@
 		if (!err) return '';
 		return err instanceof Error ? err.message : String(err);
 	}
-
-	function getActiveBeatTask(artistId: string) {
-		const adjustedNow = $serverAdjustedTime;
-		return (
-			beatProductionTasks.find((task) => {
-				if (task.workerId !== artistId) return false;
-				const startTime = new Date(task.startTime).getTime();
-				const endTime = new Date(task.endTime).getTime();
-				return startTime <= adjustedNow && endTime > adjustedNow;
-			}) ?? null
-		);
-	}
-
-	function getActiveRecordingTask(artistId: string) {
-		const adjustedNow = $serverAdjustedTime;
-		return (
-			recordingReleaseTasks.find((task) => {
-				if (task.workerId !== artistId) return false;
-				const startTime = new Date(task.startTime).getTime();
-				const endTime = new Date(task.endTime).getTime();
-				return startTime <= adjustedNow && endTime > adjustedNow;
-			}) ?? null
-		);
-	}
-	function getActiveRestingTask(artistId: string) {
-		const adjustedNow = $serverAdjustedTime;
-		return (
-			restingTasks.find((task) => {
-				if (task.workerId !== artistId) return false;
-				const startTime = new Date(task.startTime).getTime();
-				const endTime = new Date(task.endTime).getTime();
-				return startTime <= adjustedNow && endTime > adjustedNow;
-			}) ?? null
-		);
-	}
 </script>
 
 <PageContentWithScroll>
@@ -133,9 +99,9 @@
 					{#each rappers as artist (artist.id)}
 						<ArtistCard
 							{artist}
-							beatProductionTask={getActiveBeatTask(artist.id)}
-							recordingReleaseTask={getActiveRecordingTask(artist.id)}
-							restingTask={getActiveRestingTask(artist.id)}
+							beatProductionTask={getActiveBeatTask(beatProductionTasks, artist.id)}
+							recordingReleaseTask={getActiveRecordingTask(recordingReleaseTasks, artist.id)}
+							restingTask={getActiveRestingTask(restingTasks, artist.id)}
 							currentTime={$currentTime}
 							serverTimeOffset={$serverTimeOffset}
 						/>
@@ -151,9 +117,9 @@
 					{#each beatmakers as artist (artist.id)}
 						<ArtistCard
 							{artist}
-							beatProductionTask={getActiveBeatTask(artist.id)}
-							recordingReleaseTask={getActiveRecordingTask(artist.id)}
-							restingTask={getActiveRestingTask(artist.id)}
+							beatProductionTask={getActiveBeatTask(beatProductionTasks, artist.id)}
+							recordingReleaseTask={getActiveRecordingTask(recordingReleaseTasks, artist.id)}
+							restingTask={getActiveRestingTask(restingTasks, artist.id)}
 							currentTime={$currentTime}
 							serverTimeOffset={$serverTimeOffset}
 						/>

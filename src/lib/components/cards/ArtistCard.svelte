@@ -9,7 +9,7 @@
 		RestingTaskResponse
 	} from '$lib/types/task';
 	import { getRarityClass, getRarityLabel } from '$lib/utils';
-	import { BoltIcon, FaceSmileIcon, StarIcon } from 'heroicons-svelte/24/solid';
+	import { BoltIcon, FaceSmileIcon } from 'heroicons-svelte/24/solid';
 	import ArtistActivityPanel from '../ArtistActivityPanel.svelte';
 	import Chip from '../Chip.svelte';
 	import ProgressBar from '../progress-bars/ProgressBar.svelte';
