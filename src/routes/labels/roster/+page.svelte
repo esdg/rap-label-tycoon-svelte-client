@@ -1,16 +1,8 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
-	import Tooltip from '$lib/components/Tooltip.svelte';
-	import bgImage from '$lib/assets/main-bg-office.png';
-	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
-	import { createArtistsByIdsQuery, discoveredArtistsList } from '$lib/queries/artistQueries';
-	import {
-		createLabelTasksQuery,
-		createTasksByType,
-		serverTimeOffset
-	} from '$lib/queries/taskQueries';
+	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
+	import { createLabelTasksQuery, createTasksByType } from '$lib/queries/taskQueries';
 	import type {
 		ProducingBeatsTaskResponse,
 		RecordingReleaseTaskResponse,
@@ -21,8 +13,6 @@
 	import { ContractStatus } from '$lib/types/contracts';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import { createLabelByIdQuery } from '$lib/queries/labelQueries';
-	import ButtonsGroup from '$lib/components/ButtonsGroup.svelte';
-	import { goto } from '$app/navigation';
 	import RosterSubNaviationBar from '$lib/components/navigation/RosterSubNaviationBar.svelte';
 	import PageContentWithScroll from '$lib/components/PageContentWithScroll.svelte';
 
@@ -97,41 +87,6 @@
 		if (!err) return '';
 		return err instanceof Error ? err.message : String(err);
 	}
-
-	function getActiveBeatTask(artistId: string) {
-		const adjustedNow = $serverAdjustedTime;
-		return (
-			beatProductionTasks.find((task) => {
-				if (task.workerId !== artistId) return false;
-				const startTime = new Date(task.startTime).getTime();
-				const endTime = new Date(task.endTime).getTime();
-				return startTime <= adjustedNow && endTime > adjustedNow;
-			}) ?? null
-		);
-	}
-
-	function getActiveRecordingTask(artistId: string) {
-		const adjustedNow = $serverAdjustedTime;
-		return (
-			recordingReleaseTasks.find((task) => {
-				if (task.workerId !== artistId) return false;
-				const startTime = new Date(task.startTime).getTime();
-				const endTime = new Date(task.endTime).getTime();
-				return startTime <= adjustedNow && endTime > adjustedNow;
-			}) ?? null
-		);
-	}
-	function getActiveRestingTask(artistId: string) {
-		const adjustedNow = $serverAdjustedTime;
-		return (
-			restingTasks.find((task) => {
-				if (task.workerId !== artistId) return false;
-				const startTime = new Date(task.startTime).getTime();
-				const endTime = new Date(task.endTime).getTime();
-				return startTime <= adjustedNow && endTime > adjustedNow;
-			}) ?? null
-		);
-	}
 </script>
 
 <!-- Page content -->
@@ -159,14 +114,7 @@
 						<p class="text-gray-400">No rappers available.</p>
 					{:else}
 						{#each rappers as artist (artist.id)}
-							<ArtistCard
-								{artist}
-								beatProductionTask={getActiveBeatTask(artist.id)}
-								recordingReleaseTask={getActiveRecordingTask(artist.id)}
-								restingTask={getActiveRestingTask(artist.id)}
-								currentTime={$currentTime}
-								serverTimeOffset={$serverTimeOffset}
-							/>
+							<ArtistCard {artist} />
 						{/each}
 					{/if}
 				</div>
@@ -177,14 +125,7 @@
 						<p class="text-gray-400">No beatmakers available.</p>
 					{:else}
 						{#each beatmakers as artist (artist.id)}
-							<ArtistCard
-								{artist}
-								beatProductionTask={getActiveBeatTask(artist.id)}
-								recordingReleaseTask={getActiveRecordingTask(artist.id)}
-								restingTask={getActiveRestingTask(artist.id)}
-								currentTime={$currentTime}
-								serverTimeOffset={$serverTimeOffset}
-							/>
+							<ArtistCard {artist} />
 						{/each}
 					{/if}
 				</div>

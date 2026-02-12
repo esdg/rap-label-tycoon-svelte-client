@@ -10,6 +10,7 @@
 	} from '$lib/utils';
 	import BeatmakerIcon from '$lib/icons/BeatmakerIcon.svelte';
 	import RapperIcon from '$lib/icons/RapperIcon.svelte';
+	import ArtistActivityPanel from './ArtistActivityPanel.svelte';
 
 	export let artist: Artist;
 	let className = '';
@@ -48,6 +49,8 @@
 		{artist.firstName}
 		{artist.lastName}
 	</p>
+
+	<ArtistActivityPanel class="mt-6" {artist} />
 
 	<!-- Artist Details -->
 	<div class="flex flex-col gap-6 pt-6 text-sm lg:gap-8 lg:pt-8">
