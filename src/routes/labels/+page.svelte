@@ -203,38 +203,7 @@
 					<p class="mt-4 text-red-400">Error loading artists: {$artistsQuery.error?.message}</p>
 				{:else if $artistsQuery.data && $artistsQuery.data.length > 0}
 					{#each $artistsQuery.data as artist (artist.id)}
-						{@const artistBeatTask =
-							beatProductionTasks.find((t) => {
-								if (t.workerId !== artist.id) return false;
-								const adjustedNow = $serverAdjustedTime;
-								const startTime = new Date(t.startTime).getTime();
-								const endTime = new Date(t.endTime).getTime();
-								return startTime <= adjustedNow && endTime > adjustedNow;
-							}) || null}
-						{@const artistRecordingTask =
-							recordingReleaseTasks.find((t) => {
-								if (t.workerId !== artist.id) return false;
-								const adjustedNow = $serverAdjustedTime;
-								const startTime = new Date(t.startTime).getTime();
-								const endTime = new Date(t.endTime).getTime();
-								return startTime <= adjustedNow && endTime > adjustedNow;
-							}) || null}
-						{@const artistRestingTask =
-							restingTasks.find((t) => {
-								if (t.workerId !== artist.id) return false;
-								const adjustedNow = $serverAdjustedTime;
-								const startTime = new Date(t.startTime).getTime();
-								const endTime = new Date(t.endTime).getTime();
-								return startTime <= adjustedNow && endTime > adjustedNow;
-							}) || null}
-						<ArtistCard
-							{artist}
-							beatProductionTask={artistBeatTask}
-							recordingReleaseTask={artistRecordingTask}
-							restingTask={artistRestingTask}
-							currentTime={$currentTime}
-							serverTimeOffset={$serverTimeOffset}
-						/>
+						<ArtistCard {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
 					{/each}
 				{/if}
 			</div>

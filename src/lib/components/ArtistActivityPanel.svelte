@@ -4,44 +4,57 @@
 		RecordingReleaseTaskResponse,
 		RestingTaskResponse
 	} from '$lib/types/task';
-	import { getTaskProgress, getTaskStatus } from '$lib/utils';
+	import type { Artist } from '$lib/types/nonPlayingCharacter';
+	import {
+		getTaskProgress,
+		getTaskStatus,
+		getActiveBeatTask,
+		getActiveRecordingTask,
+		getActiveRestingTask
+	} from '$lib/utils';
 	import { formatTimeRemaining } from '$lib/utils/timeUtils';
+	import { currentTime } from '$lib/stores/globalTime';
+	import { serverTimeOffset } from '$lib/queries/taskQueries';
 	import ProgressBar from './progress-bars/ProgressBar.svelte';
 
-	export let beatProductionTask: ProducingBeatsTaskResponse | null = null;
-	export let recordingReleaseTask: RecordingReleaseTaskResponse | null = null;
-	export let restingTask: RestingTaskResponse | null = null;
-	export let currentTime: number = Date.now();
-	export let serverTimeOffset: number = 0;
+	export let artist: Artist;
+	export let beatProductionTasks: ProducingBeatsTaskResponse[] = [];
+	export let recordingReleaseTasks: RecordingReleaseTaskResponse[] = [];
+	export let restingTasks: RestingTaskResponse[] = [];
+
+	// Filter to find active tasks for this artist
+	$: beatProductionTask = getActiveBeatTask(beatProductionTasks, artist.id);
+	$: recordingReleaseTask = getActiveRecordingTask(recordingReleaseTasks, artist.id);
+	$: restingTask = getActiveRestingTask(restingTasks, artist.id);
 
 	$: beatTaskState = beatProductionTask
-		? getTaskStatus(beatProductionTask, serverTimeOffset)
+		? getTaskStatus(beatProductionTask, $serverTimeOffset)
 		: null;
 	$: beatTimeRemaining = beatProductionTask
-		? formatTimeRemaining(beatProductionTask.endTime, currentTime, serverTimeOffset)
+		? formatTimeRemaining(beatProductionTask.endTime, $currentTime, $serverTimeOffset)
 		: '';
 	$: beatProgress = beatProductionTask
-		? getTaskProgress(beatProductionTask, serverTimeOffset, currentTime)
+		? getTaskProgress(beatProductionTask, $serverTimeOffset, $currentTime)
 		: 0;
 	$: numberOfBeats = beatProductionTask?.numberOfBeats || 1;
 
 	$: recordingTaskState = recordingReleaseTask
-		? getTaskStatus(recordingReleaseTask, serverTimeOffset)
+		? getTaskStatus(recordingReleaseTask, $serverTimeOffset)
 		: null;
 	$: recordingTimeRemaining = recordingReleaseTask
-		? formatTimeRemaining(recordingReleaseTask.endTime, currentTime, serverTimeOffset)
+		? formatTimeRemaining(recordingReleaseTask.endTime, $currentTime, $serverTimeOffset)
 		: '';
 	$: recordingProgress = recordingReleaseTask
-		? getTaskProgress(recordingReleaseTask, serverTimeOffset, currentTime)
+		? getTaskProgress(recordingReleaseTask, $serverTimeOffset, $currentTime)
 		: 0;
 	$: numberOfTracks = recordingReleaseTask?.beatIds?.length || 1;
 
-	$: restingTaskState = restingTask ? getTaskStatus(restingTask, serverTimeOffset) : null;
+	$: restingTaskState = restingTask ? getTaskStatus(restingTask, $serverTimeOffset) : null;
 	$: restingTimeRemaining = restingTask
-		? formatTimeRemaining(restingTask.endTime, currentTime, serverTimeOffset)
+		? formatTimeRemaining(restingTask.endTime, $currentTime, $serverTimeOffset)
 		: '';
 	$: restingProgress = restingTask
-		? getTaskProgress(restingTask, serverTimeOffset, currentTime)
+		? getTaskProgress(restingTask, $serverTimeOffset, $currentTime)
 		: 0;
 
 	$: hasAnyTask = beatProductionTask || recordingReleaseTask || restingTask;

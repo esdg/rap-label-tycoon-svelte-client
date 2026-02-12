@@ -1,13 +1,8 @@
 <script lang="ts">
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
-	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { createArtistsByIdsQuery, discoveredArtistsList } from '$lib/queries/artistQueries';
-	import {
-		createLabelTasksQuery,
-		createTasksByType,
-		serverTimeOffset
-	} from '$lib/queries/taskQueries';
+	import { createLabelTasksQuery, createTasksByType } from '$lib/queries/taskQueries';
 	import type {
 		ProducingBeatsTaskResponse,
 		RecordingReleaseTaskResponse,
@@ -19,7 +14,6 @@
 	import { createLabelByIdQuery } from '$lib/queries/labelQueries';
 	import PageContentWithScroll from '$lib/components/PageContentWithScroll.svelte';
 	import ArtistFinderSubNavigationBar from '$lib/components/navigation/ArtistFinderSubNavigationBar.svelte';
-	import { getActiveBeatTask, getActiveRecordingTask, getActiveRestingTask } from '$lib/utils';
 
 	$: labelId = $currentLabel?.id ?? null;
 	$: labelQuery = createLabelByIdQuery(labelId);
@@ -99,14 +93,7 @@
 					<p class="text-gray-400">No rappers available.</p>
 				{:else}
 					{#each rappers as artist (artist.id)}
-						<ArtistCard
-							{artist}
-							beatProductionTask={getActiveBeatTask(beatProductionTasks, artist.id)}
-							recordingReleaseTask={getActiveRecordingTask(recordingReleaseTasks, artist.id)}
-							restingTask={getActiveRestingTask(restingTasks, artist.id)}
-							currentTime={$currentTime}
-							serverTimeOffset={$serverTimeOffset}
-						/>
+						<ArtistCard {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
 					{/each}
 				{/if}
 			</div>
@@ -117,14 +104,7 @@
 					<p class="text-gray-400">No beatmakers available.</p>
 				{:else}
 					{#each beatmakers as artist (artist.id)}
-						<ArtistCard
-							{artist}
-							beatProductionTask={getActiveBeatTask(beatProductionTasks, artist.id)}
-							recordingReleaseTask={getActiveRecordingTask(recordingReleaseTasks, artist.id)}
-							restingTask={getActiveRestingTask(restingTasks, artist.id)}
-							currentTime={$currentTime}
-							serverTimeOffset={$serverTimeOffset}
-						/>
+						<ArtistCard {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
 					{/each}
 				{/if}
 			</div>

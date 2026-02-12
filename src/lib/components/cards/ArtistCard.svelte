@@ -17,11 +17,9 @@
 	import Tooltip from '../Tooltip.svelte';
 
 	export let artist: Artist;
-	export let beatProductionTask: ProducingBeatsTaskResponse | null = null;
-	export let recordingReleaseTask: RecordingReleaseTaskResponse | null = null;
-	export let restingTask: RestingTaskResponse | null = null;
-	export let currentTime: number = Date.now();
-	export let serverTimeOffset: number = 0;
+	export let beatProductionTasks: ProducingBeatsTaskResponse[] = [];
+	export let recordingReleaseTasks: RecordingReleaseTaskResponse[] = [];
+	export let restingTasks: RestingTaskResponse[] = [];
 
 	function handleClick() {
 		goto(`/artists/${artist.id}`);
@@ -94,13 +92,7 @@
 					</div>
 				</div>
 			</div>
-			<ArtistActivityPanel
-				{beatProductionTask}
-				{recordingReleaseTask}
-				{restingTask}
-				{currentTime}
-				{serverTimeOffset}
-			/>
+			<ArtistActivityPanel {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
 		</div>
 	</div>
 </button>
