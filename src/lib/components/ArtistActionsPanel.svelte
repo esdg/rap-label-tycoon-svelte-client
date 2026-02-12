@@ -16,6 +16,8 @@
 	import SignContractIcon from '$lib/icons/SignContractIcon.svelte';
 	import { fetchContractsByArtistId } from '$lib/api/contracts';
 	import { createQuery } from '@tanstack/svelte-query';
+	import Tooltip from './Tooltip.svelte';
+	import Button from './Button.svelte';
 
 	export let artist: Artist;
 	let className = '';
@@ -55,54 +57,84 @@
 <div class="mb-6 flex justify-end gap-2 {className}">
 	<!-- Sign contract (only show if artist is a free agent - no contract with ANY label) -->
 	{#if !artistHasAnyActiveContract}
-		<button
-			on:click={() => openSignContractModal(artist)}
-			class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
-		>
-			<SignContractIcon />
-			<div class="text-xs uppercase">Sign contract<br />with artist</div>
-		</button>
+		<Tooltip position="bottom">
+			<button
+				slot="trigger"
+				on:click={() => openSignContractModal(artist)}
+				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+			>
+				<SignContractIcon />
+				<div class="text-xs uppercase">Sign contract<br />with artist</div>
+			</button>
+			<p class="font-bold text-white">✍️ Sign Contract</p>
+			<p>Negotiate and secure a deal.</p>
+			<p>Sign or renew a contract to officially bring the artist under your label.</p>
+		</Tooltip>
 	{/if}
 
 	{#if artistHasActiveContractWithCurrentLabel}
 		<!-- Send artist on rest button -->
-		<button
-			on:click={() => openRestingModal({ workerId: artist.id })}
-			class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
-		>
-			<RestIcon />
-			<div class="text-xs uppercase">Send Artist<br />To Rest</div>
-		</button>
-		<!-- Send artist on tour button -->
-		{#if isRapper(artist)}
+		<Tooltip position="bottom">
 			<button
+				slot="trigger"
+				on:click={() => openRestingModal({ workerId: artist.id })}
 				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
 			>
-				<WorldIcon />
-				<div class="text-xs uppercase">Send Artist<br />On Tour</div>
+				<RestIcon />
+				<div class="text-xs uppercase">Send Artist<br />To Rest</div>
 			</button>
+			<p class="font-bold text-white">🛌 Resting</p>
+			<p>Negotiate and secure a deal.</p>
+			<p>Sign or renew a contract to officially bring the artist under your label.</p>
+		</Tooltip>
+		<!-- Send artist on tour button -->
+		{#if isRapper(artist)}
+			<Tooltip position="bottom">
+				<button
+					slot="trigger"
+					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+				>
+					<WorldIcon />
+					<div class="text-xs uppercase">Send Artist<br />On Tour</div>
+				</button>
+				<p class="font-bold text-white">🎤 Send on Tour</p>
+				<p>Perform live to grow the fanbase.</p>
+				<p>Send the artist on tour to increase popularity and generate revenue.</p>
+			</Tooltip>
 		{/if}
 
 		<!-- Produce record Buttons -->
 		{#if isRapper(artist)}
-			<button
-				on:click={() => openRecordingReleaseModal({ workerId: artist.id })}
-				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
-			>
-				<RecordIcon />
-				<div class="text-xs uppercase">Produce<br />Record</div>
-			</button>
+			<Tooltip position="bottom">
+				<button
+					slot="trigger"
+					on:click={() => openRecordingReleaseModal({ workerId: artist.id })}
+					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+				>
+					<RecordIcon />
+					<div class="text-xs uppercase">Produce<br />Record</div>
+				</button>
+				<p class="font-bold text-white">🎙️ Record Release</p>
+				<p>Create and prepare a new track.</p>
+				<p>Record a song using available beats and get it ready for distribution.</p>
+			</Tooltip>
 		{/if}
 
 		<!-- Produce beat(s) button -->
 		{#if isBeatmaker(artist)}
-			<button
-				on:click={() => openProducingBeatsModal({ workerId: artist.id })}
-				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
-			>
-				<SoundWaveIcon />
-				<div class="text-xs uppercase">Produce<br />Beat(s)</div>
-			</button>
+			<Tooltip position="bottom">
+				<button
+					slot="trigger"
+					on:click={() => openProducingBeatsModal({ workerId: artist.id })}
+					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+				>
+					<SoundWaveIcon />
+					<div class="text-xs uppercase">Produce<br />Beat(s)</div>
+				</button>
+				<p class="font-bold text-white">🎧 Produce Beats</p>
+				<p>Create new instrumentals.</p>
+				<p>Assign a beatmaker to produce beats that can be used for future releases.</p>
+			</Tooltip>
 		{/if}
 	{/if}
 </div>
