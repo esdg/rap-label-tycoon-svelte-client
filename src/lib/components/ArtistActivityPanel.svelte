@@ -1,9 +1,4 @@
 <script lang="ts">
-	import type {
-		ProducingBeatsTaskResponse,
-		RecordingReleaseTaskResponse,
-		RestingTaskResponse
-	} from '$lib/types/task';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import {
 		getTaskProgress,
@@ -14,18 +9,33 @@
 	} from '$lib/utils';
 	import { formatTimeRemaining } from '$lib/utils/timeUtils';
 	import { currentTime } from '$lib/stores/globalTime';
-	import { serverTimeOffset } from '$lib/queries/taskQueries';
+	import {
+		createLabelTasksQuery,
+		createTasksByType,
+		serverTimeOffset
+	} from '$lib/queries/taskQueries';
+	import { currentLabel } from '$lib/stores/appState';
 	import ProgressBar from './progress-bars/ProgressBar.svelte';
 
 	export let artist: Artist;
-	export let beatProductionTasks: ProducingBeatsTaskResponse[] = [];
-	export let recordingReleaseTasks: RecordingReleaseTaskResponse[] = [];
-	export let restingTasks: RestingTaskResponse[] = [];
+
+	// Query tasks from cache (no extra network request)
+	$: labelId = $currentLabel?.id ?? null;
+	$: tasksQuery = createLabelTasksQuery(labelId);
+	$: taskData = $tasksQuery.data
+		? createTasksByType($tasksQuery.data)
+		: {
+				scoutingTasks: [],
+				contractTasks: [],
+				beatProductionTasks: [],
+				recordingReleaseTasks: [],
+				restingTasks: []
+			};
 
 	// Filter to find active tasks for this artist
-	$: beatProductionTask = getActiveBeatTask(beatProductionTasks, artist.id);
-	$: recordingReleaseTask = getActiveRecordingTask(recordingReleaseTasks, artist.id);
-	$: restingTask = getActiveRestingTask(restingTasks, artist.id);
+	$: beatProductionTask = getActiveBeatTask(taskData.beatProductionTasks, artist.id);
+	$: recordingReleaseTask = getActiveRecordingTask(taskData.recordingReleaseTasks, artist.id);
+	$: restingTask = getActiveRestingTask(taskData.restingTasks, artist.id);
 
 	$: beatTaskState = beatProductionTask
 		? getTaskStatus(beatProductionTask, $serverTimeOffset)

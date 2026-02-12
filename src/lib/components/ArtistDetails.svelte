@@ -1,10 +1,5 @@
 <script lang="ts">
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
-	import type {
-		ProducingBeatsTaskResponse,
-		RecordingReleaseTaskResponse,
-		RestingTaskResponse
-	} from '$lib/types/task';
 	import Chip from './Chip.svelte';
 	import ProgressBar from './progress-bars/ProgressBar.svelte';
 	import {
@@ -18,9 +13,6 @@
 	import ArtistActivityPanel from './ArtistActivityPanel.svelte';
 
 	export let artist: Artist;
-	export let beatProductionTasks: ProducingBeatsTaskResponse[] = [];
-	export let recordingReleaseTasks: RecordingReleaseTaskResponse[] = [];
-	export let restingTasks: RestingTaskResponse[] = [];
 	let className = '';
 	export { className as class };
 
@@ -58,7 +50,7 @@
 		{artist.lastName}
 	</p>
 
-	<ArtistActivityPanel {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
+	<ArtistActivityPanel {artist} />
 
 	<!-- Artist Details -->
 	<div class="flex flex-col gap-6 pt-6 text-sm lg:gap-8 lg:pt-8">

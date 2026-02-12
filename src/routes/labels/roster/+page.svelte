@@ -114,7 +114,7 @@
 						<p class="text-gray-400">No rappers available.</p>
 					{:else}
 						{#each rappers as artist (artist.id)}
-							<ArtistCard {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
+							<ArtistCard {artist} />
 						{/each}
 					{/if}
 				</div>
@@ -125,7 +125,7 @@
 						<p class="text-gray-400">No beatmakers available.</p>
 					{:else}
 						{#each beatmakers as artist (artist.id)}
-							<ArtistCard {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
+							<ArtistCard {artist} />
 						{/each}
 					{/if}
 				</div>

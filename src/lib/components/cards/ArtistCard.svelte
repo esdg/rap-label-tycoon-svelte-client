@@ -3,11 +3,6 @@
 	import BeatmakerIcon from '$lib/icons/BeatmakerIcon.svelte';
 	import RapperIcon from '$lib/icons/RapperIcon.svelte';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
-	import type {
-		ProducingBeatsTaskResponse,
-		RecordingReleaseTaskResponse,
-		RestingTaskResponse
-	} from '$lib/types/task';
 	import { getRarityClass, getRarityLabel } from '$lib/utils';
 	import { BoltIcon, FaceSmileIcon } from 'heroicons-svelte/24/solid';
 	import ArtistActivityPanel from '../ArtistActivityPanel.svelte';
@@ -17,9 +12,6 @@
 	import Tooltip from '../Tooltip.svelte';
 
 	export let artist: Artist;
-	export let beatProductionTasks: ProducingBeatsTaskResponse[] = [];
-	export let recordingReleaseTasks: RecordingReleaseTaskResponse[] = [];
-	export let restingTasks: RestingTaskResponse[] = [];
 
 	function handleClick() {
 		goto(`/artists/${artist.id}`);
@@ -92,7 +84,7 @@
 					</div>
 				</div>
 			</div>
-			<ArtistActivityPanel {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
+			<ArtistActivityPanel {artist} />
 		</div>
 	</div>
 </button>

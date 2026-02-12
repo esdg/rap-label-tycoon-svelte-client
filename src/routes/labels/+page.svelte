@@ -203,7 +203,7 @@
 					<p class="mt-4 text-red-400">Error loading artists: {$artistsQuery.error?.message}</p>
 				{:else if $artistsQuery.data && $artistsQuery.data.length > 0}
 					{#each $artistsQuery.data as artist (artist.id)}
-						<ArtistCard {artist} {beatProductionTasks} {recordingReleaseTasks} {restingTasks} />
+						<ArtistCard {artist} />
 					{/each}
 				{/if}
 			</div>
