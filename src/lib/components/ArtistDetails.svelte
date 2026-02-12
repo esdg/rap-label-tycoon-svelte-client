@@ -50,7 +50,7 @@
 		{artist.lastName}
 	</p>
 
-	<ArtistActivityPanel {artist} />
+	<ArtistActivityPanel class="mt-6" {artist} />
 
 	<!-- Artist Details -->
 	<div class="flex flex-col gap-6 pt-6 text-sm lg:gap-8 lg:pt-8">

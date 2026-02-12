@@ -17,6 +17,9 @@
 	import { currentLabel } from '$lib/stores/appState';
 	import ProgressBar from './progress-bars/ProgressBar.svelte';
 
+	let className = '';
+	export { className as class };
+
 	export let artist: Artist;
 
 	// Query tasks from cache (no extra network request)
@@ -70,117 +73,119 @@
 	$: hasAnyTask = beatProductionTask || recordingReleaseTask || restingTask;
 </script>
 
-{#if !hasAnyTask}
-	<!-- Idle State -->
-	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
-		<div class="flex items-center justify-between text-xs">
-			<span class="text-gray-500">Idle</span>
+<div class={className}>
+	{#if !hasAnyTask}
+		<!-- Idle State -->
+		<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+			<div class="flex items-center justify-between text-xs">
+				<span class="text-gray-500">Idle</span>
+			</div>
+			<ProgressBar
+				value={0}
+				lengthClass="w-full"
+				thicknessClass="h-1"
+				useGradient={false}
+				progressClass="bg-gray-700"
+				backgroundClass="bg-gray-800"
+				ariaLabel="Artist idle"
+			/>
 		</div>
-		<ProgressBar
-			value={0}
-			lengthClass="w-full"
-			thicknessClass="h-1"
-			useGradient={false}
-			progressClass="bg-gray-700"
-			backgroundClass="bg-gray-800"
-			ariaLabel="Artist idle"
-		/>
-	</div>
-{/if}
+	{/if}
 
-<!-- Resting Task Progress -->
-{#if restingTask}
-	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
-		<div class="flex items-center justify-between text-xs">
-			<span class="text-gray-400">Resting</span>
-			{#if restingTaskState === 'in-progress'}
-				<span class="font-medium text-teal-300">{restingTimeRemaining}</span>
-			{:else if restingTaskState === 'succeeded'}
-				<span class="font-medium text-success-500">Complete</span>
-			{:else if restingTaskState === 'failed'}
-				<span class="font-medium text-error-500">Failed</span>
-			{/if}
+	<!-- Resting Task Progress -->
+	{#if restingTask}
+		<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+			<div class="flex items-center justify-between text-xs">
+				<span class="text-gray-400">Resting</span>
+				{#if restingTaskState === 'in-progress'}
+					<span class="font-medium text-teal-300">{restingTimeRemaining}</span>
+				{:else if restingTaskState === 'succeeded'}
+					<span class="font-medium text-success-500">Complete</span>
+				{:else if restingTaskState === 'failed'}
+					<span class="font-medium text-error-500">Failed</span>
+				{/if}
+			</div>
+			<ProgressBar
+				value={restingProgress}
+				lengthClass="w-full"
+				thicknessClass="h-1"
+				useGradient={restingTaskState === 'in-progress'}
+				gradientFromClass="from-teal-400"
+				gradientToClass="to-emerald-400"
+				progressClass={restingTaskState === 'succeeded'
+					? 'bg-success-500'
+					: restingTaskState === 'failed'
+						? 'bg-error-500'
+						: 'bg-teal-400'}
+				backgroundClass="bg-gray-800"
+				ariaLabel="Resting progress"
+			/>
 		</div>
-		<ProgressBar
-			value={restingProgress}
-			lengthClass="w-full"
-			thicknessClass="h-1"
-			useGradient={restingTaskState === 'in-progress'}
-			gradientFromClass="from-teal-400"
-			gradientToClass="to-emerald-400"
-			progressClass={restingTaskState === 'succeeded'
-				? 'bg-success-500'
-				: restingTaskState === 'failed'
-					? 'bg-error-500'
-					: 'bg-teal-400'}
-			backgroundClass="bg-gray-800"
-			ariaLabel="Resting progress"
-		/>
-	</div>
-{/if}
+	{/if}
 
-<!-- Beat Production Task Progress -->
-{#if beatProductionTask}
-	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
-		<div class="flex items-center justify-between text-xs">
-			<span class="text-gray-400"
-				>Producing {numberOfBeats} beat{numberOfBeats !== 1 ? 's' : ''}</span
-			>
-			{#if beatTaskState === 'in-progress'}
-				<span class="font-medium text-amber-400">{beatTimeRemaining}</span>
-			{:else if beatTaskState === 'succeeded'}
-				<span class="font-medium text-success-500">Complete</span>
-			{:else if beatTaskState === 'failed'}
-				<span class="font-medium text-error-500">Failed</span>
-			{/if}
+	<!-- Beat Production Task Progress -->
+	{#if beatProductionTask}
+		<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+			<div class="flex items-center justify-between text-xs">
+				<span class="text-gray-400"
+					>Producing {numberOfBeats} beat{numberOfBeats !== 1 ? 's' : ''}</span
+				>
+				{#if beatTaskState === 'in-progress'}
+					<span class="font-medium text-amber-400">{beatTimeRemaining}</span>
+				{:else if beatTaskState === 'succeeded'}
+					<span class="font-medium text-success-500">Complete</span>
+				{:else if beatTaskState === 'failed'}
+					<span class="font-medium text-error-500">Failed</span>
+				{/if}
+			</div>
+			<ProgressBar
+				value={beatProgress}
+				lengthClass="w-full"
+				thicknessClass="h-1"
+				useGradient={beatTaskState === 'in-progress'}
+				gradientFromClass="from-amber-500"
+				gradientToClass="to-red-500"
+				progressClass={beatTaskState === 'succeeded'
+					? 'bg-success-500'
+					: beatTaskState === 'failed'
+						? 'bg-error-500'
+						: 'bg-amber-500'}
+				backgroundClass="bg-gray-800"
+				ariaLabel="Beat production progress"
+			/>
 		</div>
-		<ProgressBar
-			value={beatProgress}
-			lengthClass="w-full"
-			thicknessClass="h-1"
-			useGradient={beatTaskState === 'in-progress'}
-			gradientFromClass="from-amber-500"
-			gradientToClass="to-red-500"
-			progressClass={beatTaskState === 'succeeded'
-				? 'bg-success-500'
-				: beatTaskState === 'failed'
-					? 'bg-error-500'
-					: 'bg-amber-500'}
-			backgroundClass="bg-gray-800"
-			ariaLabel="Beat production progress"
-		/>
-	</div>
-{/if}
+	{/if}
 
-<!-- Recording Release Task Progress -->
-{#if recordingReleaseTask}
-	<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
-		<div class="flex items-center justify-between text-xs">
-			<span class="text-gray-400"
-				>Recording {numberOfTracks} track{numberOfTracks !== 1 ? 's' : ''}</span
-			>
-			{#if recordingTaskState === 'in-progress'}
-				<span class="font-medium text-purple-400">{recordingTimeRemaining}</span>
-			{:else if recordingTaskState === 'succeeded'}
-				<span class="font-medium text-success-500">Complete</span>
-			{:else if recordingTaskState === 'failed'}
-				<span class="font-medium text-error-500">Failed</span>
-			{/if}
+	<!-- Recording Release Task Progress -->
+	{#if recordingReleaseTask}
+		<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
+			<div class="flex items-center justify-between text-xs">
+				<span class="text-gray-400"
+					>Recording {numberOfTracks} track{numberOfTracks !== 1 ? 's' : ''}</span
+				>
+				{#if recordingTaskState === 'in-progress'}
+					<span class="font-medium text-purple-400">{recordingTimeRemaining}</span>
+				{:else if recordingTaskState === 'succeeded'}
+					<span class="font-medium text-success-500">Complete</span>
+				{:else if recordingTaskState === 'failed'}
+					<span class="font-medium text-error-500">Failed</span>
+				{/if}
+			</div>
+			<ProgressBar
+				value={recordingProgress}
+				lengthClass="w-full"
+				thicknessClass="h-1"
+				useGradient={recordingTaskState === 'in-progress'}
+				gradientFromClass="from-purple-500"
+				gradientToClass="to-pink-500"
+				progressClass={recordingTaskState === 'succeeded'
+					? 'bg-success-500'
+					: recordingTaskState === 'failed'
+						? 'bg-error-500'
+						: 'bg-purple-500'}
+				backgroundClass="bg-gray-800"
+				ariaLabel="Recording release progress"
+			/>
 		</div>
-		<ProgressBar
-			value={recordingProgress}
-			lengthClass="w-full"
-			thicknessClass="h-1"
-			useGradient={recordingTaskState === 'in-progress'}
-			gradientFromClass="from-purple-500"
-			gradientToClass="to-pink-500"
-			progressClass={recordingTaskState === 'succeeded'
-				? 'bg-success-500'
-				: recordingTaskState === 'failed'
-					? 'bg-error-500'
-					: 'bg-purple-500'}
-			backgroundClass="bg-gray-800"
-			ariaLabel="Recording release progress"
-		/>
-	</div>
-{/if}
+	{/if}
+</div>
