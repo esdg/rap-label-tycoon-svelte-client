@@ -43,6 +43,18 @@ import { TaskType, TaskStatus } from '$lib/types/task';
 import type { ScoutingTaskRequest, ScoutingScope } from '$lib/types/scoutingArtistsTask';
 import type { RestingType } from '$lib/types/resting';
 import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
+import { errorNotifications } from '$lib/stores/errorNotifications';
+import { getUserFriendlyError } from '$lib/utils/errorHandling';
+
+// Human-readable names for task types (used in error notifications)
+const taskTypeNames: Record<number, string> = {
+	[TaskType.Scouting]: 'Scouting',
+	[TaskType.ProducingBeats]: 'Producing Beats',
+	[TaskType.SigningContract]: 'Signing Contract',
+	[TaskType.RecordingRelease]: 'Recording Release',
+	[TaskType.PublishingRelease]: 'Publishing Release',
+	[TaskType.Resting]: 'Resting'
+};
 
 /**
  * Store for server time offset in milliseconds
@@ -221,24 +233,21 @@ export function createScoutingTaskMutation(labelId: string) {
 			return { previousTasks };
 		},
 		onError: (err, request, context) => {
-			// Rollback to previous state on error
 			if (context?.previousTasks) {
 				queryClient.setQueryData<TimedTask[]>(
 					queryKeys.tasks.byLabel(labelId),
 					context.previousTasks
 				);
 			}
+			const { title, message } = getUserFriendlyError(err);
+			errorNotifications.add(title, `${taskTypeNames[TaskType.Scouting]}: ${message}`);
 		},
 		onSuccess: (newTask, request) => {
-			// Remove optimistic task and add real task
 			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) => {
 				if (!old) return [newTask];
-				// Filter out optimistic tasks and add the real one
 				return [...old.filter((t) => !(t as any)._optimistic), newTask];
 			});
-			// Invalidate to get fresh data
 			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
-			// Also invalidate label to get updated bankroll
 			queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(labelId) });
 		}
 	});
@@ -314,26 +323,22 @@ export function createRecordingReleaseTaskMutation(labelId: string) {
 			return { previousTasks };
 		},
 		onError: (err, request, context) => {
-			// Rollback to previous state on error
 			if (context?.previousTasks) {
 				queryClient.setQueryData<TimedTask[]>(
 					queryKeys.tasks.byLabel(labelId),
 					context.previousTasks
 				);
 			}
+			const { title, message } = getUserFriendlyError(err);
+			errorNotifications.add(title, `${taskTypeNames[TaskType.RecordingRelease]}: ${message}`);
 		},
 		onSuccess: (newTask, request) => {
-			// Remove optimistic task and add real task
 			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) => {
 				if (!old) return [newTask];
-				// Filter out optimistic tasks and add the real one
 				return [...old.filter((t) => !(t as any)._optimistic), newTask];
 			});
-			// Invalidate to get fresh data
 			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
-			// Also invalidate label to get updated bankroll
 			queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(labelId) });
-			// Invalidate beats since they may now be locked
 			queryClient.invalidateQueries({ queryKey: queryKeys.beats.byLabel(labelId) });
 		}
 	});
@@ -398,6 +403,8 @@ export function createProducingBeatsTaskMutation(labelId: string) {
 					context.previousTasks
 				);
 			}
+			const { title, message } = getUserFriendlyError(err);
+			errorNotifications.add(title, `${taskTypeNames[TaskType.ProducingBeats]}: ${message}`);
 		},
 		onSuccess: (newTask) => {
 			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) => {
@@ -469,6 +476,8 @@ export function createRestingTaskMutation(labelId: string) {
 					context.previousTasks
 				);
 			}
+			const { title, message } = getUserFriendlyError(err);
+			errorNotifications.add(title, `${taskTypeNames[TaskType.Resting]}: ${message}`);
 		},
 		onSuccess: (newTask) => {
 			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) => {
@@ -539,6 +548,8 @@ export function createSignArtistContractTaskMutation(labelId: string) {
 					context.previousTasks
 				);
 			}
+			const { title, message } = getUserFriendlyError(err);
+			errorNotifications.add(title, `${taskTypeNames[TaskType.SigningContract]}: ${message}`);
 		},
 		onSuccess: (newTask) => {
 			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) => {

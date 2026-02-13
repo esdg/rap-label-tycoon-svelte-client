@@ -309,11 +309,7 @@
 		};
 
 		// Start the mutation (don't await it!)
-		$restingMutation!.mutate(taskRequest, {
-			onError: (err) => {
-				console.error('Resting task creation failed:', err);
-			}
-		});
+		$restingMutation!.mutate(taskRequest);
 
 		// Update bankroll optimistically using cost prediction
 		if (costPrediction) {

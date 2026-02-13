@@ -17,12 +17,11 @@
 	import { predictSignArtistContractCost } from '$lib/api';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import Dropdown from '$lib/components/Dropdown.svelte';
-	import type { TaskCostPrediction, SigningContractTaskResponse } from '$lib/types/task';
+	import type { TaskCostPrediction } from '$lib/types/task';
 	import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
 	import { yearsToTimeSpan, formatDuration } from '$lib/utils';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 	import type { Contract } from '$lib/types/contracts';
-	import { ContractStatus } from '$lib/types/contracts';
 
 	// State
 	let activeStepIndex = 0;
@@ -121,11 +120,7 @@
 		};
 
 		// Start the mutation (don't await it!)
-		$signingMutation!.mutate(taskRequest, {
-			onError: (err) => {
-				console.error('Signing contract task creation failed:', err);
-			}
-		});
+		$signingMutation!.mutate(taskRequest);
 
 		// Update bankroll optimistically using cost prediction
 		if (costPrediction) {

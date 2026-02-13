@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { modalStore } from '$lib/stores/modal';
-	import { appState, currentLabel, currentPlayer } from '$lib/stores/appState';
-	import { predictScoutingCost, TaskCreationError } from '$lib/api';
+	import { currentLabel, currentPlayer } from '$lib/stores/appState';
+	import { predictScoutingCost } from '$lib/api';
 	import { loadClientConfig } from '$lib/services/config';
-	import { queryKeys, queryClient } from '$lib/queries/queryClient';
 	import { createScoutingTaskMutation } from '$lib/queries/taskQueries';
 	import { RapMusicStyle, RapMusicStyleNames } from '$lib/types/musicStyles';
 	import {
@@ -22,7 +21,6 @@
 	import CostEstimation from './CostEstimation.svelte';
 	import { type TaskCostPrediction } from '$lib/types/task';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
-	import { getTaskErrorMessage } from '$lib/utils';
 
 	// State
 	let scoutingType: ScoutingType = ScoutingType.Rappers;
@@ -146,13 +144,7 @@
 		};
 
 		// Start the mutation (don't await it!)
-		$scoutingMutation!.mutate(taskRequest, {
-			onError: (err) => {
-				// Error is already handled by mutation's onError
-				// But we could show a toast notification here
-				console.error('Scouting task creation failed:', err);
-			}
-		});
+		$scoutingMutation!.mutate(taskRequest);
 
 		// Close the modal immediately!
 		modalStore.close();

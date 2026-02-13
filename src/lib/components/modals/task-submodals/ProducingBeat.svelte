@@ -194,11 +194,7 @@
 		};
 
 		// Start the mutation (don't await it!)
-		$producingMutation!.mutate(taskRequest, {
-			onError: (err) => {
-				console.error('Producing beats task creation failed:', err);
-			}
-		});
+		$producingMutation!.mutate(taskRequest);
 
 		// Update bankroll optimistically using cost prediction
 		if (costPrediction) {

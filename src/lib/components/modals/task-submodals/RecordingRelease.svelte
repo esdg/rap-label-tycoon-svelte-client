@@ -272,11 +272,7 @@
 		};
 
 		// Start the mutation (don't await it!)
-		$recordingMutation!.mutate(taskRequest, {
-			onError: (err) => {
-				console.error('Recording release task creation failed:', err);
-			}
-		});
+		$recordingMutation!.mutate(taskRequest);
 
 		// Update bankroll optimistically using cost prediction
 		if (costPrediction) {
