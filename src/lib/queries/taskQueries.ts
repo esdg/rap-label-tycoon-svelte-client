@@ -481,18 +481,73 @@ export function createRestingTaskMutation(labelId: string) {
 	});
 }
 
-// Mutation: Create sign artist contract task
+// Mutation: Create sign artist contract task with optimistic updates
 export function createSignArtistContractTaskMutation(labelId: string) {
 	const queryClient = useQueryClient();
 
-	return createMutation<TimedTask, Error, SignArtistContractRequest>({
-		mutationFn: createSignArtistContractTask,
-		onSuccess: (newTask) => {
+	return createMutation<
+		TimedTask,
+		Error,
+		SignArtistContractRequest & { costPrediction?: TaskCostPrediction },
+		{ previousTasks?: TimedTask[] }
+	>({
+		mutationFn: async (request) => {
+			const { costPrediction, ...apiRequest } = request;
+			return createSignArtistContractTask(apiRequest);
+		},
+		onMutate: async (request) => {
+			await queryClient.cancelQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
+
+			const previousTasks = queryClient.getQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId));
+
+			const now = new Date();
+			const estimatedDuration = request.costPrediction?.duration || '00:01:00:00';
+			const endTime = new Date(now.getTime() + parseDuration(estimatedDuration));
+
+			const optimisticTask: SigningContractTaskResponse = {
+				id: `temp-${Date.now()}-${Math.random()}`,
+				labelId: request.labelId,
+				workerId: request.workerId,
+				taskType: TaskType.SigningContract,
+				name: 'Signing Contract',
+				description: 'Preparing the contract, negotiations underway...',
+				budgetRequired: request.costPrediction?.budgetRequired ?? 0,
+				staminaCost: request.costPrediction?.staminaCost ?? 0,
+				startTime: now.toISOString(),
+				endTime: endTime.toISOString(),
+				claimedAt: null,
+				createdAt: now.toISOString(),
+				updatedAt: now.toISOString(),
+				status: TaskStatus.Pending,
+				results: null,
+				viewedAt: null,
+				contractId: '',
+				_optimistic: true,
+				_requestData: request
+			} as any;
+
 			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) =>
-				old ? [...old, newTask] : [newTask]
+				old ? [...old, optimisticTask] : [optimisticTask]
 			);
+
+			return { previousTasks };
+		},
+		onError: (err, request, context) => {
+			if (context?.previousTasks) {
+				queryClient.setQueryData<TimedTask[]>(
+					queryKeys.tasks.byLabel(labelId),
+					context.previousTasks
+				);
+			}
+		},
+		onSuccess: (newTask) => {
+			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) => {
+				if (!old) return [newTask];
+				return [...old.filter((t) => !(t as any)._optimistic), newTask];
+			});
 			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
 			queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(labelId) });
+			queryClient.invalidateQueries({ queryKey: queryKeys.contracts.byLabel(labelId) });
 		}
 	});
 }
