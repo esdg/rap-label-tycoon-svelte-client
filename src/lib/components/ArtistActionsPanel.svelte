@@ -56,21 +56,29 @@
 
 <div class="mb-6 flex justify-end gap-2 {className}">
 	<!-- Sign contract (only show if artist is a free agent - no contract with ANY label) -->
-	{#if !artistHasAnyActiveContract}
-		<Tooltip position="bottom">
-			<button
-				slot="trigger"
-				on:click={() => openSignContractModal(artist)}
-				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
-			>
-				<SignContractIcon />
-				<div class="text-xs uppercase">Sign contract<br />with artist</div>
-			</button>
-			<p class="font-bold text-white">✍️ Sign Contract</p>
-			<p>Negotiate and secure a deal.</p>
-			<p>Sign or renew a contract to officially bring the artist under your label.</p>
-		</Tooltip>
-	{/if}
+
+	<Tooltip position="bottom">
+		<button
+			disabled={artistHasAnyActiveContract}
+			slot="trigger"
+			on:click={() => openSignContractModal(artist)}
+			class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
+		>
+			<SignContractIcon />
+			<div class="text-xs uppercase">Sign contract<br />with artist</div>
+		</button>
+		<p class="font-bold text-white">✍️ Sign Contract</p>
+		<p>
+			{artistHasAnyActiveContract
+				? 'Artist already has an active contract.'
+				: 'Negotiate and secure a deal.'}
+		</p>
+		<p>
+			{artistHasAnyActiveContract
+				? 'Wait for the current contract to expire before signing a new one.'
+				: 'Sign or renew a contract to officially bring the artist under your label.'}
+		</p>
+	</Tooltip>
 
 	{#if artistHasActiveContractWithCurrentLabel}
 		<!-- Send artist on rest button -->
@@ -78,7 +86,7 @@
 			<button
 				slot="trigger"
 				on:click={() => openRestingModal({ workerId: artist.id })}
-				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 			>
 				<RestIcon />
 				<div class="text-xs uppercase">Send Artist<br />To Rest</div>
@@ -92,7 +100,7 @@
 			<Tooltip position="bottom">
 				<button
 					slot="trigger"
-					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 				>
 					<WorldIcon />
 					<div class="text-xs uppercase">Send Artist<br />On Tour</div>
@@ -109,7 +117,7 @@
 				<button
 					slot="trigger"
 					on:click={() => openRecordingReleaseModal({ workerId: artist.id })}
-					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 				>
 					<RecordIcon />
 					<div class="text-xs uppercase">Produce<br />Record</div>
@@ -126,7 +134,7 @@
 				<button
 					slot="trigger"
 					on:click={() => openProducingBeatsModal({ workerId: artist.id })}
-					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500"
+					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 				>
 					<SoundWaveIcon />
 					<div class="text-xs uppercase">Produce<br />Beat(s)</div>

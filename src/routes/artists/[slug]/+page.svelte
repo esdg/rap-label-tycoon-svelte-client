@@ -47,7 +47,7 @@
 				<div class="h-screen overflow-y-auto md:basis-3/5">
 					<div class="mx-auto max-w-7xl overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
 						<ArtistActionsPanel artist={$artistQuery.data} />
-						<ArtistDetails class="pointer-events-none -mt-24" artist={$artistQuery.data} />
+						<ArtistDetails class="pointer-events-none" artist={$artistQuery.data} />
 					</div>
 				</div>
 			</div>
