@@ -3,26 +3,23 @@
 	import { colors } from '$lib/theme';
 	import { modalStore } from '$lib/stores/modal';
 	import { appState, currentLabel, currentPlayer } from '$lib/stores/appState';
-	import { createLabelTasksQuery, createTasksByType } from '$lib/queries/taskQueries';
+	import {
+		createLabelTasksQuery,
+		createTasksByType,
+		createRecordingReleaseTaskMutation
+	} from '$lib/queries/taskQueries';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { createLabelBeatsQuery } from '$lib/queries/beatQueries';
 	import { createLabelTracksQuery } from '$lib/queries/releaseQueries';
-	import { queryKeys, queryClient } from '$lib/queries/queryClient';
 	import { loadClientConfig } from '$lib/services/config';
 	import { ContractStatus } from '$lib/types/contracts';
 	import { RapMusicStyle, RapMusicStyleNames } from '$lib/types/musicStyles';
-	import {
-		predictRecordingReleaseCost,
-		createRecordingReleaseTask,
-		TaskCreationError,
-		type RecordingReleaseRequest
-	} from '$lib/api';
+	import { predictRecordingReleaseCost, type RecordingReleaseRequest } from '$lib/api';
 	import type { Rapper } from '$lib/types/nonPlayingCharacter';
 	import type { Beat } from '$lib/types/beat';
 	import type { ReleaseType } from '$lib/types/config';
 	import type { TaskCostPrediction } from '$lib/types/task';
-	import { getTaskErrorMessage } from '$lib/utils';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
@@ -55,6 +52,11 @@
 	// Step 2 state
 	let selectedBeatIds: Set<string> = new Set();
 	let filteredBeats: Beat[] = [];
+
+	// Create the mutation
+	$: recordingMutation = $currentLabel
+		? createRecordingReleaseTaskMutation($currentLabel.id)
+		: null;
 
 	// Reactive queries
 	$: labelId = $currentLabel?.id || null;
@@ -249,39 +251,40 @@
 		}
 	}
 
-	async function handleStartRecording() {
+	function handleStartRecording() {
 		const payload = buildRecordingReleaseRequest();
 		if (!payload) {
 			error = 'Missing recording details. Please fill out the form.';
 			return;
 		}
 
-		loading = true;
+		if (!recordingMutation) {
+			error = 'Mutation not ready';
+			return;
+		}
+
 		error = null;
 
-		try {
-			const response = await createRecordingReleaseTask(payload);
+		// Include costPrediction for optimistic task duration estimation
+		const taskRequest = {
+			...payload,
+			costPrediction: costPrediction ?? undefined
+		};
 
-			// Update bankroll in appState
-			appState.updateCurrentLabelBankroll(-response.budgetRequired);
-
-			// Invalidate tasks and beats queries to refetch
-			if ($currentLabel) {
-				queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel($currentLabel.id) });
-				queryClient.invalidateQueries({ queryKey: queryKeys.beats.byLabel($currentLabel.id) });
+		// Start the mutation (don't await it!)
+		$recordingMutation!.mutate(taskRequest, {
+			onError: (err) => {
+				console.error('Recording release task creation failed:', err);
 			}
+		});
 
-			modalStore.close();
-		} catch (err) {
-			if (err instanceof TaskCreationError) {
-				error = getTaskErrorMessage(err.errorResponse.code, err.errorResponse.message);
-			} else {
-				error = 'Failed to create recording release task. Please try again.';
-			}
-			console.error(err);
-		} finally {
-			loading = false;
+		// Update bankroll optimistically using cost prediction
+		if (costPrediction) {
+			appState.updateCurrentLabelBankroll(-costPrediction.budgetRequired);
 		}
+
+		// Close the modal immediately!
+		modalStore.close();
 	}
 
 	// Event handlers

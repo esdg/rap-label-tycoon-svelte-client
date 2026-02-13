@@ -2,7 +2,7 @@
 	import { colors } from '$lib/theme';
 	import { modalStore } from '$lib/stores/modal';
 	import { appState, currentLabel, currentPlayer } from '$lib/stores/appState';
-	import { queryKeys, queryClient } from '$lib/queries/queryClient';
+	import { createSignArtistContractTaskMutation } from '$lib/queries/taskQueries';
 	import { createLabelContractsQuery } from '$lib/queries/contractQueries';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
@@ -14,16 +14,12 @@
 	import NumericField from '$lib/components/formfields/NumericField.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import CostEstimation from './CostEstimation.svelte';
-	import {
-		predictSignArtistContractCost,
-		createSignArtistContractTask,
-		TaskCreationError
-	} from '$lib/api';
+	import { predictSignArtistContractCost } from '$lib/api';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import type { TaskCostPrediction, SigningContractTaskResponse } from '$lib/types/task';
 	import type { SignArtistContractRequest } from '$lib/types/SigningContractTask';
-	import { getTaskErrorMessage, yearsToTimeSpan, formatDuration } from '$lib/utils';
+	import { yearsToTimeSpan, formatDuration } from '$lib/utils';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 	import type { Contract } from '$lib/types/contracts';
 	import { ContractStatus } from '$lib/types/contracts';
@@ -41,6 +37,11 @@
 	// Fetch contracts for the current label
 	$: labelId = $currentLabel?.id ?? null;
 	$: contractsQuery = createLabelContractsQuery(labelId);
+
+	// Create the mutation
+	$: signingMutation = $currentLabel
+		? createSignArtistContractTaskMutation($currentLabel.id)
+		: null;
 
 	// Find the contract for this specific artist
 	$: existingContract = ($contractsQuery.data ?? []).find(
@@ -100,48 +101,39 @@
 		fetchCostPrediction();
 	}
 
-	async function handleMakeOffer() {
+	function handleMakeOffer() {
 		const payload = buildCostPredictionRequest();
 		if (!payload) {
 			error = 'Missing contract details. Please fill out the form.';
 			return;
 		}
 
-		loading = true;
+		if (!signingMutation) {
+			error = 'Mutation not ready';
+			return;
+		}
+
 		error = null;
 
-		try {
-			const response = await createSignArtistContractTask(payload);
+		const taskRequest = {
+			...payload,
+			costPrediction: costPrediction ?? undefined
+		};
 
-			// Update bankroll in appState
-			appState.updateCurrentLabelBankroll(-response.budgetRequired);
-
-			// Invalidate tasks and contracts queries to refetch
-			if ($currentLabel) {
-				queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel($currentLabel.id) });
-				queryClient.invalidateQueries({ queryKey: queryKeys.contracts.byLabel($currentLabel.id) });
-
-				// Also invalidate specific contract if we have the contractId
-				const contractTask = response as SigningContractTaskResponse;
-				if (contractTask.contractId) {
-					queryClient.invalidateQueries({
-						queryKey: queryKeys.contracts.byIds([contractTask.contractId])
-					});
-				}
+		// Start the mutation (don't await it!)
+		$signingMutation!.mutate(taskRequest, {
+			onError: (err) => {
+				console.error('Signing contract task creation failed:', err);
 			}
+		});
 
-			modalStore.close();
-		} catch (err) {
-			error = 'Failed to make an offer. Please try again.';
-			if (err instanceof TaskCreationError) {
-				error = getTaskErrorMessage(err.errorResponse.code, err.errorResponse.message);
-			} else {
-				error = 'Failed to create signing contract task. Please try again.';
-			}
-			console.error(err);
-		} finally {
-			loading = false;
+		// Update bankroll optimistically using cost prediction
+		if (costPrediction) {
+			appState.updateCurrentLabelBankroll(-costPrediction.budgetRequired);
 		}
+
+		// Close the modal immediately!
+		modalStore.close();
 	}
 
 	// Event handlers

@@ -13,6 +13,7 @@
 	} from '$lib/utils';
 	import Tooltip from '../Tooltip.svelte';
 	import { ArrowRightIcon } from 'heroicons-svelte/24/solid';
+	import { ArrowPathIcon } from 'heroicons-svelte/24/outline';
 	import { openScoutResultsModal, openSignContractModal } from '$lib/modals/helpers';
 
 	export let contractsTaskResponse: SigningContractTaskResponse[] = [];
@@ -23,14 +24,23 @@
 		contractId: string;
 		contract?: Contract;
 		task: SigningContractTaskResponse;
+		isOptimistic?: boolean;
 	};
 
 	let contractTaskGroups: ContractTaskGroup[] = [];
 
-	// Extract artist IDs from contracts
-	$: artistIds = contracts
-		.map((c) => c.artistId)
-		.filter((id): id is string => typeof id === 'string' && id.length > 0);
+	// Extract artist IDs from contracts AND optimistic tasks
+	$: optimisticArtistIds = contractsTaskResponse
+		.filter((t) => (t as any)._optimistic === true && (t as any)._requestData?.artistId)
+		.map((t) => (t as any)._requestData.artistId as string);
+	$: artistIds = [
+		...new Set([
+			...contracts
+				.map((c) => c.artistId)
+				.filter((id): id is string => typeof id === 'string' && id.length > 0),
+			...optimisticArtistIds
+		])
+	];
 
 	// Create query for artists
 	$: artistsQuery = createArtistsByIdsQuery(artistIds);
@@ -38,6 +48,14 @@
 	function getArtistById(artistId: string | null): Artist | undefined {
 		if (!artistId || !$artistsQuery.data) return undefined;
 		return $artistsQuery.data.find((artist) => artist.id === artistId);
+	}
+
+	function getOptimisticArtistId(task: SigningContractTaskResponse): string | null {
+		return (task as any)?._requestData?.artistId ?? null;
+	}
+
+	function getOptimisticRequestData(task: SigningContractTaskResponse): any {
+		return (task as any)?._requestData ?? null;
 	}
 
 	function formatReleases(numberOfReleases?: Record<string, number | null> | null): string {
@@ -49,7 +67,20 @@
 
 	$: contractTaskGroups = (() => {
 		const map = new Map<string, ContractTaskGroup>();
+		const optimisticTasks: ContractTaskGroup[] = [];
+
 		for (const task of contractsTaskResponse) {
+			// Handle optimistic tasks separately (they have empty contractId)
+			if ((task as any)._optimistic === true) {
+				optimisticTasks.push({
+					contractId: task.id, // Use temp id as key
+					contract: undefined,
+					task,
+					isOptimistic: true
+				});
+				continue;
+			}
+
 			if (!task.contractId) continue;
 			const contract = contracts.find((c) => c.id === task.contractId);
 			const contractId = contract?.id ?? task.contractId;
@@ -61,16 +92,21 @@
 				map.set(contractId, { contractId, contract, task });
 			}
 		}
-		return Array.from(map.values());
+		return [...Array.from(map.values()), ...optimisticTasks];
 	})();
 </script>
 
 <article class="select-none overflow-hidden rounded-lg border border-gray-700 bg-primary-950">
 	<div class="px-4 py-2">{contractTaskGroups.length} contract(s)</div>
 	<div>
-		{#each contractTaskGroups as { contractId, contract, task }}
-			{@const artist = contract ? getArtistById(contract.artistId) : undefined}
-			{@const isFinished = task.results && new Date(task.endTime).getTime() < currentTime}
+		{#each contractTaskGroups as { contractId, contract, task, isOptimistic }}
+			{@const artist = isOptimistic
+				? getArtistById(getOptimisticArtistId(task))
+				: contract
+					? getArtistById(contract.artistId)
+					: undefined}
+			{@const isFinished =
+				!isOptimistic && task.results && new Date(task.endTime).getTime() < currentTime}
 			{@const isFailed = isFinished && task.results && !task.results.success}
 			{@const finishedClass = isFinished
 				? 'hover:border hover:border-primary-500 cursor-pointer'
@@ -78,7 +114,33 @@
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 
-			{#if contract && artist}
+			{#if isOptimistic}
+				{@const requestData = getOptimisticRequestData(task)}
+				{@const estimatedCost = requestData?.costPrediction?.budgetRequired ?? null}
+				{@const estimatedDuration = requestData?.costPrediction?.duration ?? ''}
+				<div
+					class="grid grid-cols-[95px,190px,1fr,1fr,5px] items-center gap-4 border-t border-gray-700 bg-black px-4 py-1 text-sm last:rounded-b-lg"
+				>
+					<div class="truncate text-right font-condensed font-light">
+						{artist?.stageName ?? 'Artist'}
+					</div>
+					<div class="flex items-center gap-2">
+						<ArrowPathIcon class="h-3 w-3 animate-spin text-indigo-400" />
+						<span class="text-xs text-indigo-300">Negotiating...</span>
+					</div>
+					<div class="text-xs font-thin text-gray-500">
+						{#if estimatedDuration}
+							{formatDuration(estimatedDuration)}
+						{/if}
+					</div>
+					<div class="text-xs text-gray-500">
+						{#if estimatedCost !== null}
+							{formatCurrency(estimatedCost)}
+						{/if}
+					</div>
+					<div></div>
+				</div>
+			{:else if contract && artist}
 				<div
 					class="grid grid-cols-[95px,190px,1fr,1fr,5px] items-center gap-4 border-t border-gray-700 bg-black px-4 py-1 text-sm last:rounded-b-lg {finishedClass}"
 					on:click={() => {
@@ -87,7 +149,7 @@
 						}
 					}}
 				>
-					<div class="font-condensed truncate text-right font-light">
+					<div class="truncate text-right font-condensed font-light">
 						{artist.stageName}
 					</div>
 					<div>
