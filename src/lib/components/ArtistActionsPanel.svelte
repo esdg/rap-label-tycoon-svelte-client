@@ -1,8 +1,4 @@
 <script lang="ts">
-	import RecordIcon from '$lib/icons/RecordIcon.svelte';
-	import RestIcon from '$lib/icons/RestIcon.svelte';
-	import SoundWaveIcon from '$lib/icons/SoundWaveIcon.svelte';
-	import WorldIcon from '$lib/icons/WorldIcon.svelte';
 	import {
 		openProducingBeatsModal,
 		openRecordingReleaseModal,
@@ -17,7 +13,11 @@
 	import { fetchContractsByArtistId } from '$lib/api/contracts';
 	import { createQuery } from '@tanstack/svelte-query';
 	import Tooltip from './Tooltip.svelte';
-	import Button from './Button.svelte';
+	import OnTourIcon from '$lib/assets/icons/on-tour-icon.png';
+	import ProduceBeatsIcon from '$lib/assets/icons/produce-beats-icon.png';
+	import ProduceRecordIcon from '$lib/assets/icons/produce-record-icon.png';
+	import RestIcon from '$lib/assets/icons/rest-icon.png';
+	import SingContractIcon from '$lib/assets/icons/sign-contract-icon.png';
 
 	export let artist: Artist;
 	let className = '';
@@ -62,9 +62,13 @@
 			disabled={artistHasAnyActiveContract}
 			slot="trigger"
 			on:click={() => openSignContractModal(artist)}
-			class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
+			class="group flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 		>
-			<SignContractIcon />
+			<img
+				src={SingContractIcon}
+				alt="Sign Contract Icon"
+				class="h-[58px] w-[58px] group-disabled:opacity-30"
+			/>
 			<div class="text-xs uppercase">Sign contract<br />with artist</div>
 		</button>
 		<p class="font-bold text-white">✍️ Sign Contract</p>
@@ -86,9 +90,9 @@
 			<button
 				slot="trigger"
 				on:click={() => openRestingModal({ workerId: artist.id })}
-				class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
+				class="group flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 			>
-				<RestIcon />
+				<img src={RestIcon} alt="Rest Icon" class="h-[58px] w-[58px] group-disabled:opacity-30" />
 				<div class="text-xs uppercase">Send Artist<br />To Rest</div>
 			</button>
 			<p class="font-bold text-white">🛌 Resting</p>
@@ -100,9 +104,13 @@
 			<Tooltip position="bottom">
 				<button
 					slot="trigger"
-					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
+					class="group flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 				>
-					<WorldIcon />
+					<img
+						src={OnTourIcon}
+						alt="On Tour Icon"
+						class="h-[58px] w-[58px] group-disabled:opacity-30"
+					/>
 					<div class="text-xs uppercase">Send Artist<br />On Tour</div>
 				</button>
 				<p class="font-bold text-white">🎤 Send on Tour</p>
@@ -117,9 +125,13 @@
 				<button
 					slot="trigger"
 					on:click={() => openRecordingReleaseModal({ workerId: artist.id })}
-					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
+					class="group flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 				>
-					<RecordIcon />
+					<img
+						src={ProduceRecordIcon}
+						alt="Produce Record Icon"
+						class="h-[58px] w-[58px] group-disabled:opacity-30"
+					/>
 					<div class="text-xs uppercase">Produce<br />Record</div>
 				</button>
 				<p class="font-bold text-white">🎙️ Record Release</p>
@@ -134,9 +146,13 @@
 				<button
 					slot="trigger"
 					on:click={() => openProducingBeatsModal({ workerId: artist.id })}
-					class="flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
+					class="group flex size-28 select-none flex-col items-center gap-1 rounded-md border border-gray-600 bg-[#080B12] p-2 transition-colors duration-200 hover:border-secondary-500 hover:ring-1 hover:ring-secondary-500 disabled:cursor-not-allowed disabled:border-gray-700 disabled:text-gray-500 disabled:hover:border-gray-700 disabled:hover:ring-0"
 				>
-					<SoundWaveIcon />
+					<img
+						src={ProduceBeatsIcon}
+						alt="Produce Beats Icon"
+						class="h-[58px] w-[58px] group-disabled:opacity-30"
+					/>
 					<div class="text-xs uppercase">Produce<br />Beat(s)</div>
 				</button>
 				<p class="font-bold text-white">🎧 Produce Beats</p>

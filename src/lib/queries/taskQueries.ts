@@ -77,6 +77,8 @@ export const serverTimeOffset = writable<number>(0);
  * $: tasks = $tasksQuery.data ?? [];
  */
 export function createLabelTasksQuery(labelId: string | null) {
+	const queryClient = useQueryClient();
+
 	return createQuery({
 		queryKey: labelId ? queryKeys.tasks.byLabel(labelId) : ['tasks', 'none'],
 		queryFn: async () => {
@@ -85,7 +87,15 @@ export function createLabelTasksQuery(labelId: string | null) {
 			const clientTime = Date.now();
 			const serverTime = result.serverTime.getTime();
 			serverTimeOffset.set(serverTime - clientTime);
-			return normalizeTasksForUI(result.data);
+			const serverTasks = normalizeTasksForUI(result.data);
+
+			// Preserve optimistic tasks during background refetches.
+			// The server response won't include our optimistic tasks (the API call
+			// is still pending). Merging here (not in structuralSharing) ensures
+			// that manual setQueryData calls from onError/onSuccess aren't affected.
+			const currentCache = queryClient.getQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId!));
+			const optimisticTasks = currentCache?.filter((t) => (t as any)._optimistic) ?? [];
+			return optimisticTasks.length > 0 ? [...serverTasks, ...optimisticTasks] : serverTasks;
 		},
 		enabled: !!labelId,
 		// Apply task-specific query configuration for frequent updates
@@ -183,6 +193,9 @@ export function createScoutingTaskMutation(labelId: string) {
 		ScoutingTaskRequest & { costPrediction?: TaskCostPrediction },
 		{ previousTasks?: TimedTask[] }
 	>({
+		// Keep mutation in cache after settling so onSuccess/onError fire
+		// even if the component that triggered it has been destroyed (e.g. navigation).
+		gcTime: 10 * 60 * 1000,
 		mutationFn: async (request) => {
 			// Remove costPrediction from the actual API request
 			const { costPrediction, ...apiRequest } = request;
@@ -274,6 +287,7 @@ export function createRecordingReleaseTaskMutation(labelId: string) {
 		RecordingReleaseRequest & { costPrediction?: TaskCostPrediction },
 		{ previousTasks?: TimedTask[] }
 	>({
+		gcTime: 10 * 60 * 1000,
 		mutationFn: async (request) => {
 			const { costPrediction, ...apiRequest } = request;
 			return createRecordingReleaseTask(apiRequest);
@@ -354,6 +368,7 @@ export function createProducingBeatsTaskMutation(labelId: string) {
 		ProducingBeatsRequest & { costPrediction?: TaskCostPrediction },
 		{ previousTasks?: TimedTask[] }
 	>({
+		gcTime: 10 * 60 * 1000,
 		mutationFn: async (request) => {
 			const { costPrediction, ...apiRequest } = request;
 			return createProducingBeatsTask(apiRequest);
@@ -427,6 +442,7 @@ export function createRestingTaskMutation(labelId: string) {
 		RestingTaskRequest & { costPrediction?: TaskCostPrediction },
 		{ previousTasks?: TimedTask[] }
 	>({
+		gcTime: 10 * 60 * 1000,
 		mutationFn: async (request) => {
 			const { costPrediction, ...apiRequest } = request;
 			return createRestingTask(apiRequest);
@@ -500,6 +516,7 @@ export function createSignArtistContractTaskMutation(labelId: string) {
 		SignArtistContractRequest & { costPrediction?: TaskCostPrediction },
 		{ previousTasks?: TimedTask[] }
 	>({
+		gcTime: 10 * 60 * 1000,
 		mutationFn: async (request) => {
 			const { costPrediction, ...apiRequest } = request;
 			return createSignArtistContractTask(apiRequest);

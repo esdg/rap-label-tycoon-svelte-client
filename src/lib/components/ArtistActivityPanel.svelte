@@ -150,21 +150,9 @@
 			{#if restingTaskState === 'loading'}
 				<div class="flex items-center justify-between text-xs">
 					<span class="text-gray-400">Resting</span>
+					<p class="text-xs text-teal-300">Taking a break, settling in...</p>
 					<ArrowPathIcon class="h-3 w-3 animate-spin text-teal-400" />
 				</div>
-				<p class="text-xs text-teal-300">Taking a break, settling in...</p>
-				{#if restingEstimatedDuration}
-					<div class="flex justify-between text-xs text-gray-500">
-						<span>Duration:</span>
-						<span>{formatDuration(restingEstimatedDuration)}</span>
-					</div>
-				{/if}
-				{#if restingEstimatedCost !== null}
-					<div class="flex justify-between text-xs text-gray-500">
-						<span>Est. Cost:</span>
-						<span>{formatCurrency(restingEstimatedCost)}</span>
-					</div>
-				{/if}
 			{:else}
 				<div class="flex items-center justify-between text-xs">
 					<span class="text-gray-400">Resting</span>
@@ -203,21 +191,9 @@
 					<span class="text-gray-400"
 						>Producing {numberOfBeats} beat{numberOfBeats !== 1 ? 's' : ''}</span
 					>
+					<p class="text-xs text-amber-300">Studio is heating up...</p>
 					<ArrowPathIcon class="h-3 w-3 animate-spin text-amber-400" />
 				</div>
-				<p class="text-xs text-amber-300">Studio is heating up...</p>
-				{#if beatEstimatedDuration}
-					<div class="flex justify-between text-xs text-gray-500">
-						<span>Duration:</span>
-						<span>{formatDuration(beatEstimatedDuration)}</span>
-					</div>
-				{/if}
-				{#if beatEstimatedCost !== null}
-					<div class="flex justify-between text-xs text-gray-500">
-						<span>Est. Cost:</span>
-						<span>{formatCurrency(beatEstimatedCost)}</span>
-					</div>
-				{/if}
 			{:else}
 				<div class="flex items-center justify-between text-xs">
 					<span class="text-gray-400"
@@ -255,24 +231,12 @@
 		<div class="space-y-1 rounded-md border border-gray-700 bg-gray-800/50 p-2">
 			{#if recordingTaskState === 'loading'}
 				<div class="flex items-center justify-between text-xs">
+					<p class="text-xs text-purple-300">Studio is warming up...</p>
 					<span class="text-gray-400"
 						>Recording {numberOfTracks} track{numberOfTracks !== 1 ? 's' : ''}</span
 					>
 					<ArrowPathIcon class="h-3 w-3 animate-spin text-purple-400" />
 				</div>
-				<p class="text-xs text-purple-300">Studio is warming up...</p>
-				{#if recordingEstimatedDuration}
-					<div class="flex justify-between text-xs text-gray-500">
-						<span>Duration:</span>
-						<span>{formatDuration(recordingEstimatedDuration)}</span>
-					</div>
-				{/if}
-				{#if recordingEstimatedCost !== null}
-					<div class="flex justify-between text-xs text-gray-500">
-						<span>Est. Cost:</span>
-						<span>{formatCurrency(recordingEstimatedCost)}</span>
-					</div>
-				{/if}
 			{:else}
 				<div class="flex items-center justify-between text-xs">
 					<span class="text-gray-400"
