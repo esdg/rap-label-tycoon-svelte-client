@@ -2,8 +2,7 @@
 	export let image: string;
 	export let id: string | undefined = undefined;
 	// Allow parent to override the gradient overlay classes
-	export let gradientClass =
-		'bg-gradient-to-t from-primary-950 md:via-primary-950 md:via-10% to-transparent';
+	export let gradientClass = '';
 
 	let className = '';
 	export { className as class };
@@ -11,7 +10,7 @@
 
 <section
 	{id}
-	class="md:h-auto md:basis-2/5 md:overflow-hidden relative select-none grid {className}"
+	class="relative grid select-none md:h-auto md:basis-2/5 md:overflow-hidden {className}"
 >
 	<img src={image} alt="Hero" class="absolute inset-0 h-full w-full object-cover" />
 
