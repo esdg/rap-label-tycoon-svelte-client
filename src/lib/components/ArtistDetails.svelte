@@ -3,6 +3,8 @@
 	import Chip from './Chip.svelte';
 	import ProgressBar from './progress-bars/ProgressBar.svelte';
 	import {
+		formatCurrency,
+		formatDuration,
 		getArtistSkillSections,
 		getRarityClass,
 		getRarityLabel,
@@ -256,8 +258,9 @@
 											>Advance</span
 										>
 										<span class="mt-0.5 text-sm font-semibold text-white sm:text-base">
-											<span class="text-gray-500">$</span
-											>{activeContract.currentTerms.advance.toLocaleString()}
+											<span class="text-gray-500"></span>{formatCurrency(
+												activeContract.currentTerms.advance
+											)}
 										</span>
 									</div>
 									<!-- Signing Bonus -->
@@ -267,8 +270,9 @@
 											>Signing Bonus</span
 										>
 										<span class="mt-0.5 text-sm font-semibold text-white sm:text-base">
-											<span class="text-gray-500">$</span
-											>{activeContract.currentTerms.signingBonus.toLocaleString()}
+											<span class="text-gray-500"></span>{formatCurrency(
+												activeContract.currentTerms.signingBonus
+											)}
 										</span>
 									</div>
 									<!-- Duration -->
@@ -279,7 +283,7 @@
 												>Duration</span
 											>
 											<span class="mt-0.5 text-sm font-semibold text-white sm:text-base">
-												{activeContract.currentTerms.contractDuration}
+												{formatDuration(activeContract.currentTerms.contractDuration)}
 											</span>
 										</div>
 									{/if}
