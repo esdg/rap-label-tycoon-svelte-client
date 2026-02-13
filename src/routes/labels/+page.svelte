@@ -80,9 +80,6 @@
 			};
 	$: scoutingTasks = taskData.scoutingTasks;
 	$: contractTasks = taskData.contractTasks;
-	$: beatProductionTasks = taskData.beatProductionTasks;
-	$: recordingReleaseTasks = taskData.recordingReleaseTasks;
-	$: restingTasks = taskData.restingTasks;
 
 	// Fetch all contracts for the current label
 	$: contractsQuery = createLabelContractsQuery(labelId);

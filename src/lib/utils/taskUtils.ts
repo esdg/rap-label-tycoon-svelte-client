@@ -72,9 +72,10 @@ export function getScoutingType(task: ScoutingTaskResponse): ScoutingType {
  */
 export function getActiveBeatTask(
 	tasks: ProducingBeatsTaskResponse[],
-	artistId: string
+	artistId: string,
+	currentAdjustedTime?: number
 ): ProducingBeatsTaskResponse | null {
-	const adjustedNow = get(serverAdjustedTime);
+	const adjustedNow = currentAdjustedTime ?? get(serverAdjustedTime);
 	return (
 		tasks.find((task) => {
 			if (task.workerId !== artistId) return false;
@@ -93,9 +94,10 @@ export function getActiveBeatTask(
  */
 export function getActiveRecordingTask(
 	tasks: RecordingReleaseTaskResponse[],
-	artistId: string
+	artistId: string,
+	currentAdjustedTime?: number
 ): RecordingReleaseTaskResponse | null {
-	const adjustedNow = get(serverAdjustedTime);
+	const adjustedNow = currentAdjustedTime ?? get(serverAdjustedTime);
 	return (
 		tasks.find((task) => {
 			if (task.workerId !== artistId) return false;
@@ -114,9 +116,10 @@ export function getActiveRecordingTask(
  */
 export function getActiveRestingTask(
 	tasks: RestingTaskResponse[],
-	artistId: string
+	artistId: string,
+	currentAdjustedTime?: number
 ): RestingTaskResponse | null {
-	const adjustedNow = get(serverAdjustedTime);
+	const adjustedNow = currentAdjustedTime ?? get(serverAdjustedTime);
 	return (
 		tasks.find((task) => {
 			if (task.workerId !== artistId) return false;

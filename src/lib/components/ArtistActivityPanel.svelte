@@ -15,6 +15,7 @@
 		serverTimeOffset
 	} from '$lib/queries/taskQueries';
 	import { currentLabel } from '$lib/stores/appState';
+	import { serverAdjustedTime } from '$lib/stores/globalTime';
 	import ProgressBar from './progress-bars/ProgressBar.svelte';
 
 	let className = '';
@@ -36,9 +37,14 @@
 			};
 
 	// Filter to find active tasks for this artist
-	$: beatProductionTask = getActiveBeatTask(taskData.beatProductionTasks, artist.id);
-	$: recordingReleaseTask = getActiveRecordingTask(taskData.recordingReleaseTasks, artist.id);
-	$: restingTask = getActiveRestingTask(taskData.restingTasks, artist.id);
+	$: adjustedNow = $serverAdjustedTime;
+	$: beatProductionTask = getActiveBeatTask(taskData.beatProductionTasks, artist.id, adjustedNow);
+	$: recordingReleaseTask = getActiveRecordingTask(
+		taskData.recordingReleaseTasks,
+		artist.id,
+		adjustedNow
+	);
+	$: restingTask = getActiveRestingTask(taskData.restingTasks, artist.id, adjustedNow);
 
 	$: beatTaskState = beatProductionTask
 		? getTaskStatus(beatProductionTask, $serverTimeOffset)

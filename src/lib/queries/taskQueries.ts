@@ -67,7 +67,7 @@ export function createLabelTasksQuery(labelId: string | null) {
 			const clientTime = Date.now();
 			const serverTime = result.serverTime.getTime();
 			serverTimeOffset.set(serverTime - clientTime);
-			return result.data;
+			return normalizeTasksForUI(result.data);
 		},
 		enabled: !!labelId,
 		// Apply task-specific query configuration for frequent updates
@@ -77,22 +77,40 @@ export function createLabelTasksQuery(labelId: string | null) {
 
 // Derived: Split tasks by type with proper typing
 export function createTasksByType(tasks: AnyTaskResponse[]) {
+	const normalized = normalizeTasksForUI(tasks);
 	return {
-		scoutingTasks: tasks.filter((t): t is ScoutingTaskResponse => t.taskType === TaskType.Scouting),
-		contractTasks: tasks.filter(
+		scoutingTasks: normalized.filter(
+			(t): t is ScoutingTaskResponse => t.taskType === TaskType.Scouting
+		),
+		contractTasks: normalized.filter(
 			(t): t is SigningContractTaskResponse => t.taskType === TaskType.SigningContract
 		),
-		beatProductionTasks: tasks.filter(
+		beatProductionTasks: normalized.filter(
 			(t): t is ProducingBeatsTaskResponse => t.taskType === TaskType.ProducingBeats
 		),
-		recordingReleaseTasks: tasks.filter(
+		recordingReleaseTasks: normalized.filter(
 			(t): t is RecordingReleaseTaskResponse => t.taskType === TaskType.RecordingRelease
 		),
-		restingTasks: tasks.filter(
+		restingTasks: normalized.filter(
 			(t): t is RestingTaskResponse =>
 				t.taskType === TaskType.Resting || 'restingTypeId' in (t as RestingTaskResponse)
 		)
 	};
+}
+
+function normalizeTasksForUI(tasks: AnyTaskResponse[]): AnyTaskResponse[] {
+	return tasks.map((task) => {
+		// Ensure workerId is present for UI components that match on workerId
+		if (!('workerId' in task) || !task.workerId) {
+			if ('beatmakerId' in task && task.beatmakerId) {
+				return { ...task, workerId: task.beatmakerId } as AnyTaskResponse;
+			}
+			if ('rapperId' in task && task.rapperId) {
+				return { ...task, workerId: task.rapperId } as AnyTaskResponse;
+			}
+		}
+		return task;
+	});
 }
 
 // Query: Get scouting scopes (static reference data)
