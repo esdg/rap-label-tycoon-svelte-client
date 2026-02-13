@@ -2,10 +2,13 @@
 	import { colors } from '$lib/theme';
 	import { modalStore } from '$lib/stores/modal';
 	import { appState, currentLabel, currentPlayer } from '$lib/stores/appState';
-	import { createLabelTasksQuery, createTasksByType } from '$lib/queries/taskQueries';
+	import {
+		createLabelTasksQuery,
+		createTasksByType,
+		createProducingBeatsTaskMutation
+	} from '$lib/queries/taskQueries';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
-	import { queryKeys, queryClient } from '$lib/queries/queryClient';
 	import { ContractStatus } from '$lib/types/contracts';
 	import { RapMusicStyle, RapMusicStyleNames } from '$lib/types/musicStyles';
 	import Stepper from '$lib/components/Stepper.svelte';
@@ -17,15 +20,9 @@
 	import SelectField from '$lib/components/formfields/SelectField.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import CostEstimation from './CostEstimation.svelte';
-	import {
-		predictProducingBeatsCost,
-		createProducingBeatsTask,
-		TaskCreationError,
-		type ProducingBeatsRequest
-	} from '$lib/api';
+	import { predictProducingBeatsCost, type ProducingBeatsRequest } from '$lib/api';
 	import type { Beatmaker } from '$lib/types/nonPlayingCharacter';
 	import type { TaskCostPrediction } from '$lib/types/task';
-	import { getTaskErrorMessage } from '$lib/utils';
 
 	// Props
 	export let preselectedWorkerId: string | undefined = undefined;
@@ -43,6 +40,9 @@
 	let selectedBeatmakerId: string | null = null;
 	let numberOfBeats: number | null = 1;
 	let selectedGenres: Set<RapMusicStyle> = new Set();
+
+	// Create the mutation
+	$: producingMutation = $currentLabel ? createProducingBeatsTaskMutation($currentLabel.id) : null;
 
 	// Reactive queries - using the same pattern as label dashboard
 	$: labelId = $currentLabel?.id || null;
@@ -174,38 +174,39 @@
 		}
 	}
 
-	async function handleProduceBeat() {
+	function handleProduceBeat() {
 		const payload = buildProducingBeatsRequest();
 		if (!payload) {
 			error = 'Missing production details. Please fill out the form.';
 			return;
 		}
 
-		loading = true;
+		if (!producingMutation) {
+			error = 'Mutation not ready';
+			return;
+		}
+
 		error = null;
 
-		try {
-			const response = await createProducingBeatsTask(payload);
+		const taskRequest = {
+			...payload,
+			costPrediction: costPrediction ?? undefined
+		};
 
-			// Update bankroll in appState
-			appState.updateCurrentLabelBankroll(-response.budgetRequired);
-
-			// Invalidate tasks query to refetch
-			if ($currentLabel) {
-				queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel($currentLabel.id) });
+		// Start the mutation (don't await it!)
+		$producingMutation!.mutate(taskRequest, {
+			onError: (err) => {
+				console.error('Producing beats task creation failed:', err);
 			}
+		});
 
-			modalStore.close();
-		} catch (err) {
-			if (err instanceof TaskCreationError) {
-				error = getTaskErrorMessage(err.errorResponse.code, err.errorResponse.message);
-			} else {
-				error = 'Failed to create producing beats task. Please try again.';
-			}
-			console.error(err);
-		} finally {
-			loading = false;
+		// Update bankroll optimistically using cost prediction
+		if (costPrediction) {
+			appState.updateCurrentLabelBankroll(-costPrediction.budgetRequired);
 		}
+
+		// Close the modal immediately!
+		modalStore.close();
 	}
 
 	// Event handlers

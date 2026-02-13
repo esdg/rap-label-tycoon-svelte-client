@@ -5,21 +5,15 @@
 	import {
 		createLabelTasksQuery,
 		createRestingTypesQuery,
-		createTasksByType
+		createTasksByType,
+		createRestingTaskMutation
 	} from '$lib/queries/taskQueries';
 	import { createContractsByIdsQuery } from '$lib/queries/contractQueries';
 	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
-	import { queryClient, queryKeys } from '$lib/queries/queryClient';
 	import { ContractStatus, type Contract } from '$lib/types/contracts';
-	import {
-		createRestingTask,
-		predictRestingTaskCost,
-		TaskCreationError,
-		type RestingTaskRequest
-	} from '$lib/api';
+	import { predictRestingTaskCost, type RestingTaskRequest } from '$lib/api';
 	import type { RestingType } from '$lib/types/resting';
 	import type { TaskCostPrediction } from '$lib/types/task';
-	import { getTaskErrorMessage } from '$lib/utils';
 	import Stepper from '$lib/components/Stepper.svelte';
 	import ContentPanel from '$lib/components/ContentPanel.svelte';
 	import ContentPanelItem from '$lib/components/ContentPanelItem.svelte';
@@ -73,6 +67,9 @@
 	let wasReadyForCostPrediction = false;
 	let step1Valid = false;
 	let labelId: string | null = null;
+
+	// Create the mutation
+	$: restingMutation = $currentLabel ? createRestingTaskMutation($currentLabel.id) : null;
 
 	const restingTypesQuery = createRestingTypesQuery();
 
@@ -292,37 +289,39 @@
 		}
 	}
 
-	async function handleSendToRest() {
+	function handleSendToRest() {
 		const payload = buildRestingTaskRequest();
 		if (!payload) {
 			error = 'Missing resting details. Please pick an artist, rest type, and duration.';
 			return;
 		}
 
-		loading = true;
+		if (!restingMutation) {
+			error = 'Mutation not ready';
+			return;
+		}
+
 		error = null;
 
-		try {
-			const response = await createRestingTask(payload);
+		const taskRequest = {
+			...payload,
+			costPrediction: costPrediction ?? undefined
+		};
 
-			appState.updateCurrentLabelBankroll(-response.budgetRequired);
-
-			if ($currentLabel) {
-				queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel($currentLabel.id) });
-				queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId($currentLabel.id) });
+		// Start the mutation (don't await it!)
+		$restingMutation!.mutate(taskRequest, {
+			onError: (err) => {
+				console.error('Resting task creation failed:', err);
 			}
+		});
 
-			modalStore.close();
-		} catch (err) {
-			if (err instanceof TaskCreationError) {
-				error = getTaskErrorMessage(err.errorResponse.code, err.errorResponse.message);
-			} else {
-				error = 'Failed to start resting task. Please try again.';
-			}
-			console.error(err);
-		} finally {
-			loading = false;
+		// Update bankroll optimistically using cost prediction
+		if (costPrediction) {
+			appState.updateCurrentLabelBankroll(-costPrediction.budgetRequired);
 		}
+
+		// Close the modal immediately!
+		modalStore.close();
 	}
 
 	function handleCancel() {
