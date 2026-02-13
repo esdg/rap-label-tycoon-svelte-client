@@ -19,6 +19,8 @@ import {
 	predictScoutingCost,
 	createSignArtistContractTask,
 	predictSignArtistContractCost,
+	createRecordingReleaseTask,
+	type RecordingReleaseRequest,
 	createPublishingReleaseTask,
 	type PublishingReleaseRequest
 } from '$lib/api/tasks';
@@ -247,6 +249,90 @@ function parseDuration(duration: string): number {
 	}
 	// Default to 1 hour if parsing fails
 	return 60 * 60 * 1000;
+}
+
+// Mutation: Create recording release task with optimistic updates
+export function createRecordingReleaseTaskMutation(labelId: string) {
+	const queryClient = useQueryClient();
+
+	return createMutation<
+		TimedTask,
+		Error,
+		RecordingReleaseRequest & { costPrediction?: TaskCostPrediction },
+		{ previousTasks?: TimedTask[] }
+	>({
+		mutationFn: async (request) => {
+			const { costPrediction, ...apiRequest } = request;
+			return createRecordingReleaseTask(apiRequest);
+		},
+		onMutate: async (request) => {
+			// Cancel any outgoing refetches to prevent overwriting optimistic update
+			await queryClient.cancelQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
+
+			// Snapshot the previous value
+			const previousTasks = queryClient.getQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId));
+
+			// Create optimistic task
+			const now = new Date();
+			const estimatedDuration = request.costPrediction?.duration || '00:01:00:00'; // Default 1 hour
+			const endTime = new Date(now.getTime() + parseDuration(estimatedDuration));
+
+			const optimisticTask: RecordingReleaseTaskResponse = {
+				id: `temp-${Date.now()}-${Math.random()}`,
+				labelId: request.labelId,
+				workerId: request.rapperId,
+				taskType: TaskType.RecordingRelease,
+				name: 'Recording Release',
+				description: 'Recording is starting, the studio is warming up...',
+				budgetRequired: request.costPrediction?.budgetRequired ?? 0,
+				staminaCost: request.costPrediction?.staminaCost ?? 0,
+				startTime: now.toISOString(),
+				endTime: endTime.toISOString(),
+				claimedAt: null,
+				createdAt: now.toISOString(),
+				updatedAt: now.toISOString(),
+				status: TaskStatus.Pending,
+				results: null,
+				viewedAt: null,
+				rapperId: request.rapperId,
+				releaseTypeId: request.releaseTypeId,
+				beatIds: request.beatIds,
+				_optimistic: true,
+				_requestData: request
+			} as any;
+
+			// Optimistically add the task to the cache
+			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) =>
+				old ? [...old, optimisticTask] : [optimisticTask]
+			);
+
+			// Return context for rollback
+			return { previousTasks };
+		},
+		onError: (err, request, context) => {
+			// Rollback to previous state on error
+			if (context?.previousTasks) {
+				queryClient.setQueryData<TimedTask[]>(
+					queryKeys.tasks.byLabel(labelId),
+					context.previousTasks
+				);
+			}
+		},
+		onSuccess: (newTask, request) => {
+			// Remove optimistic task and add real task
+			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(labelId), (old) => {
+				if (!old) return [newTask];
+				// Filter out optimistic tasks and add the real one
+				return [...old.filter((t) => !(t as any)._optimistic), newTask];
+			});
+			// Invalidate to get fresh data
+			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byLabel(labelId) });
+			// Also invalidate label to get updated bankroll
+			queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(labelId) });
+			// Invalidate beats since they may now be locked
+			queryClient.invalidateQueries({ queryKey: queryKeys.beats.byLabel(labelId) });
+		}
+	});
 }
 
 // Mutation: Create sign artist contract task
