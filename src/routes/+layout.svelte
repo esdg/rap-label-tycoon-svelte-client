@@ -107,11 +107,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true" />
 <link
-	href="https://fonts.googleapis.com/css2?family=Roboto:ital,wdth,wght@0,75,100..900;1,75,100..900&display=swap"
+	href="https://fonts.googleapis.com/css2?family=Roboto:ital,wdth,wght@100;200;300;400;500;700;800;900&display=swap"
 	rel="stylesheet"
 />
 <link
-	href="https://fonts.googleapis.com/css2?family=Roboto:ital,wdth,wght@0,75..100,100..900;1,75..100,100..900&display=swap"
+	href="https://fonts.googleapis.com/css2?family=Roboto:ital,wdth,wght@100;200;300;400;500;700;800;900&display=swap"
 	rel="stylesheet"
 />
 
@@ -119,7 +119,7 @@
 	<Modal />
 	<ErrorAlert />
 
-	<div class="flex flex-row antialiased">
+	<div class="flex flex-row font-roboto antialiased">
 		{#if $isAuthLoading}
 			<!-- Show loading screen only during initial auth check -->
 			<LoadingScreen />
@@ -127,7 +127,7 @@
 			{#if $isAuthenticated && !isPublicRoute && $currentPlayer}
 				<MenuBar />
 			{/if}
-			<main class="min-h-screen flex-grow bg-primary-950 font-roboto text-white">
+			<main class="min-h-screen flex-grow bg-primary-950 text-white">
 				<slot />
 			</main>
 		{/if}
