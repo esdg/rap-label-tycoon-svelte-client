@@ -20,8 +20,10 @@
 	import { getDiscoveredArtist } from '$lib/queries/artistQueries';
 
 	let isOpen = false;
-	let includeRead = false;
+	let includeRead = true;
 	let limit = 20;
+
+	const prefetchedArtistIds = new Set<string>();
 
 	$: labelId = $currentLabel?.id ?? null;
 	$: labelName = $currentLabel?.name ?? 'your label';
@@ -82,6 +84,25 @@
 		return null;
 	}
 
+	async function ensureArtistCached(artistId: string | null | undefined) {
+		if (!artistId || prefetchedArtistIds.has(artistId)) return;
+
+		const cached = queryClient.getQueryData<any>(queryKeys.artists.byId(artistId));
+		if (cached?.stageName) {
+			prefetchedArtistIds.add(artistId);
+			return;
+		}
+
+		prefetchedArtistIds.add(artistId);
+		try {
+			const artist = await fetchArtistById(artistId);
+			queryClient.setQueryData(queryKeys.artists.byId(artistId), artist);
+		} catch (err) {
+			// Allow retry on future attempts if fetch fails
+			prefetchedArtistIds.delete(artistId);
+		}
+	}
+
 	async function ensureWorkerParts(workerId: string | null | undefined) {
 		if (!workerId) return;
 
@@ -116,13 +137,22 @@
 	}
 
 	$: if ($eventLogsQuery.data) {
-		const ids = Array.from(
+		const workerIds = Array.from(
 			new Set(
 				$eventLogsQuery.data.map((e) => e.dataPayload.workerId).filter((id): id is string => !!id)
 			)
 		);
-		ids.forEach((id) => {
+		workerIds.forEach((id) => {
 			ensureWorkerParts(id);
+		});
+
+		const artistIds = Array.from(
+			new Set(
+				$eventLogsQuery.data.map((e) => e.dataPayload.artistId).filter((id): id is string => !!id)
+			)
+		);
+		artistIds.forEach((id) => {
+			ensureArtistCached(id);
 		});
 	}
 
@@ -143,22 +173,22 @@
 		if (event.dataPayload.success === false) {
 			return {
 				dot: 'bg-red-500',
-				badge: 'border-red-700/50 bg-red-900/40 text-red-200',
+				badge: 'bg-error-900/40 text-error-200',
 				status: 'Failed'
 			};
 		}
-
+		/* 
 		if (!event.isRead) {
 			return {
 				dot: 'bg-secondary-400',
 				badge: 'border-secondary-700/60 bg-secondary-900/40 text-secondary-200',
 				status: 'New'
 			};
-		}
+		} */
 
 		return {
 			dot: 'bg-gray-500',
-			badge: 'border-gray-700/60 bg-gray-900/50 text-gray-200',
+			badge: 'bg-success-900/50 text-success-200',
 			status: 'Seen'
 		};
 	}
@@ -167,26 +197,22 @@
 </script>
 
 <div class="relative flex flex-col items-center">
-	<Tooltip position="right">
-		<button
-			slot="trigger"
-			type="button"
-			on:click={togglePanel}
-			class="relative rounded-full p-2 text-white transition hover:text-secondary-500 focus:outline-none"
-			aria-expanded={isOpen}
-			aria-label="Toggle notifications"
-		>
-			<BellAlertIcon class="h-6 w-6" />
-			{#if unreadCount > 0}
-				<span
-					class="absolute -right-0 -top-0 mr-1 mt-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-secondary-500 text-[10px] font-semibold text-black shadow-lg"
-				>
-					{unreadCount}
-				</span>
-			{/if}
-		</button>
-		Notifications
-	</Tooltip>
+	<button
+		type="button"
+		on:click={togglePanel}
+		class="relative rounded-full p-2 text-white transition hover:text-secondary-500 focus:outline-none"
+		aria-expanded={isOpen}
+		aria-label="Toggle notifications"
+	>
+		<BellAlertIcon class="h-6 w-6" />
+		{#if unreadCount > 0}
+			<span
+				class="absolute -right-0 -top-0 mr-1 mt-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-secondary-500 text-[10px] font-semibold text-black shadow-lg"
+			>
+				{unreadCount}
+			</span>
+		{/if}
+	</button>
 
 	{#if isOpen}
 		<div
@@ -249,10 +275,8 @@
 										>
 									{/if} -->
 										{#if event.readAt}
-											<span
-												class="rounded-full border border-secondary-800 px-2 py-0.5 text-gray-300"
-											>
-												Read {formatRelativeTime(event.readAt)}
+											<span>
+												(viewed {formatRelativeTime(event.readAt)})
 											</span>
 										{/if}
 									</div>
