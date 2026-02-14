@@ -5,154 +5,23 @@
 		ExclamationTriangleIcon,
 		ClockIcon
 	} from 'heroicons-svelte/24/solid';
-	import { currentLabel } from '$lib/stores/appState';
+	import { currentLabel, currentPlayer } from '$lib/stores/appState';
 	import { createEventLogsQuery } from '$lib/queries/eventLogQueries';
-	import type { EventLog } from '$lib/types/eventLog';
 	import { clickOutside } from '$lib/utils/clickOutside';
-	import { formatRelativeTime } from '$lib/utils/timeUtils';
-	import Chip from '../Chip.svelte';
-	import { describeEvent, formatPayloadLabel, type DescriptionPart } from './notificationTemplates';
-	import { writable, get as getStore } from 'svelte/store';
-	import { currentPlayer } from '$lib/stores/appState';
-	import { fetchArtistById } from '$lib/api/artists';
-	import { queryClient, queryKeys } from '$lib/queries/queryClient';
-	import { getDiscoveredArtist } from '$lib/queries/artistQueries';
+	import NotificationItem from './NotificationItem.svelte';
 
 	let isOpen = false;
 	let includeRead = true;
 	let limit = 20;
 
-	const prefetchedArtistIds = new Set<string>();
-
 	$: labelId = $currentLabel?.id ?? null;
+	$: playerId = $currentPlayer?.id ?? null;
 	$: eventLogsQuery = createEventLogsQuery(labelId, {
 		limit,
 		includeRead,
 		refetchInterval: 15000
 	});
 	$: unreadCount = $eventLogsQuery?.data?.filter((event) => !event.isRead).length ?? 0;
-
-	const workerPartsMap = writable<Record<string, DescriptionPart[]>>({});
-
-	function shortId(value?: string) {
-		return value ? `#${value.slice(-4)}` : 'unknown';
-	}
-
-	function setWorkerParts(id: string | null | undefined, parts: DescriptionPart[]) {
-		if (!id) return;
-		workerPartsMap.update((map) => ({ ...map, [id]: parts }));
-	}
-
-	function resolveFromCaches(workerId: string): DescriptionPart[] | null {
-		const cached = queryClient.getQueryData<any>(queryKeys.artists.byId(workerId));
-		if (cached?.stageName) {
-			return [
-				{ kind: 'link', label: cached.stageName, href: `/artists/${encodeURIComponent(workerId)}` }
-			];
-		}
-
-		const discovered = getDiscoveredArtist(workerId)?.artist;
-		if (discovered?.stageName) {
-			return [
-				{
-					kind: 'link',
-					label: discovered.stageName,
-					href: `/artists/${encodeURIComponent(workerId)}`
-				}
-			];
-		}
-
-		// Check list caches under artists
-		const queries = queryClient.getQueriesData<any>({ queryKey: ['artists'] });
-		for (const [, data] of queries) {
-			if (Array.isArray(data)) {
-				const found = data.find((a: any) => a?.id === workerId);
-				if (found?.stageName) {
-					return [
-						{
-							kind: 'link',
-							label: found.stageName,
-							href: `/artists/${encodeURIComponent(workerId)}`
-						}
-					];
-				}
-			}
-		}
-
-		return null;
-	}
-
-	async function ensureArtistCached(artistId: string | null | undefined) {
-		if (!artistId || prefetchedArtistIds.has(artistId)) return;
-
-		const cached = queryClient.getQueryData<any>(queryKeys.artists.byId(artistId));
-		if (cached?.stageName) {
-			prefetchedArtistIds.add(artistId);
-			return;
-		}
-
-		prefetchedArtistIds.add(artistId);
-		try {
-			const artist = await fetchArtistById(artistId);
-			queryClient.setQueryData(queryKeys.artists.byId(artistId), artist);
-		} catch (err) {
-			// Allow retry on future attempts if fetch fails
-			prefetchedArtistIds.delete(artistId);
-		}
-	}
-
-	async function ensureWorkerParts(workerId: string | null | undefined) {
-		if (!workerId) return;
-
-		const map = getStore(workerPartsMap);
-		if (map[workerId]) return;
-
-		const playerId = getStore(currentPlayer)?.id;
-		if (playerId && workerId === playerId) {
-			setWorkerParts(workerId, [{ kind: 'text', value: 'You' }]);
-			return;
-		}
-
-		const cached = resolveFromCaches(workerId);
-		if (cached) {
-			setWorkerParts(workerId, cached);
-			return;
-		}
-
-		try {
-			const artist = await fetchArtistById(workerId);
-			queryClient.setQueryData(queryKeys.artists.byId(workerId), artist);
-			setWorkerParts(workerId, [
-				{
-					kind: 'link',
-					label: artist.stageName ?? `Artist ${shortId(workerId)}`,
-					href: `/artists/${encodeURIComponent(workerId)}`
-				}
-			]);
-		} catch (err) {
-			setWorkerParts(workerId, [{ kind: 'text', value: `Worker ${shortId(workerId)}` }]);
-		}
-	}
-
-	$: if ($eventLogsQuery.data) {
-		const workerIds = Array.from(
-			new Set(
-				$eventLogsQuery.data.map((e) => e.dataPayload.workerId).filter((id): id is string => !!id)
-			)
-		);
-		workerIds.forEach((id) => {
-			ensureWorkerParts(id);
-		});
-
-		const artistIds = Array.from(
-			new Set(
-				$eventLogsQuery.data.map((e) => e.dataPayload.artistId).filter((id): id is string => !!id)
-			)
-		);
-		artistIds.forEach((id) => {
-			ensureArtistCached(id);
-		});
-	}
 
 	function togglePanel() {
 		isOpen = !isOpen;
@@ -162,17 +31,7 @@
 		isOpen = false;
 	}
 
-	function getTone(event: EventLog) {
-		if (event.dataPayload.success === false) {
-			return {
-				badge: 'bg-error-900/40 text-error-200'
-			};
-		}
 
-		return {
-			badge: 'bg-success-900/50 text-success-200'
-		};
-	}
 </script>
 
 <div class="relative flex flex-col items-center">
@@ -220,36 +79,7 @@
 					</div>
 				{:else}
 					{#each $eventLogsQuery.data as event (event.id)}
-						{@const tone = getTone(event)}
-						{@const workerParts = $workerPartsMap[event.dataPayload.workerId ?? '']}
-						<article class="flex gap-3 border-b border-gray-700/40 px-4 py-3 last:border-b-0">
-							<div class="flex flex-1 flex-col gap-1">
-								<div class="flex flex-wrap items-center gap-2 text-sm font-thin text-white">
-									<Chip class={`${tone.badge} rounded-none text-xs`}>
-										{formatPayloadLabel(event.dataPayload.payload_type)}
-									</Chip>
-									<div class="flex flex-wrap items-center gap-1 text-[11px] text-gray-400">
-										<ClockIcon class="h-3 w-3 text-gray-600" />
-										<span>{formatRelativeTime(event.createdAt)}</span>
-										{#if event.readAt}
-											<span>
-												(viewed {formatRelativeTime(event.readAt)})
-											</span>
-										{/if}
-									</div>
-								</div>
-								<p class="text-xs text-gray-300">
-									{#each describeEvent(event, workerParts) as part, index (index)}
-										{#if part.kind === 'link'}
-											<a href={part.href} class="text-secondary-400 hover:underline">{part.label}</a
-											>
-										{:else}
-											<span>{part.value}</span>
-										{/if}
-									{/each}
-								</p>
-							</div>
-						</article>
+						<NotificationItem {event} currentPlayerId={playerId} />
 					{/each}
 				{/if}
 			</section>

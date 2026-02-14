@@ -13,6 +13,7 @@ export * from './performanceUtils';
 export * from './typeGuards';
 export * from './errorHandling';
 export * from './performance';
+export * from './notificationUtils';
 export { formatRelativeTime } from './timeUtils';
 
 // Re-export formatDuration from timeUtils for backward compatibility
