@@ -12,6 +12,7 @@
 	import { clickOutside } from '$lib/utils/clickOutside';
 	import { formatRelativeTime } from '$lib/utils/timeUtils';
 	import { get } from 'svelte/store';
+	import Chip from '../Chip.svelte';
 
 	let isOpen = false;
 	let includeRead = false;
@@ -148,7 +149,7 @@
 			<BellAlertIcon class="h-6 w-6" />
 			{#if unreadCount > 0}
 				<span
-					class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary-500 px-1 text-[10px] font-semibold text-black shadow-lg"
+					class="absolute -right-0 -top-0 mr-1 mt-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-secondary-500 text-[10px] font-semibold text-black shadow-lg"
 				>
 					{unreadCount}
 				</span>
@@ -159,41 +160,14 @@
 
 	{#if isOpen}
 		<div
-			class="absolute left-12 top-0 z-50 w-[26rem] max-w-[80vw] overflow-hidden rounded-2xl border border-secondary-800/70 bg-gradient-to-br from-primary-900/95 to-primary-800/95 shadow-2xl backdrop-blur"
+			class="absolute right-11 top-0 z-50 w-[26rem] max-w-[80vw] overflow-hidden rounded-md border border-secondary-800/70 bg-primary-950/95 shadow-2xl backdrop-blur"
 			use:clickOutside
 			on:click_outside={closePanel}
 		>
-			<header
+			<!-- 			<header
 				class="flex items-start justify-between gap-3 border-b border-secondary-800/60 px-4 py-3"
 			>
-				<div class="space-y-1">
-					<p class="text-xs uppercase tracking-[0.12em] text-secondary-500">Notifications</p>
-					<p class="text-lg font-semibold text-white">{panelLabel}</p>
-					{#if !$eventLogsQuery.isLoading && !$eventLogsQuery.isError}
-						<p class="text-xs text-gray-400">
-							Showing {includeRead ? 'all' : 'unread'} events for {labelName}
-						</p>
-					{/if}
-				</div>
 				<div class="flex items-center gap-2 text-xs text-gray-200">
-					<label
-						class="flex cursor-pointer items-center gap-2 rounded-full border border-secondary-800/70 bg-primary-950 px-2 py-1 transition hover:border-secondary-600"
-					>
-						<input
-							type="checkbox"
-							bind:checked={includeRead}
-							class="h-4 w-4 accent-secondary-500"
-						/>
-						<span>Show read</span>
-					</label>
-					<select
-						on:change={handleLimitChange}
-						class="rounded-full border border-secondary-800/70 bg-primary-900 px-2 py-1 text-xs text-white focus:border-secondary-600 focus:outline-none"
-					>
-						<option value={10}>10</option>
-						<option value={20} selected={limit === 20}>20</option>
-						<option value={50}>50</option>
-					</select>
 					<button
 						type="button"
 						on:click={refresh}
@@ -203,7 +177,7 @@
 						<ArrowPathIcon class="h-4 w-4" />
 					</button>
 				</div>
-			</header>
+			</header> -->
 
 			<section class="max-h-[70vh] overflow-y-auto">
 				{#if $eventLogsQuery.isLoading}
@@ -231,26 +205,26 @@
 							<div class={`mt-1 h-3 w-3 rounded-full ${tone.dot}`}></div>
 							<div class="flex flex-1 flex-col gap-1">
 								<div class="flex flex-wrap items-center gap-2 text-sm font-semibold text-white">
-									<span>{getEventTitle(event)}</span>
-									<span
+									<!-- <span>{getEventTitle(event)}</span> -->
+									<!-- <span
 										class={`rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-wide ${tone.badge}`}
 									>
 										{tone.status}
-									</span>
-									<span class="text-[11px] uppercase tracking-wide text-secondary-400">
+									</span> -->
+									<Chip class="{tone.badge}text-xs">
 										{formatPayloadLabel(event.dataPayload.payload_type)}
-									</span>
+									</Chip>
 								</div>
 								<p class="text-xs text-gray-300">{getEventDescription(event)}</p>
 								<div class="flex flex-wrap items-center gap-2 text-[11px] text-gray-400">
 									<ClockIcon class="h-4 w-4 text-secondary-400" />
 									<span>{formatRelativeTime(event.createdAt)}</span>
-									{#if event.priority}
+									<!-- 									{#if event.priority}
 										<span
 											class="rounded-full border border-secondary-800 px-2 py-0.5 text-secondary-300"
 											>Priority {event.priority}</span
 										>
-									{/if}
+									{/if} -->
 									{#if event.readAt}
 										<span
 											class="rounded-full border border-secondary-800 px-2 py-0.5 text-gray-300"
