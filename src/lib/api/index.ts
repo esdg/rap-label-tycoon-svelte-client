@@ -11,3 +11,4 @@ export * from './config';
 export * from './beats';
 export * from './releases';
 export * from './performanceReports';
+export * from './eventLogs';

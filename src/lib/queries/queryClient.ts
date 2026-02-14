@@ -52,6 +52,12 @@ export const queryKeys = {
 		byPlayer: (playerId: string) => ['labels', 'player', playerId] as const
 	},
 
+	// Event logs / notifications
+	eventLogs: {
+		byLabel: (labelId: string, includeRead: boolean = false, limit: number = 20) =>
+			['event-logs', 'label', labelId, includeRead ? 'all' : 'unread', limit] as const
+	},
+
 	// Tasks (scoped to label)
 	tasks: {
 		all: ['tasks'] as const,
