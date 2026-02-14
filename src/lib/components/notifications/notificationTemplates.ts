@@ -24,7 +24,7 @@ const templates: Record<string, Template> = {
 			...worker,
 			{
 				kind: 'text',
-				value: ` ${success ? 'delivered' : 'could not finish'} ${pluralize(beats, 'beat')}`
+				value: ` ${success ? 'produced' : 'did not produce any'} ${pluralize(beats, 'beat')}`
 			}
 		];
 
@@ -39,22 +39,29 @@ const templates: Record<string, Template> = {
 		const data = event.dataPayload;
 		const success = data.success !== false;
 		const worker = resolveWorkerParts(data.workerId, currentPlayerId);
-		const parts: DescriptionPart[] = [
-			...worker,
-			{ kind: 'text', value: ` ${success ? 'signed ' : 'could not sign '}` },
-			{ kind: 'text', value: formatContractLabel(data.contractId) },
-			{ kind: 'text', value: ' with ' }
-		];
-
+		let artistLabel: DescriptionPart;
 		if (data.artistId) {
-			parts.push({
+			artistLabel = {
 				kind: 'link',
 				label: resolveArtistLabel(data.artistId),
 				href: `/artists/${encodeURIComponent(data.artistId)}`
-			});
+			};
 		} else {
-			parts.push({ kind: 'text', value: 'an artist' });
+			artistLabel = { kind: 'text', value: 'an artist' };
 		}
+
+		const parts: DescriptionPart[] = [
+			artistLabel,
+			{ kind: 'text', value: ` ${success ? ' accepted ' : ' refused '}` },
+			{ kind: 'text', value: 'your label offer ' },
+			{ kind: 'text', value: `(${formatContractLabel(data.contractId)}). ` },
+			{ kind: 'text', value: ' You can ' },
+			{
+				kind: 'link',
+				label: ` ${success ? 'start producing' : 'propose a new offer'}`,
+				href: `${success ? '/beats/start' : `/contracts/${encodeURIComponent(data.contractId ?? '')}`}`
+			}
+		];
 
 		parts.push({ kind: 'text', value: '.' });
 		return parts;
@@ -66,14 +73,28 @@ const templates: Record<string, Template> = {
 		const worker = resolveWorkerParts(data.workerId, currentPlayerId);
 
 		if (!success) {
-			return [...worker, { kind: 'text', value: ' returned without results.' }];
+			return [
+				{ kind: 'text', value: 'Your prospector (' },
+				...worker,
+				{ kind: 'text', value: ') returned without results.' }
+			];
 		}
 
 		return [
+			{ kind: 'text', value: 'Your prospector (' },
 			...worker,
 			{
 				kind: 'text',
-				value: ` discovered ${pluralize(discovered, 'new talent')}.`
+				value: `) discovered `
+			},
+			{
+				kind: 'link',
+				label: `${pluralize(discovered, 'new talent')}`,
+				href: `${success ? '/beats/start' : `/contracts/${encodeURIComponent(data.contractId ?? '')}`}`
+			},
+			{
+				kind: 'text',
+				value: `.`
 			}
 		];
 	}

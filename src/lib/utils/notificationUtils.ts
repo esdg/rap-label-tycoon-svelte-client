@@ -9,7 +9,7 @@ import { getDiscoveredArtist } from '$lib/queries/artistQueries';
 
 export type DescriptionPart =
 	| { kind: 'text'; value: string }
-	| { kind: 'link'; label: string; href: string };
+	| { kind: 'link'; label: string; href: string; color?: string };
 
 /**
  * Generate a short ID suffix for display

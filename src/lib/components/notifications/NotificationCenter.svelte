@@ -6,13 +6,18 @@
 		ClockIcon
 	} from 'heroicons-svelte/24/solid';
 	import { currentLabel, currentPlayer } from '$lib/stores/appState';
-	import { createEventLogsQuery } from '$lib/queries/eventLogQueries';
+	import {
+		createEventLogsQuery,
+		createMarkEventLogsAsReadMutation
+	} from '$lib/queries/eventLogQueries';
 	import { clickOutside } from '$lib/utils/clickOutside';
 	import NotificationItem from './NotificationItem.svelte';
 
 	let isOpen = false;
 	let includeRead = true;
-	let limit = 20;
+	let limit = 10;
+	let markedIds = new Set<string>();
+	let isMarking = false;
 
 	$: labelId = $currentLabel?.id ?? null;
 	$: playerId = $currentPlayer?.id ?? null;
@@ -23,15 +28,40 @@
 	});
 	$: unreadCount = $eventLogsQuery?.data?.filter((event) => !event.isRead).length ?? 0;
 
+	const markAsReadMutation = createMarkEventLogsAsReadMutation();
+
 	function togglePanel() {
 		isOpen = !isOpen;
+
+		// Mark unread notifications as read when panel opens
+		if (isOpen && labelId && $eventLogsQuery.data && !isMarking) {
+			const unreadIds = $eventLogsQuery.data
+				.filter((event) => !event.isRead && !markedIds.has(event.id))
+				.map((event) => event.id);
+
+			if (unreadIds.length > 0) {
+				isMarking = true;
+				// Track these IDs to prevent re-marking
+				unreadIds.forEach((id) => markedIds.add(id));
+
+				$markAsReadMutation.mutate(
+					{
+						labelId,
+						eventLogIds: unreadIds
+					},
+					{
+						onSettled: () => {
+							isMarking = false;
+						}
+					}
+				);
+			}
+		}
 	}
 
 	function closePanel() {
 		isOpen = false;
 	}
-
-
 </script>
 
 <div class="relative flex flex-col items-center" use:clickOutside on:click_outside={closePanel}>

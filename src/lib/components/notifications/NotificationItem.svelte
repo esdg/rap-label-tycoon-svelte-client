@@ -24,7 +24,12 @@
 	}
 </script>
 
-<article class="flex gap-3 border-b border-gray-700/40 px-4 py-3 last:border-b-0">
+<article class="relative flex gap-3 border-b border-gray-700/40 px-4 py-3 last:border-b-0">
+	{#if !event.isRead}
+		<div
+			class="absolute right-2 top-2 h-1.5 w-1.5 flex-none rounded-full bg-secondary-500 text-xs"
+		></div>
+	{/if}
 	<div class="flex flex-1 flex-col gap-1">
 		<div class="flex flex-wrap items-center gap-2 text-sm font-thin text-white">
 			<Chip class={`${tone.badge} rounded-none text-xs`}>

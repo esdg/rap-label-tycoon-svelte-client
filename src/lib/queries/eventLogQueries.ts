@@ -1,7 +1,7 @@
 // Query hooks for label event logs / notifications
-import { createQuery } from '@tanstack/svelte-query';
-import { queryKeys } from './queryClient';
-import { fetchEventLogs } from '$lib/api/eventLogs';
+import { createQuery, createMutation } from '@tanstack/svelte-query';
+import { queryKeys, queryClient } from './queryClient';
+import { fetchEventLogs, markEventLogsAsRead } from '$lib/api/eventLogs';
 import type { EventLog } from '$lib/types/eventLog';
 
 export interface EventLogsQueryOptions {
@@ -23,5 +23,25 @@ export function createEventLogsQuery(labelId: string | null, options: EventLogsQ
 		enabled: !!labelId,
 		staleTime: 10 * 1000,
 		refetchInterval
+	});
+}
+
+export function createMarkEventLogsAsReadMutation() {
+	return createMutation({
+		mutationFn: markEventLogsAsRead,
+		onSuccess: (_, variables) => {
+			// Update all event log queries for this label
+			queryClient.setQueriesData<EventLog[]>(
+				{ queryKey: ['event-logs', 'label', variables.labelId], exact: false },
+				(oldData) => {
+					if (!oldData) return oldData;
+					return oldData.map((event) =>
+						variables.eventLogIds.includes(event.id)
+							? { ...event, isRead: true, readAt: new Date().toISOString() }
+							: event
+					);
+				}
+			);
+		}
 	});
 }
