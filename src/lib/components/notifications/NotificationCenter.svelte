@@ -34,7 +34,7 @@
 
 </script>
 
-<div class="relative flex flex-col items-center">
+<div class="relative flex flex-col items-center" use:clickOutside on:click_outside={closePanel}>
 	<button
 		type="button"
 		on:click={togglePanel}
@@ -55,8 +55,6 @@
 	{#if isOpen}
 		<div
 			class="absolute right-11 top-0 z-50 w-[26rem] max-w-[80vw] select-none overflow-hidden rounded-md border border-gray-600/70 bg-primary-950/95 shadow-2xl backdrop-blur"
-			use:clickOutside
-			on:click_outside={closePanel}
 		>
 			<section class="max-h-[70vh] overflow-y-auto">
 				{#if $eventLogsQuery.isLoading}
