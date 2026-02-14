@@ -11,8 +11,8 @@
 	import type { EventLog } from '$lib/types/eventLog';
 	import { clickOutside } from '$lib/utils/clickOutside';
 	import { formatRelativeTime } from '$lib/utils/timeUtils';
-	import { get } from 'svelte/store';
 	import Chip from '../Chip.svelte';
+	import { describeEvent, formatPayloadLabel } from './notificationTemplates';
 
 	let isOpen = false;
 	let includeRead = false;
@@ -35,74 +35,9 @@
 		isOpen = false;
 	}
 
-	function refresh() {
-		const query = get(eventLogsQuery);
-		query?.refetch?.();
-	}
-
 	function handleLimitChange(event: Event) {
 		const value = Number((event.target as HTMLSelectElement).value);
 		limit = Number.isFinite(value) ? value : limit;
-	}
-
-	const payloadLabels: Record<string, string> = {
-		producing_beats: 'Beat Production',
-		signing_contract: 'Contract',
-		scouting: 'Scouting'
-	};
-
-	function getEventTitle(event: EventLog): string {
-		const { payload_type: payloadType, success } = event.dataPayload;
-		switch (payloadType) {
-			case 'producing_beats':
-				return success === false ? 'Beat production failed' : 'Beat batch finished';
-			case 'signing_contract':
-				return success === false ? 'Contract signing failed' : 'Contract signed';
-			case 'scouting':
-				return success === false ? 'Scouting run failed' : 'Scouting complete';
-			default:
-				return success === false ? 'Event failed' : 'New update';
-		}
-	}
-
-	function pluralize(value: number, word: string) {
-		return `${value} ${word}${value === 1 ? '' : 's'}`;
-	}
-
-	function shortId(value?: string) {
-		return value ? `#${value.slice(-4)}` : 'unknown';
-	}
-
-	function getEventDescription(event: EventLog): string {
-		const data = event.dataPayload;
-		const workerLabel = data.workerId ? `Worker ${shortId(data.workerId)}` : 'Team';
-
-		switch (data.payload_type) {
-			case 'producing_beats': {
-				const beats = data.producedBeatsCount ?? 0;
-				const styles = data.productionStyles?.length
-					? pluralize(data.productionStyles.length, 'style')
-					: null;
-				const delivered = `${pluralize(beats, 'beat')}`;
-				return `${workerLabel} ${data.success === false ? 'could not finish' : 'delivered'} ${delivered}${
-					styles ? ` in ${styles}` : ''
-				}.`;
-			}
-			case 'signing_contract': {
-				const artist = data.artistId ? `artist ${shortId(data.artistId)}` : 'artist';
-				const contract = data.contractId ? `contract ${shortId(data.contractId)}` : 'contract';
-				return `${workerLabel} ${data.success === false ? 'could not sign' : 'signed'} ${contract} with ${artist}.`;
-			}
-			case 'scouting': {
-				const discovered = data.numberOfNpcDiscovered ?? 0;
-				if (data.success === false) return `${workerLabel} returned without results.`;
-				return `${workerLabel} discovered ${pluralize(discovered, 'new talent')}.`;
-			}
-			default: {
-				const label = payloadLabels[data.payload_type] || data.payload_type || 'event';
-				return `${workerLabel} reported a ${label}.`;
-			}
-		}
 	}
 
 	function getTone(event: EventLog) {
@@ -130,10 +65,6 @@
 	}
 
 	$: panelLabel = unreadCount > 0 ? `${unreadCount} new` : 'Up to date';
-
-	function formatPayloadLabel(type?: string) {
-		return payloadLabels[type ?? ''] || type || 'Event';
-	}
 </script>
 
 <div class="relative flex flex-col items-center">
@@ -205,17 +136,20 @@
 							<div class={`mt-1 h-3 w-3 rounded-full ${tone.dot}`}></div>
 							<div class="flex flex-1 flex-col gap-1">
 								<div class="flex flex-wrap items-center gap-2 text-sm font-semibold text-white">
-									<!-- <span>{getEventTitle(event)}</span> -->
-									<!-- <span
-										class={`rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-wide ${tone.badge}`}
-									>
-										{tone.status}
-									</span> -->
-									<Chip class="{tone.badge}text-xs">
+									<Chip class={`${tone.badge} text-xs`}>
 										{formatPayloadLabel(event.dataPayload.payload_type)}
 									</Chip>
 								</div>
-								<p class="text-xs text-gray-300">{getEventDescription(event)}</p>
+								<p class="text-xs text-gray-300">
+									{#each describeEvent(event) as part, index (index)}
+										{#if part.kind === 'link'}
+											<a href={part.href} class="text-secondary-400 hover:underline">{part.label}</a
+											>
+										{:else}
+											<span>{part.value}</span>
+										{/if}
+									{/each}
+								</p>
 								<div class="flex flex-wrap items-center gap-2 text-[11px] text-gray-400">
 									<ClockIcon class="h-4 w-4 text-secondary-400" />
 									<span>{formatRelativeTime(event.createdAt)}</span>
