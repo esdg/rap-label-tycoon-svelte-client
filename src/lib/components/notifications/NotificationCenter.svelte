@@ -5,7 +5,6 @@
 		ExclamationTriangleIcon,
 		ClockIcon
 	} from 'heroicons-svelte/24/solid';
-	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { currentLabel } from '$lib/stores/appState';
 	import { createEventLogsQuery } from '$lib/queries/eventLogQueries';
 	import type { EventLog } from '$lib/types/eventLog';
@@ -26,7 +25,6 @@
 	const prefetchedArtistIds = new Set<string>();
 
 	$: labelId = $currentLabel?.id ?? null;
-	$: labelName = $currentLabel?.name ?? 'your label';
 	$: eventLogsQuery = createEventLogsQuery(labelId, {
 		limit,
 		includeRead,
@@ -164,36 +162,17 @@
 		isOpen = false;
 	}
 
-	function handleLimitChange(event: Event) {
-		const value = Number((event.target as HTMLSelectElement).value);
-		limit = Number.isFinite(value) ? value : limit;
-	}
-
 	function getTone(event: EventLog) {
 		if (event.dataPayload.success === false) {
 			return {
-				dot: 'bg-red-500',
-				badge: 'bg-error-900/40 text-error-200',
-				status: 'Failed'
+				badge: 'bg-error-900/40 text-error-200'
 			};
 		}
-		/* 
-		if (!event.isRead) {
-			return {
-				dot: 'bg-secondary-400',
-				badge: 'border-secondary-700/60 bg-secondary-900/40 text-secondary-200',
-				status: 'New'
-			};
-		} */
 
 		return {
-			dot: 'bg-gray-500',
-			badge: 'bg-success-900/50 text-success-200',
-			status: 'Seen'
+			badge: 'bg-success-900/50 text-success-200'
 		};
 	}
-
-	$: panelLabel = unreadCount > 0 ? `${unreadCount} new` : 'Up to date';
 </script>
 
 <div class="relative flex flex-col items-center">
@@ -220,21 +199,6 @@
 			use:clickOutside
 			on:click_outside={closePanel}
 		>
-			<!-- 			<header
-				class="flex items-start justify-between gap-3 border-b border-gray-800/60 px-4 py-3"
-			>
-				<div class="flex items-center gap-2 text-xs text-gray-200">
-					<button
-						type="button"
-						on:click={refresh}
-						title="Refresh"
-						class="rounded-full border border-gray-800/70 bg-primary-950 p-2 text-gray-100 transition hover:border-gray-500 hover:text-gray-300"
-					>
-						<ArrowPathIcon class="h-4 w-4" />
-					</button>
-				</div>
-			</header> -->
-
 			<section class="max-h-[70vh] overflow-y-auto">
 				{#if $eventLogsQuery.isLoading}
 					<div class="flex items-center gap-3 px-4 py-6 text-gray-300">
@@ -259,7 +223,6 @@
 						{@const tone = getTone(event)}
 						{@const workerParts = $workerPartsMap[event.dataPayload.workerId ?? '']}
 						<article class="flex gap-3 border-b border-gray-700/40 px-4 py-3 last:border-b-0">
-							<!-- <div class={`mt-1 h-3 w-3 rounded-full ${tone.dot}`}></div> -->
 							<div class="flex flex-1 flex-col gap-1">
 								<div class="flex flex-wrap items-center gap-2 text-sm font-thin text-white">
 									<Chip class={`${tone.badge} rounded-none text-xs`}>
@@ -268,12 +231,6 @@
 									<div class="flex flex-wrap items-center gap-1 text-[11px] text-gray-400">
 										<ClockIcon class="h-3 w-3 text-gray-600" />
 										<span>{formatRelativeTime(event.createdAt)}</span>
-										<!-- 									{#if event.priority}
-										<span
-											class="rounded-full border border-secondary-800 px-2 py-0.5 text-secondary-300"
-											>Priority {event.priority}</span
-										>
-									{/if} -->
 										{#if event.readAt}
 											<span>
 												(viewed {formatRelativeTime(event.readAt)})
