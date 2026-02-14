@@ -79,17 +79,18 @@ function artistLabel(artistId?: string) {
 	return `artist ${shortId(artistId)}`;
 }
 
-type Template = (event: EventLog) => DescriptionPart[];
+type Template = (event: EventLog, workerOverride?: DescriptionPart[]) => DescriptionPart[];
 
 const templates: Record<string, Template> = {
-	producing_beats: (event) => {
+	producing_beats: (event, workerOverride) => {
 		const data = event.dataPayload;
 		const beats = data.producedBeatsCount ?? 0;
 		const styles = data.productionStyles?.length ?? 0;
 		const success = data.success !== false;
+		const worker = workerOverride ?? workerParts(event);
 
 		const parts: DescriptionPart[] = [
-			...workerParts(event),
+			...worker,
 			{
 				kind: 'text',
 				value: ` ${success ? 'delivered' : 'could not finish'} ${pluralize(beats, 'beat')}`
@@ -103,11 +104,12 @@ const templates: Record<string, Template> = {
 		parts.push({ kind: 'text', value: '.' });
 		return parts;
 	},
-	signing_contract: (event) => {
+	signing_contract: (event, workerOverride) => {
 		const data = event.dataPayload;
 		const success = data.success !== false;
+		const worker = workerOverride ?? workerParts(event);
 		const parts: DescriptionPart[] = [
-			...workerParts(event),
+			...worker,
 			{ kind: 'text', value: ` ${success ? 'signed ' : 'could not sign '}` },
 			{ kind: 'text', value: contractLabel(data.contractId) },
 			{ kind: 'text', value: ' with ' }
@@ -126,17 +128,18 @@ const templates: Record<string, Template> = {
 		parts.push({ kind: 'text', value: '.' });
 		return parts;
 	},
-	scouting: (event) => {
+	scouting: (event, workerOverride) => {
 		const data = event.dataPayload;
 		const success = data.success !== false;
 		const discovered = data.numberOfNpcDiscovered ?? 0;
+		const worker = workerOverride ?? workerParts(event);
 
 		if (!success) {
-			return [...workerParts(event), { kind: 'text', value: ' returned without results.' }];
+			return [...worker, { kind: 'text', value: ' returned without results.' }];
 		}
 
 		return [
-			...workerParts(event),
+			...worker,
 			{
 				kind: 'text',
 				value: ` discovered ${pluralize(discovered, 'new talent')}.`
@@ -145,17 +148,20 @@ const templates: Record<string, Template> = {
 	}
 };
 
-const defaultTemplate: Template = (event) => [
-	...workerParts(event),
+const defaultTemplate: Template = (event, workerOverride) => [
+	...(workerOverride ?? workerParts(event)),
 	{
 		kind: 'text',
 		value: ` reported a ${formatPayloadLabel(event.dataPayload.payload_type)}.`
 	}
 ];
 
-export function describeEvent(event: EventLog): DescriptionPart[] {
+export function describeEvent(
+	event: EventLog,
+	workerOverride?: DescriptionPart[]
+): DescriptionPart[] {
 	const payloadType = event.dataPayload.payload_type;
-	return (templates[payloadType] ?? defaultTemplate)(event);
+	return (templates[payloadType] ?? defaultTemplate)(event, workerOverride);
 }
 
 export function formatPayloadLabel(type?: string) {
