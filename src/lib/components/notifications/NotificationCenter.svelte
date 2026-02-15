@@ -18,6 +18,7 @@
 	let limit = 10;
 	let markedIds = new Set<string>();
 	let isMarking = false;
+	let markTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	$: labelId = $currentLabel?.id ?? null;
 	$: playerId = $currentPlayer?.id ?? null;
@@ -30,11 +31,8 @@
 
 	const markAsReadMutation = createMarkEventLogsAsReadMutation();
 
-	function togglePanel() {
-		isOpen = !isOpen;
-
-		// Mark unread notifications as read when panel opens
-		if (isOpen && labelId && $eventLogsQuery.data && !isMarking) {
+	function markUnreadAsRead() {
+		if (labelId && $eventLogsQuery.data && !isMarking) {
 			const unreadIds = $eventLogsQuery.data
 				.filter((event) => !event.isRead && !markedIds.has(event.id))
 				.map((event) => event.id);
@@ -59,7 +57,31 @@
 		}
 	}
 
+	function togglePanel() {
+		isOpen = !isOpen;
+
+		// Clear any pending mark timeout
+		if (markTimeout) {
+			clearTimeout(markTimeout);
+			markTimeout = null;
+		}
+
+		// Mark as read after 2 seconds when opening
+		if (isOpen) {
+			markTimeout = setTimeout(() => {
+				markUnreadAsRead();
+				markTimeout = null;
+			}, 2000);
+		}
+	}
+
 	function closePanel() {
+		// Clear timeout and mark immediately when closing
+		if (markTimeout) {
+			clearTimeout(markTimeout);
+			markTimeout = null;
+		}
+		markUnreadAsRead();
 		isOpen = false;
 	}
 </script>
