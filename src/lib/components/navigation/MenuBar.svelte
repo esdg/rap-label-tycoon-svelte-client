@@ -135,10 +135,12 @@
 		{/if}
 	{/each}
 
-	<Tooltip position="right" wrapperClass="mt-auto">
-		<button on:click={handleLogout} slot="trigger">
-			<PowerIcon class="h-6 w-6 hover:text-secondary-500" />
-		</button>
-		Sign Out
-	</Tooltip>
+	<div class="mt-auto flex flex-col items-center gap-3">
+		<Tooltip position="right">
+			<button on:click={handleLogout} slot="trigger">
+				<PowerIcon class="h-6 w-6 hover:text-secondary-500" />
+			</button>
+			Sign Out
+		</Tooltip>
+	</div>
 </nav>

@@ -186,6 +186,54 @@ export function formatTimeRemaining(
 	return `${hours}h ${minutes}m ${seconds}s`;
 }
 
+/**
+ * Returns a concise relative time string like "5m ago" or "in 2h".
+ */
+export function formatRelativeTime(
+	date: string | number | Date,
+	referenceTime: number = Date.now()
+): string {
+	const timestamp =
+		date instanceof Date
+			? date.getTime()
+			: typeof date === 'string'
+				? new Date(date).getTime()
+				: date;
+
+	if (!Number.isFinite(timestamp)) return '';
+
+	const diff = referenceTime - timestamp;
+	const abs = Math.abs(diff);
+
+	const units: Array<[number, string]> = [
+		[1000, 'second'],
+		[60 * 1000, 'minute'],
+		[60 * 60 * 1000, 'hour'],
+		[24 * 60 * 60 * 1000, 'day'],
+		[7 * 24 * 60 * 60 * 1000, 'week'],
+		[30 * 24 * 60 * 60 * 1000, 'month'],
+		[365 * 24 * 60 * 60 * 1000, 'year']
+	];
+
+	let value = Math.round(abs / 1000);
+	let unit = 'second';
+
+	for (let i = units.length - 1; i >= 0; i -= 1) {
+		const [ms, label] = units[i];
+		if (abs >= ms) {
+			value = Math.round(abs / ms);
+			unit = label;
+			break;
+		}
+	}
+
+	const plural = value === 1 ? '' : 's';
+	const prefix = diff < 0 ? 'in ' : '';
+	const suffix = diff >= 0 ? ' ago' : '';
+
+	return `${prefix}${value} ${unit}${plural}${suffix}`;
+}
+
 // Helper to get current server-adjusted time (re-export for convenience)
 export function getServerTime(offset: number = 0): number {
 	return getServerAdjustedTime(offset);

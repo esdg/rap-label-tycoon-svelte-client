@@ -33,6 +33,7 @@
 	import ArtistCard from '$lib/components/cards/ArtistCard.svelte';
 	import { ContractStatus } from '$lib/types/contracts';
 	import { RapMusicStyleNames, type RapMusicStyle } from '$lib/types/musicStyles';
+	import NotificationCenter from '$lib/components/notifications/NotificationCenter.svelte';
 
 	// Helper to check if a task is optimistic (has temporary ID and extra data)
 	function getOptimisticTaskData(task: any) {
@@ -210,6 +211,14 @@
 	<div></div>
 	<!-- 3 col -->
 	<div class="flex flex-col items-center gap-8">
+		<div class="flex w-full items-center gap-4">
+			<div class="rounded-md border border-gray-500 bg-primary-950">
+				<NotificationCenter />
+			</div>
+			<div class="rounded-md border border-gray-500 bg-primary-950 p-2">
+				Next financial report in: <span class="font-bold">xxxx</span>
+			</div>
+		</div>
 		<div id="label-stats" class="flex grow flex-col gap-4">
 			<div class="max-w-52 text-center text-3xl font-black uppercase">{$currentLabel?.name}</div>
 			{#if $currentLabel?.rating}
