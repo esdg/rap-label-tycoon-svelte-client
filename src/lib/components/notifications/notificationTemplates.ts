@@ -54,9 +54,13 @@ const templates: Record<string, Template> = {
 		const parts: DescriptionPart[] = [
 			artistLabel,
 			{ kind: 'text', value: ` ${success ? ' accepted ' : ' refused '}` },
-			{ kind: 'text', value: 'your label offer ' },
-			{ kind: 'text', value: `(${formatContractLabel(data.contractId)}). ` },
-			{ kind: 'text', value: ' You can ' },
+			{ kind: 'text', value: 'your ' },
+			{
+				kind: 'link',
+				label: `contract`,
+				href: `${success ? '/beats/start' : `/contracts/${encodeURIComponent(data.contractId ?? '')}`}`
+			},
+			{ kind: 'text', value: ' label offert. You can ' },
 			{
 				kind: 'link',
 				label: ` ${success ? 'start producing' : 'propose a new offer'}`,
