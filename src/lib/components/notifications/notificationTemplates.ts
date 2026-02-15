@@ -4,11 +4,31 @@ import {
 	pluralize,
 	resolveWorkerParts,
 	resolveArtistLabel,
-	formatContractLabel,
-	formatPayloadLabel
+	formatPayloadLabel,
+	findArtistInCache,
+	getTaskWithCache,
+	fetchScoutedArtists
 } from '$lib/utils/notificationUtils';
+import { modalStore } from '$lib/stores/modal';
+import {
+	openProducingBeatsModal,
+	openRecordingReleaseModal,
+	openScoutResultsModal,
+	openSignContractModal
+} from '$lib/modals/helpers';
+import type { ScoutingTaskResponse } from '$lib/types/task';
 
 export type { DescriptionPart };
+
+function getArtistType(artistId: string | undefined): 'rapper' | 'beatmaker' | null {
+	if (!artistId) return null;
+	const artist = findArtistInCache(artistId);
+	if (!artist) return null;
+	const type = artist.$type?.toLowerCase();
+	if (type?.includes('rapper')) return 'rapper';
+	if (type?.includes('beatmaker')) return 'beatmaker';
+	return null;
+}
 
 type Template = (event: EventLog, currentPlayerId: string | null | undefined) => DescriptionPart[];
 
@@ -38,7 +58,8 @@ const templates: Record<string, Template> = {
 	signing_contract: (event, currentPlayerId) => {
 		const data = event.dataPayload;
 		const success = data.success !== false;
-		const worker = resolveWorkerParts(data.workerId, currentPlayerId);
+		const artistType = getArtistType(data.artistId);
+
 		let artistLabel: DescriptionPart;
 		if (data.artistId) {
 			artistLabel = {
@@ -51,6 +72,16 @@ const templates: Record<string, Template> = {
 			artistLabel = { kind: 'text', value: 'an artist' };
 		}
 
+		// Determine action label based on artist type
+		let actionLabel = 'start producing beats';
+		if (success && artistType === 'rapper') {
+			actionLabel = 'start recording';
+		} else if (success && artistType === 'beatmaker') {
+			actionLabel = 'start producing beats';
+		} else if (!success) {
+			actionLabel = 'propose a new offer';
+		}
+
 		const parts: DescriptionPart[] = [
 			artistLabel,
 			{ kind: 'text', value: ` ${success ? ' accepted ' : ' refused '}` },
@@ -58,13 +89,25 @@ const templates: Record<string, Template> = {
 			{
 				kind: 'link',
 				label: `contract`,
-				href: `${success ? '/beats/start' : `/contracts/${encodeURIComponent(data.contractId ?? '')}`}`
+				href: `/artists/${encodeURIComponent(data.artistId ?? '')}`
 			},
-			{ kind: 'text', value: ' label offert. You can ' },
+			{ kind: 'text', value: ' label offer. You can ' },
 			{
-				kind: 'link',
-				label: ` ${success ? 'start producing' : 'propose a new offer'}`,
-				href: `${success ? '/beats/start' : `/contracts/${encodeURIComponent(data.contractId ?? '')}`}`
+				kind: 'action',
+				label: actionLabel,
+				onClick: () => {
+					if (!success) {
+						// Open SignContract modal for failed contracts
+						const artist = findArtistInCache(data.artistId ?? '');
+						if (artist) openSignContractModal(artist);
+					} else if (artistType === 'rapper') {
+						// Open RecordingRelease modal for rappers
+						openRecordingReleaseModal({ workerId: data.artistId });
+					} else if (artistType === 'beatmaker') {
+						// Open ProducingBeat modal for beatmakers
+						openProducingBeatsModal({ workerId: data.artistId });
+					}
+				}
 			}
 		];
 
@@ -93,9 +136,23 @@ const templates: Record<string, Template> = {
 				value: `) discovered `
 			},
 			{
-				kind: 'link',
+				kind: 'action',
 				label: `${pluralize(discovered, 'new talent')}`,
-				href: `${success ? '/beats/start' : `/contracts/${encodeURIComponent(data.contractId ?? '')}`}`
+				onClick: async () => {
+					if (!data.taskId) return;
+
+					// Fetch task from cache or API
+					const task = await getTaskWithCache(data.taskId);
+					if (!task || task.taskType !== 0) return; // TaskType.Scouting === 0
+
+					const scoutingTask = task as ScoutingTaskResponse;
+
+					// Fetch and cache discovered artists before opening modal
+					await fetchScoutedArtists(scoutingTask);
+
+					// Open the modal with all data loaded
+					openScoutResultsModal(scoutingTask);
+				}
 			},
 			{
 				kind: 'text',

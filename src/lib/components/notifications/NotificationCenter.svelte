@@ -15,7 +15,7 @@
 
 	let isOpen = false;
 	let includeRead = true;
-	let limit = 10;
+	let limit = 30;
 	let markedIds = new Set<string>();
 	let isMarking = false;
 	let markTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -133,7 +133,7 @@
 						</div>
 					{:else}
 						{#each $eventLogsQuery.data as event (event.id)}
-							<NotificationItem {event} currentPlayerId={playerId} />
+							<NotificationItem {event} currentPlayerId={playerId} on:close-panel={closePanel} />
 						{/each}
 					{/if}
 				</section>

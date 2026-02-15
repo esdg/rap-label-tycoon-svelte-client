@@ -5,11 +5,15 @@
 
 import { queryClient, queryKeys } from '$lib/queries/queryClient';
 import type { AnyArtist } from '$lib/api/artists';
-import { getDiscoveredArtist } from '$lib/queries/artistQueries';
+import { getDiscoveredArtist, addDiscoveredArtists } from '$lib/queries/artistQueries';
+import type { TimedTask, ScoutingTaskResponse, ScoutingTaskResults } from '$lib/types/task';
+import { fetchTaskById } from '$lib/api/tasks';
+import { fetchArtistsByIds } from '$lib/api/artists';
 
 export type DescriptionPart =
 	| { kind: 'text'; value: string; color?: string }
-	| { kind: 'link'; label: string; href: string; color?: string };
+	| { kind: 'link'; label: string; href: string; color?: string }
+	| { kind: 'action'; label: string; onClick: () => void | Promise<void>; color?: string };
 
 /**
  * Generate a short ID suffix for display
@@ -47,6 +51,23 @@ export function findArtistInCache(artistId: string): AnyArtist | undefined {
 		}
 		if (data && typeof data === 'object' && 'id' in data && data.id === artistId) {
 			return data as AnyArtist;
+		}
+	}
+
+	return undefined;
+}
+
+/**
+ * Find a task in any of the query caches
+ * Checks: task list caches by label
+ */
+export function findTaskInCache(taskId: string): TimedTask | undefined {
+	// Search through all task query caches
+	const queries = queryClient.getQueriesData<TimedTask[]>({ queryKey: ['tasks'] });
+	for (const [, data] of queries) {
+		if (Array.isArray(data)) {
+			const found = data.find((task: TimedTask) => task?.id === taskId);
+			if (found) return found;
 		}
 	}
 
@@ -119,4 +140,53 @@ export const PayloadLabels: Record<string, string> = {
 
 export function formatPayloadLabel(type?: string): string {
 	return PayloadLabels[type ?? ''] || type || 'Event';
+}
+
+/**
+ * Fetch a task by ID and cache it
+ * First checks cache, then fetches from API if not found
+ */
+export async function getTaskWithCache(taskId: string): Promise<TimedTask | undefined> {
+	// Try cache first
+	let task = findTaskInCache(taskId);
+	if (task) return task;
+
+	// Fetch from API
+	try {
+		task = await fetchTaskById(taskId);
+		// Cache the fetched task
+		if (task?.labelId) {
+			queryClient.setQueryData<TimedTask[]>(queryKeys.tasks.byLabel(task.labelId), (oldData) => {
+				if (Array.isArray(oldData)) {
+					return [...oldData, task!];
+				}
+				return [task!];
+			});
+		}
+		return task;
+	} catch (error) {
+		console.error('Failed to fetch task:', error);
+		return undefined;
+	}
+}
+
+/**
+ * Fetch and cache discovered artists from a scouting task
+ */
+export async function fetchScoutedArtists(scoutingTask: ScoutingTaskResponse): Promise<void> {
+	if (!scoutingTask.results || !('discoveredArtistsIds' in scoutingTask.results)) {
+		return;
+	}
+
+	const scoutingResults = scoutingTask.results as ScoutingTaskResults;
+	if (!scoutingResults.discoveredArtistsIds?.length) {
+		return;
+	}
+
+	try {
+		const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
+		addDiscoveredArtists(artists, false);
+	} catch (error) {
+		console.error('Failed to fetch discovered artists:', error);
+	}
 }

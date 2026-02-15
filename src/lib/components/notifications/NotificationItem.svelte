@@ -5,9 +5,12 @@
 	import { formatPayloadLabel } from '$lib/utils/notificationUtils';
 	import Chip from '../Chip.svelte';
 	import { describeEvent } from './notificationTemplates';
+	import { createEventDispatcher } from 'svelte';
 
 	export let event: EventLog;
 	export let currentPlayerId: string | null | undefined;
+
+	const dispatch = createEventDispatcher();
 
 	$: tone = getTone(event);
 
@@ -21,6 +24,11 @@
 		return {
 			badge: 'bg-success-900 text-success-200'
 		};
+	}
+
+	async function handleActionClick(onClick: () => void | Promise<void>) {
+		await onClick();
+		dispatch('close-panel');
 	}
 </script>
 
@@ -55,6 +63,13 @@
 						href={part.href}
 						class="{part.color ?? 'text-secondary-500'} underline hover:no-underline"
 						>{part.label}</a
+					>
+				{:else if part.kind === 'action'}
+					<button
+						type="button"
+						on:click={() => handleActionClick(part.onClick)}
+						class="{part.color ?? 'text-secondary-500'} cursor-pointer underline hover:no-underline"
+						>{part.label}</button
 					>
 				{:else}
 					<span class={part.color ?? ''}>{part.value}</span>

@@ -16,6 +16,7 @@ export interface EventLogPayload {
 	// Common fields shared across payloads
 	success?: boolean;
 	workerId?: string;
+	taskId?: string;
 	// Producing beats
 	producedBeatsCount?: number;
 	productionStyles?: number[];

@@ -20,6 +20,11 @@ export async function fetchLabelTasks(labelId: string): Promise<TimestampedRespo
 	return apiFetchWithTime<TimedTask[]>(`/api/v1/rap-labels/${labelId}/tasks`);
 }
 
+// Fetch a single task by ID
+export async function fetchTaskById(taskId: string): Promise<TimedTask> {
+	return apiFetch<TimedTask>(`/api/v1/tasks/${taskId}`);
+}
+
 // Claim a completed task
 export async function claimTask(taskId: string): Promise<TimedTask> {
 	return apiFetch<TimedTask>(`/api/v1/tasks/${taskId}/claim`, {
