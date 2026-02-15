@@ -8,7 +8,7 @@ import type { AnyArtist } from '$lib/api/artists';
 import { getDiscoveredArtist } from '$lib/queries/artistQueries';
 
 export type DescriptionPart =
-	| { kind: 'text'; value: string }
+	| { kind: 'text'; value: string; color?: string }
 	| { kind: 'link'; label: string; href: string; color?: string };
 
 /**
@@ -75,7 +75,8 @@ export function resolveWorkerParts(
 			{
 				kind: 'link',
 				label: artist.stageName,
-				href: `/artists/${encodeURIComponent(workerId)}`
+				href: `/artists/${encodeURIComponent(workerId)}`,
+				color: workerId === currentPlayerId ? 'text-category-1-500' : 'text-category-2-400'
 			}
 		];
 	}
@@ -109,7 +110,11 @@ export function formatContractLabel(contractId?: string): string {
 export const PayloadLabels: Record<string, string> = {
 	producing_beats: 'Beat Production',
 	signing_contract: 'Contract',
-	scouting: 'Scouting'
+	scouting: 'Scouting',
+	daily_income_report: 'Daily Income',
+	publishing_release: 'Release Published',
+	resting: 'Rest',
+	recording_release: 'Recording'
 };
 
 export function formatPayloadLabel(type?: string): string {

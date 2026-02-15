@@ -14,17 +14,17 @@
 	function getTone(event: EventLog) {
 		if (event.dataPayload.success === false) {
 			return {
-				badge: 'bg-error-900/40 text-error-200'
+				badge: 'bg-error-900 text-error-200'
 			};
 		}
 
 		return {
-			badge: 'bg-success-900/50 text-success-200'
+			badge: 'bg-success-900 text-success-200'
 		};
 	}
 </script>
 
-<article class="relative flex gap-3 border-b border-gray-700/40 px-4 py-3 last:border-b-0">
+<article class="relative flex gap-3 border-b border-gray-700/40 p-2 last:border-b-0">
 	{#if !event.isRead}
 		<div
 			class="absolute right-2 top-2 h-1.5 w-1.5 flex-none rounded-full bg-secondary-500 text-xs"
@@ -32,9 +32,12 @@
 	{/if}
 	<div class="flex flex-1 flex-col gap-1">
 		<div class="flex flex-wrap items-center gap-2 text-sm font-thin text-white">
-			<Chip class={`${tone.badge} rounded-none text-xs`}>
-				{formatPayloadLabel(event.dataPayload.payload_type)}
-			</Chip>
+			<div class="flex">
+				<div class={`${tone.badge} h-auto w-1`}></div>
+				<Chip class="rounded-none bg-gray-700 text-xs text-gray-300">
+					{formatPayloadLabel(event.dataPayload.payload_type)}
+				</Chip>
+			</div>
 			<div class="flex flex-wrap items-center gap-1 text-[11px] text-gray-400">
 				<ClockIcon class="h-3 w-3 text-gray-600" />
 				<span>{formatRelativeTime(event.createdAt)}</span>
@@ -45,12 +48,16 @@
 				{/if}
 			</div>
 		</div>
-		<p class="text-xs text-gray-300">
+		<p class="text-sm text-gray-300">
 			{#each describeEvent(event, currentPlayerId) as part, index (index)}
 				{#if part.kind === 'link'}
-					<a href={part.href} class="text-secondary-400 hover:underline">{part.label}</a>
+					<a
+						href={part.href}
+						class="{part.color ?? 'text-secondary-500'} underline hover:no-underline"
+						>{part.label}</a
+					>
 				{:else}
-					<span>{part.value}</span>
+					<span class={part.color ?? ''}>{part.value}</span>
 				{/if}
 			{/each}
 		</p>

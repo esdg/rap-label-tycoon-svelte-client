@@ -84,33 +84,37 @@
 
 	{#if isOpen}
 		<div
-			class="absolute right-11 top-0 z-50 w-[26rem] max-w-[80vw] select-none overflow-hidden rounded-md border border-gray-600/70 bg-primary-950/95 shadow-2xl backdrop-blur"
+			class="absolute -right-6 top-14 z-50 w-[26rem] max-w-[80vw] select-none before:absolute before:-top-[8px] before:left-[364px] before:z-[60] before:h-4 before:w-4 before:rotate-45 before:border-l before:border-t before:border-gray-600/70 before:bg-primary-950/95 before:content-['']"
 		>
-			<section class="max-h-[70vh] overflow-y-auto">
-				{#if $eventLogsQuery.isLoading}
-					<div class="flex items-center gap-3 px-4 py-6 text-gray-300">
-						<ArrowPathIcon class="h-5 w-5 animate-spin text-secondary-400" />
-						<span>Loading the latest updates...</span>
-					</div>
-				{:else if $eventLogsQuery.isError}
-					<div class="flex items-start gap-3 px-4 py-5 text-red-200">
-						<ExclamationTriangleIcon class="h-5 w-5 text-red-400" />
-						<div>
-							<p class="text-sm font-semibold">Could not fetch notifications</p>
-							<p class="text-xs text-red-200/80">{$eventLogsQuery.error?.message}</p>
+			<div
+				class="overflow-hidden rounded-md border border-gray-600/70 bg-primary-950/95 shadow-2xl backdrop-blur"
+			>
+				<section class="max-h-[70vh] overflow-y-auto">
+					{#if $eventLogsQuery.isLoading}
+						<div class="flex items-center gap-3 px-4 py-6 text-gray-300">
+							<ArrowPathIcon class="h-5 w-5 animate-spin text-secondary-400" />
+							<span>Loading the latest updates...</span>
 						</div>
-					</div>
-				{:else if !$eventLogsQuery.data || $eventLogsQuery.data.length === 0}
-					<div class="flex items-center gap-3 px-4 py-6 text-gray-300">
-						<ClockIcon class="h-5 w-5 text-secondary-400" />
-						<span>No {includeRead ? '' : 'unread '}notifications yet.</span>
-					</div>
-				{:else}
-					{#each $eventLogsQuery.data as event (event.id)}
-						<NotificationItem {event} currentPlayerId={playerId} />
-					{/each}
-				{/if}
-			</section>
+					{:else if $eventLogsQuery.isError}
+						<div class="flex items-start gap-3 px-4 py-5 text-red-200">
+							<ExclamationTriangleIcon class="h-5 w-5 text-red-400" />
+							<div>
+								<p class="text-sm font-semibold">Could not fetch notifications</p>
+								<p class="text-xs text-red-200/80">{$eventLogsQuery.error?.message}</p>
+							</div>
+						</div>
+					{:else if !$eventLogsQuery.data || $eventLogsQuery.data.length === 0}
+						<div class="flex items-center gap-3 px-4 py-6 text-gray-300">
+							<ClockIcon class="h-5 w-5 text-secondary-400" />
+							<span>No {includeRead ? '' : 'unread '}notifications yet.</span>
+						</div>
+					{:else}
+						{#each $eventLogsQuery.data as event (event.id)}
+							<NotificationItem {event} currentPlayerId={playerId} />
+						{/each}
+					{/if}
+				</section>
+			</div>
 		</div>
 	{/if}
 </div>
