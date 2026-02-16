@@ -6,13 +6,25 @@
 		PowerIcon,
 		MegaphoneIcon,
 		MagnifyingGlassCircleIcon,
-		TrophyIcon
+		TrophyIcon,
+		Cog8ToothIcon
 	} from 'heroicons-svelte/24/solid';
 	import RecordIconSmall from '$lib/icons/RecordIconSmall.svelte';
 	import RosterIcon from '$lib/icons/RosterIcon.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
+	import SettingsPanel from '$lib/components/navigation/SettingsPanel.svelte';
 	import { logoutAndRedirect } from '$lib/services/auth';
 	import { page } from '$app/stores';
+
+	let isSettingsPanelOpen = false;
+
+	function toggleSettingsPanel() {
+		isSettingsPanelOpen = !isSettingsPanelOpen;
+	}
+
+	function closeSettingsPanel() {
+		isSettingsPanelOpen = false;
+	}
 
 	interface MenuItem {
 		path: string;
@@ -137,6 +149,12 @@
 
 	<div class="mt-auto flex flex-col items-center gap-3">
 		<Tooltip position="right">
+			<button on:click={toggleSettingsPanel} slot="trigger">
+				<Cog8ToothIcon class="h-6 w-6 hover:text-secondary-500" />
+			</button>
+			Settings
+		</Tooltip>
+		<Tooltip position="right">
 			<button on:click={handleLogout} slot="trigger">
 				<PowerIcon class="h-6 w-6 hover:text-secondary-500" />
 			</button>
@@ -144,3 +162,5 @@
 		</Tooltip>
 	</div>
 </nav>
+
+<SettingsPanel isOpen={isSettingsPanelOpen} onClose={closeSettingsPanel} />

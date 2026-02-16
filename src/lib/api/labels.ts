@@ -41,3 +41,15 @@ export async function removeArtistFromWatchlist(labelId: string, artistId: strin
 export async function fetchAllLabels(): Promise<Label[]> {
 	return apiFetch<Label[]>('/api/v1/rap-labels');
 }
+
+export interface UpdateLabelRequest {
+	name?: string;
+	description?: string;
+}
+
+export async function updateLabel(labelId: string, data: UpdateLabelRequest): Promise<Label> {
+	return apiFetch<Label>(`/api/v1/rap-labels/${labelId}`, {
+		method: 'PATCH',
+		body: JSON.stringify(data)
+	});
+}

@@ -22,3 +22,14 @@ export async function fetchPlayersByIds(playerIds: string[]): Promise<Player[]> 
 	// Fetch all players in parallel
 	return Promise.all(playerIds.map((id) => fetchPlayerById(id)));
 }
+
+export interface UpdatePlayerRequest {
+	username?: string;
+}
+
+export async function updatePlayer(playerId: string, data: UpdatePlayerRequest): Promise<Player> {
+	return apiFetch<Player>(`/api/v1/players/${playerId}`, {
+		method: 'PATCH',
+		body: JSON.stringify(data)
+	});
+}

@@ -1,14 +1,17 @@
 // Label query hooks
 import { createQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
+import { get } from 'svelte/store';
 import { queryKeys } from './queryClient';
 import {
 	fetchLabelById,
 	fetchLabelsByIds,
 	fetchAllLabels,
 	createLabel,
+	updateLabel,
 	addArtistToWatchlist,
 	removeArtistFromWatchlist,
-	type CreateLabelRequest
+	type CreateLabelRequest,
+	type UpdateLabelRequest
 } from '$lib/api/labels';
 import type { Label } from '$lib/types/label';
 import { appState } from '$lib/stores/appState';
@@ -155,6 +158,26 @@ export function createRemoveFromWatchlistMutation() {
 		onSettled: (data, error, { labelId }) => {
 			// Always refetch after error or success
 			queryClient.invalidateQueries({ queryKey: queryKeys.labels.byId(labelId) });
+		}
+	});
+}
+
+// Mutation: Update label
+export function createUpdateLabelMutation() {
+	const queryClient = useQueryClient();
+
+	return createMutation<Label, Error, { labelId: string; data: UpdateLabelRequest }>({
+		mutationFn: ({ labelId, data }) => updateLabel(labelId, data),
+		onSuccess: (label) => {
+			// Update cache
+			queryClient.setQueryData(queryKeys.labels.byId(label.id), label);
+			// Update current label in app state if it's the one being edited
+			const currentLabel = get(appState).currentLabel;
+			if (currentLabel?.id === label.id) {
+				appState.setCurrentLabel(label);
+			}
+			// Invalidate related queries
+			queryClient.invalidateQueries({ queryKey: queryKeys.labels.all });
 		}
 	});
 }

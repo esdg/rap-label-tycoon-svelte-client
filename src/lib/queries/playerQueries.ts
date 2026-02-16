@@ -5,9 +5,11 @@ import {
 	fetchPlayerById,
 	fetchPlayerByFirebaseId,
 	fetchPlayersByIds,
-	createPlayer
+	createPlayer,
+	updatePlayer
 } from '$lib/api/players';
 import type { Player, CreatePlayerRequest } from '$lib/types/player';
+import type { UpdatePlayerRequest } from '$lib/api/players';
 
 // Query: Get player by Firebase UID
 export function createPlayerByFirebaseIdQuery(firebaseId: string | null) {
@@ -46,6 +48,22 @@ export function createPlayerMutation() {
 			// Cache the new player data
 			queryClient.setQueryData(queryKeys.player.byId(player.id), player);
 			queryClient.setQueryData(queryKeys.player.byFirebaseId(player.firebaseUserId), player);
+		}
+	});
+}
+
+// Mutation: Update player
+export function createUpdatePlayerMutation() {
+	const queryClient = useQueryClient();
+
+	return createMutation<Player, Error, { playerId: string; data: UpdatePlayerRequest }>({
+		mutationFn: ({ playerId, data }) => updatePlayer(playerId, data),
+		onSuccess: (player) => {
+			// Update cache
+			queryClient.setQueryData(queryKeys.player.byId(player.id), player);
+			queryClient.setQueryData(queryKeys.player.byFirebaseId(player.firebaseUserId), player);
+			// Invalidate related queries
+			queryClient.invalidateQueries({ queryKey: queryKeys.player.all });
 		}
 	});
 }
