@@ -6,8 +6,7 @@ import {
 	resolveArtistLabel,
 	formatPayloadLabel,
 	findArtistInCache,
-	getTaskWithCache,
-	fetchScoutedArtists
+	getTaskWithCache
 } from '$lib/utils/notificationUtils';
 import { modalStore } from '$lib/stores/modal';
 import {
@@ -95,14 +94,14 @@ const templates: Record<string, Template> = {
 			{
 				kind: 'action',
 				label: actionLabel,
-				onClick: () => {
+				onClick: async () => {
 					if (!success) {
 						// Open SignContract modal for failed contracts
 						const artist = findArtistInCache(data.artistId ?? '');
 						if (artist) openSignContractModal(artist);
 					} else if (artistType === 'rapper') {
-						// Open RecordingRelease modal for rappers
-						openRecordingReleaseModal({ workerId: data.artistId });
+						// Open RecordingRelease modal (beats are prefetched in the helper)
+						await openRecordingReleaseModal({ workerId: data.artistId });
 					} else if (artistType === 'beatmaker') {
 						// Open ProducingBeat modal for beatmakers
 						openProducingBeatsModal({ workerId: data.artistId });
@@ -147,11 +146,8 @@ const templates: Record<string, Template> = {
 
 					const scoutingTask = task as ScoutingTaskResponse;
 
-					// Fetch and cache discovered artists before opening modal
-					await fetchScoutedArtists(scoutingTask);
-
-					// Open the modal with all data loaded
-					openScoutResultsModal(scoutingTask);
+					// Open the modal (artists are prefetched in the helper)
+					await openScoutResultsModal(scoutingTask);
 				}
 			},
 			{

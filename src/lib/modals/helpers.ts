@@ -9,6 +9,8 @@ import { MODAL_DEFAULTS, MODAL_TYPES, TASK_SUB_MODALS } from './constants';
 import type { Artist } from '$lib/types/nonPlayingCharacter';
 import type { ScoutingTaskResponse } from '$lib/types/task';
 import { get } from 'svelte/store';
+import { currentLabel } from '$lib/stores/appState';
+import { prefetchLabelBeats, fetchScoutedArtists } from '$lib/utils/notificationUtils';
 
 /**
  * Internal helper to open or transition a modal based on current state
@@ -38,7 +40,10 @@ export function openScoutingModal() {
  *
  * @param scoutingTask - The completed scouting task with results
  */
-export function openScoutResultsModal(scoutingTask: ScoutingTaskResponse) {
+export async function openScoutResultsModal(scoutingTask: ScoutingTaskResponse) {
+	// Prefetch discovered artists to ensure they're available when modal opens
+	await fetchScoutedArtists(scoutingTask);
+
 	openOrTransition(MODAL_TYPES.TASK, {
 		subModal: TASK_SUB_MODALS.SCOUT_RESULTS,
 		scoutingTaskResponse: scoutingTask,
@@ -88,11 +93,17 @@ export function openProducingBeatsModal(options?: {
  *
  * @param options - Optional overrides for title and image
  */
-export function openRecordingReleaseModal(options?: {
+export async function openRecordingReleaseModal(options?: {
 	title?: string;
 	imageUrl?: string;
 	workerId?: string;
 }) {
+	// Prefetch beats to ensure they're available when modal opens
+	const label = get(currentLabel);
+	if (label?.id) {
+		await prefetchLabelBeats(label.id);
+	}
+
 	openOrTransition(MODAL_TYPES.TASK, {
 		subModal: TASK_SUB_MODALS.RECORDING_RELEASE,
 		title: options?.title ?? MODAL_DEFAULTS.RECORDING_RELEASE.title,

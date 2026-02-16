@@ -9,6 +9,7 @@ import { getDiscoveredArtist, addDiscoveredArtists } from '$lib/queries/artistQu
 import type { TimedTask, ScoutingTaskResponse, ScoutingTaskResults } from '$lib/types/task';
 import { fetchTaskById } from '$lib/api/tasks';
 import { fetchArtistsByIds } from '$lib/api/artists';
+import { fetchBeatsByLabelId } from '$lib/api/beats';
 
 export type DescriptionPart =
 	| { kind: 'text'; value: string; color?: string }
@@ -188,5 +189,24 @@ export async function fetchScoutedArtists(scoutingTask: ScoutingTaskResponse): P
 		addDiscoveredArtists(artists, false);
 	} catch (error) {
 		console.error('Failed to fetch discovered artists:', error);
+	}
+}
+
+/**
+ * Prefetch and cache beats for a label
+ */
+export async function prefetchLabelBeats(labelId: string | null | undefined): Promise<void> {
+	if (!labelId) return;
+
+	// Check if beats are already cached
+	const cached = queryClient.getQueryData(queryKeys.beats.byLabel(labelId));
+	if (cached) return;
+
+	// Fetch and cache beats
+	try {
+		const beats = await fetchBeatsByLabelId(labelId);
+		queryClient.setQueryData(queryKeys.beats.byLabel(labelId), beats);
+	} catch (error) {
+		console.error('Failed to prefetch beats:', error);
 	}
 }

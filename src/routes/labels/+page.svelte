@@ -151,21 +151,8 @@
 	// Note: Task auto-claiming is now handled globally by taskClaimingService in +layout.svelte
 
 	async function handleOpenScoutResultsModal(scoutingTaskResponse: ScoutingTaskResponse) {
-		// Fetch and add discovered artists to store if they exist
-		if (scoutingTaskResponse.results && 'discoveredArtistsIds' in scoutingTaskResponse.results) {
-			const scoutingResults = scoutingTaskResponse.results as ScoutingTaskResults;
-			if (scoutingResults.discoveredArtistsIds?.length > 0) {
-				try {
-					const artists = await fetchArtistsByIds(scoutingResults.discoveredArtistsIds);
-					addDiscoveredArtists(artists, false);
-				} catch (err) {
-					handleError('FetchScoutedArtists', err);
-					errorNotifications.add('Fetch Failed', 'Could not load discovered artists.');
-				}
-			}
-		}
-
-		openScoutResultsModal(scoutingTaskResponse);
+		// Artists are prefetched in the helper function
+		await openScoutResultsModal(scoutingTaskResponse);
 	}
 </script>
 
