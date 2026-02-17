@@ -137,3 +137,58 @@ export function getArtistRankLabel(rankId: string, config: AppConfig | null): st
 
 	return `rank ${toRomanNumeral(rank.level)}`;
 }
+
+/**
+ * Get label rank label in format "Rank I", "Rank II", etc.
+ */
+export function getLabelRankLabel(rankId: string, config: AppConfig | null): string {
+	if (!rankId) return '';
+	if (!config) return '';
+
+	const rank = config.ranks.find((r) => r.id === rankId && r.$type === 'label-rank');
+
+	if (!rank) {
+		console.warn(`Label rank not found for rankId: ${rankId}`, {
+			availableRanks: config.ranks
+				.filter((r) => r.$type === 'label-rank')
+				.map((r) => ({ id: r.id, level: r.level }))
+		});
+		return '';
+	}
+
+	return `rank ${toRomanNumeral(rank.level)}`;
+}
+
+/**
+ * Get label rank info including current rank and next rank target XP
+ */
+export function getLabelRankInfo(
+	rankId: string,
+	currentXp: number,
+	config: AppConfig | null
+): {
+	currentRank: string;
+	currentXp: number;
+	nextRankXp: number | null;
+	isMaxRank: boolean;
+} | null {
+	if (!rankId || !config) return null;
+
+	const currentRank = config.ranks.find((r) => r.id === rankId && r.$type === 'label-rank');
+	if (!currentRank) return null;
+
+	// Get all label ranks sorted by level
+	const labelRanks = config.ranks
+		.filter((r) => r.$type === 'label-rank')
+		.sort((a, b) => a.level - b.level);
+
+	// Find next rank
+	const nextRank = labelRanks.find((r) => r.level > currentRank.level);
+
+	return {
+		currentRank: `rank ${toRomanNumeral(currentRank.level)}`,
+		currentXp,
+		nextRankXp: nextRank ? nextRank.requiredXp : null,
+		isMaxRank: !nextRank
+	};
+}

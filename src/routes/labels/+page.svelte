@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal';
-	import { currentLabel } from '$lib/stores/appState';
+	import { currentLabel, appState } from '$lib/stores/appState';
 	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
 	import Button from '$lib/components/Button.svelte';
 	import bgImage from '$lib/assets/main-bg-office.png';
@@ -23,7 +23,8 @@
 		getTaskProgress,
 		getTaskStatus,
 		handleError,
-		formatDuration
+		formatDuration,
+		getLabelRankInfo
 	} from '$lib/utils';
 	import { getDateRange } from '$lib/utils/performanceUtils';
 	import { errorNotifications } from '$lib/stores/errorNotifications';
@@ -132,6 +133,12 @@
 	$: trendIndicator =
 		monthlyRevenue > yesterdayRevenue ? '▲' : monthlyRevenue < yesterdayRevenue ? '▼' : '-';
 
+	// Get label rank info
+	$: labelRankInfo =
+		$currentLabel && $appState.clientConfig
+			? getLabelRankInfo($currentLabel.rankId, $currentLabel.xp, $appState.clientConfig)
+			: null;
+
 	// Time tracking for UI updates (progress bars, countdowns)
 	// Note: Using global time store - no local timer needed!
 	// Task claiming is now handled globally by taskClaimingService
@@ -157,7 +164,7 @@
 </script>
 
 <div
-	class="grid min-h-screen grid-cols-[minmax(0,35rem)_1fr_max-content] overflow-x-hidden p-4 text-white sm:p-8"
+	class="grid min-h-screen select-none grid-cols-[minmax(0,35rem)_1fr_max-content] overflow-x-hidden p-4 text-white sm:p-8"
 	style="background-image: url({bgImage}); background-size: cover; background-position: center;"
 >
 	<!-- 1 col -->
@@ -208,20 +215,41 @@
 		</div>
 		<div id="label-stats" class="flex grow flex-col gap-4">
 			<div class="max-w-52 text-center text-3xl font-black uppercase">{$currentLabel?.name}</div>
+			{#if labelRankInfo}
+				<div id="label-rank" class="flex flex-col-reverse items-center">
+					<span class="text-xs uppercase text-category-3-700">Rank</span>
+					<span class="text-2xl uppercase text-secondary-500">{labelRankInfo.currentRank}</span>
+				</div>
+			{/if}
+			{#if labelRankInfo}
+				<div id="label-xp" class="flex flex-col-reverse items-center">
+					<span class="text-xs uppercase text-category-3-700">
+						{labelRankInfo.isMaxRank ? 'Total XP' : 'XP Progress'}
+					</span>
+					<span class="text-2xl font-black">
+						{labelRankInfo.currentXp.toLocaleString()}
+						{#if !labelRankInfo.isMaxRank && labelRankInfo.nextRankXp !== null}
+							<span class="text-sm text-gray-400">
+								/ {labelRankInfo.nextRankXp.toLocaleString()}
+							</span>
+						{/if}
+					</span>
+				</div>
+			{/if}
 			{#if $currentLabel?.rating}
 				<div id="label-rating" class="flex flex-col-reverse items-center">
-					<span class="text-xs uppercase text-secondary-700">Rating</span>
+					<span class="text-xs uppercase text-category-3-700">Rating</span>
 					<span class="text-2xl text-category-1-500">{$currentLabel?.rating}</span>
 				</div>
 			{/if}
 			{#if $currentLabel?.bankroll}
 				<div id="label-bank" class="flex flex-col-reverse items-center">
-					<span class="text-xs uppercase text-secondary-700">Bank</span>
+					<span class="text-xs uppercase text-category-3-700">Bank</span>
 					<span class="text-2xl font-black">{formatCurrency($currentLabel?.bankroll)}</span>
 				</div>
 			{/if}
 			<div id="monthly-revenue" class="flex flex-col-reverse items-center">
-				<span class="text-xs uppercase text-secondary-700">Monthly<br />Revenue</span>
+				<span class="text-xs uppercase text-category-3-700">Monthly<br />Revenue</span>
 				<div class="flex items-center text-category-2-500">
 					<span class="text-2xl font-black">{formatCurrency(monthlyRevenue)}</span>
 					<span class="mt-2 text-xs">{trendIndicator}</span>
