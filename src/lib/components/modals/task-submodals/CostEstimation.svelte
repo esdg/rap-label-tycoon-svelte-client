@@ -39,7 +39,8 @@
 					<p class="text-xs font-semibold uppercase tracking-wider text-gray-400 sm:text-sm">
 						Budget Required
 					</p>
-					<Chip class="bg-secondary-400 px-2 text-[10px] normal-case text-black sm:text-xs"
+					<Chip
+						class="bg-secondary-400 px-2 text-[10px] uppercase normal-case text-black sm:text-xs"
 						>Upfront</Chip
 					>
 				</div>
@@ -54,7 +55,7 @@
 					<p class="text-xs font-semibold uppercase tracking-wider text-gray-400 sm:text-sm">
 						Duration
 					</p>
-					<Chip class="bg-info-300 px-2 text-[10px] normal-case text-black sm:text-xs"
+					<Chip class="bg-info-300 px-2 text-[10px] lowercase normal-case text-black sm:text-xs"
 						>Real time</Chip
 					>
 				</div>
@@ -69,7 +70,7 @@
 					<p class="text-xs font-semibold uppercase tracking-wider text-gray-400 sm:text-sm">
 						Stamina Cost
 					</p>
-					<Chip class="bg-warning-300 px-2 text-[10px] normal-case text-black sm:text-xs"
+					<Chip class="bg-warning-300 px-2 text-[10px] lowercase normal-case text-black sm:text-xs"
 						>Effort</Chip
 					>
 				</div>

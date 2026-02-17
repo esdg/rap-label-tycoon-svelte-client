@@ -3,8 +3,9 @@
 	import BeatmakerIcon from '$lib/icons/BeatmakerIcon.svelte';
 	import RapperIcon from '$lib/icons/RapperIcon.svelte';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
-	import { getRarityClass, getRarityLabel } from '$lib/utils';
+	import { getRarityClass, getRarityLabel, getArtistRankLabel } from '$lib/utils';
 	import { BoltIcon, FaceSmileIcon } from 'heroicons-svelte/24/solid';
+	import { appState } from '$lib/stores/appState';
 	import ArtistActivityPanel from '../ArtistActivityPanel.svelte';
 	import Chip from '../Chip.svelte';
 	import ProgressBar from '../progress-bars/ProgressBar.svelte';
@@ -12,6 +13,8 @@
 	import Tooltip from '../Tooltip.svelte';
 
 	export let artist: Artist;
+
+	$: rankLabel = getArtistRankLabel(artist.rankId, $appState.clientConfig);
 
 	function handleClick() {
 		goto(`/artists/${artist.id}`);
@@ -49,7 +52,14 @@
 						{artist.lastName}
 						{artist.firstName}
 					</p>
-					<Chip class={getRarityClass(artist.rarity)}>{getRarityLabel(artist.rarity)}</Chip>
+					<div class="flex flex-wrap gap-1">
+						<Chip class={getRarityClass(artist.rarity) + ' lowercase'}
+							>{getRarityLabel(artist.rarity)}</Chip
+						>
+						{#if rankLabel}
+							<Chip class="bg-gray-700 text-black">{rankLabel}</Chip>
+						{/if}
+					</div>
 				</div>
 				<div class="vitality-infos flex w-24 flex-col gap-1 self-end">
 					<div class="flex">

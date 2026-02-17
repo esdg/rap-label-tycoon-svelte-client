@@ -42,7 +42,7 @@
 		<div class="flex flex-wrap items-center gap-2 text-sm font-thin text-white">
 			<div class="flex">
 				<div class={`${tone.badge} h-auto w-1`}></div>
-				<Chip class="rounded-none bg-gray-700 text-xs text-gray-300">
+				<Chip class="rounded-none bg-gray-700 text-xs lowercase text-gray-300">
 					{formatPayloadLabel(event.dataPayload.payload_type)}
 				</Chip>
 			</div>
