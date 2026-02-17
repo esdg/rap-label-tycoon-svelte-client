@@ -136,7 +136,9 @@ export const PayloadLabels: Record<string, string> = {
 	daily_income_report: 'Daily Income',
 	publishing_release: 'Release Published',
 	resting: 'Rest',
-	recording_release: 'Recording'
+	recording_release: 'Recording',
+	artist_rank_up: 'Artist Rank Up',
+	label_rank_up: 'Label Rank Up'
 };
 
 export function formatPayloadLabel(type?: string): string {

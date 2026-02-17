@@ -8,6 +8,7 @@ import {
 	findArtistInCache,
 	getTaskWithCache
 } from '$lib/utils/notificationUtils';
+import { toRomanNumeral } from '$lib/utils/artistUtils';
 import { modalStore } from '$lib/stores/modal';
 import {
 	openProducingBeatsModal,
@@ -234,6 +235,51 @@ const templates: Record<string, Template> = {
 
 		parts.push({ kind: 'text', value: '.' });
 		return parts;
+	},
+	artist_rank_up: (event) => {
+		const data = event.dataPayload;
+		const artistName = data.artistName ?? 'An artist';
+		const artistId = data.artistId;
+		const rankLevel = data.rankLevel ?? 0;
+
+		const parts: DescriptionPart[] = [];
+
+		if (artistId) {
+			parts.push({
+				kind: 'link',
+				label: artistName,
+				href: `/artists/${encodeURIComponent(artistId)}`,
+				color: 'text-secondary-400'
+			});
+		} else {
+			parts.push({ kind: 'text', value: artistName, color: 'text-secondary-400' });
+		}
+
+		parts.push(
+			{ kind: 'text', value: ' reached ' },
+			{
+				kind: 'text',
+				value: `RANK ${toRomanNumeral(rankLevel)}`,
+				color: 'text-secondary-500 font-bold'
+			},
+			{ kind: 'text', value: '!' }
+		);
+
+		return parts;
+	},
+	label_rank_up: (event) => {
+		const data = event.dataPayload;
+		const rankLevel = data.rankLevel ?? 0;
+
+		return [
+			{ kind: 'text', value: 'Your label reached ' },
+			{
+				kind: 'text',
+				value: `RANK ${toRomanNumeral(rankLevel)}`,
+				color: 'text-secondary-500 font-bold'
+			},
+			{ kind: 'text', value: '!' }
+		];
 	}
 };
 

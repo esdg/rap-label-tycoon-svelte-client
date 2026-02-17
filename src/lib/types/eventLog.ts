@@ -9,6 +9,8 @@ export type EventPayloadType =
 	| 'publishing_release'
 	| 'resting'
 	| 'recording_release'
+	| 'artist_rank_up'
+	| 'label_rank_up'
 	| string;
 
 export interface EventLogPayload {
@@ -42,6 +44,11 @@ export interface EventLogPayload {
 	// Resting
 	restingTypeId?: string;
 	staminaRestored?: number;
+	// Artist rank up
+	artistName?: string;
+	rankName?: string;
+	rankLevel?: number;
+	totalXp?: number;
 	// Allow backend to add additional fields without breaking the UI
 	[key: string]: unknown;
 }
