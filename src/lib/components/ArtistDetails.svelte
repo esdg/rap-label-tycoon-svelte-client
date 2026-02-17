@@ -8,8 +8,10 @@
 		getArtistSkillSections,
 		getRarityClass,
 		getRarityLabel,
+		getArtistRankLabel,
 		type SkillSection
 	} from '$lib/utils';
+	import { appState } from '$lib/stores/appState';
 	import BeatmakerIcon from '$lib/icons/BeatmakerIcon.svelte';
 	import RapperIcon from '$lib/icons/RapperIcon.svelte';
 	import ArtistActivityPanel from './ArtistActivityPanel.svelte';
@@ -73,13 +75,19 @@
 	}
 
 	const sections = getArtistSkillSections(artist);
+
+	$: rankLabel = getArtistRankLabel(artist.rankId, $appState.clientConfig);
 </script>
 
 <div
 	class="flex select-none flex-col border-b border-white/5 pb-12 last:border-none last:pb-0 {className}"
 >
-	<div class="mb-4">
-		<Chip class={getRarityClass(artist.rarity)}>{getRarityLabel(artist.rarity)}</Chip>
+	<div class="mb-4 flex flex-wrap gap-1">
+		<Chip class={getRarityClass(artist.rarity) + ' lowercase'}>{getRarityLabel(artist.rarity)}</Chip
+		>
+		{#if rankLabel}
+			<Chip class="bg-gray-700 text-black">{rankLabel}</Chip>
+		{/if}
 	</div>
 
 	<!-- Artist Header -->

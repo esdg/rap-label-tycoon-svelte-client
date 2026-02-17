@@ -435,7 +435,7 @@
 											</p>
 										</div>
 										{#if selectedBeatIds.has(beat.id)}
-											<Chip class="flex-shrink-0">Selected</Chip>
+											<Chip class="flex-shrink-0 lowercase">Selected</Chip>
 										{/if}
 									</div>
 								</button>
