@@ -23,13 +23,28 @@ export interface BeatmakerArchetype extends ArtistArchetypeBase {
 
 export type ArtistArchetype = RapperArchetype | BeatmakerArchetype;
 
-export interface ArtistRank {
+export type RankType = 'artist-rank' | 'label-rank';
+
+interface RankBase {
+	$type: RankType;
 	id: string;
 	name: string;
 	description: string;
 	requiredXp: number;
+	level: number;
+}
+
+export interface ArtistRank extends RankBase {
+	$type: 'artist-rank';
 	additionalPerks: number;
 }
+
+export interface LabelRank extends RankBase {
+	$type: 'label-rank';
+	additionalUpgradePoints: number;
+}
+
+export type Rank = ArtistRank | LabelRank;
 
 export interface ReleaseType {
 	id: string;
@@ -46,7 +61,7 @@ export interface ReleaseType {
 export interface AppConfig {
 	apiBaseUrl: string;
 	artistArchetypes: ArtistArchetype[];
-	artistRanks: ArtistRank[];
+	ranks: Rank[];
 	releaseTypes: ReleaseType[];
 	scoutingScopes: ScoutingScope[];
 	restingTypes: RestingType[];

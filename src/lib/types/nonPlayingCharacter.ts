@@ -43,7 +43,7 @@ export interface Artist extends NonPlayableCharacter {
 	streetCredibility: number;
 	archetypeId: string;
 	rankId: string;
-	experience: number;
+	xp: number;
 	rapMusicStyles: number[];
 	taskIds: string[];
 	reputation: number;
