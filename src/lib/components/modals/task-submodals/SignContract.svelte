@@ -22,6 +22,8 @@
 	import { yearsToTimeSpan, formatDuration } from '$lib/utils';
 	import ScrollableContainer from '$lib/components/ScrollableContainer.svelte';
 	import type { Contract } from '$lib/types/contracts';
+	import Tooltip from '$lib/components/Tooltip.svelte';
+	import { InformationCircleIcon } from 'heroicons-svelte/24/solid';
 
 	// State
 	let activeStepIndex = 0;
@@ -625,25 +627,45 @@
 							class="mx-auto grid w-full max-w-2xl grid-cols-1 items-stretch gap-4 text-white sm:grid-cols-2"
 						>
 							<div class="flex grow flex-wrap items-center justify-center gap-2">
-								<label
-									class="block w-20 select-none text-center font-thin uppercase"
-									for="contract-bonus">Bonus</label
-								>
+								<Tooltip position="top">
+									<label
+										slot="trigger"
+										class="block w-20 cursor-help select-none text-center font-thin uppercase"
+										for="contract-bonus"
+									>
+										Bonus
+										<InformationCircleIcon class="inline-block h-3.5 w-3.5 text-gray-400" />
+									</label>
+									<div class="text-sm">
+										<strong>Signing Bonus:</strong> One-time payment given to the artist when they sign
+										the contract. This money is theirs to keep regardless of performance.
+									</div>
+								</Tooltip>
 								<NumericField
 									class="w-full max-w-44"
 									id="contract-bonus"
 									bind:value={signingBonus}
-									step={100}
+									step={500}
 									suffix="$"
 									min={0}
-									max={10000}
+									max={100000}
 								/>
 							</div>
 							<div class="flex flex-wrap items-center justify-center gap-2">
-								<label
-									class="block w-20 select-none text-center font-thin uppercase"
-									for="contract-advance">Advance</label
-								>
+								<Tooltip position="top">
+									<label
+										slot="trigger"
+										class="block w-20 cursor-help select-none text-center font-thin uppercase"
+										for="contract-advance"
+									>
+										Advance
+										<InformationCircleIcon class="inline-block h-3.5 w-3.5 text-gray-400" />
+									</label>
+									<div class="text-sm">
+										<strong>Advance:</strong> Upfront payment for each project the artist releases. This
+										is recouped from the artist's royalty earnings before they receive any royalty payments.
+									</div>
+								</Tooltip>
 								<NumericField
 									class="w-full max-w-44"
 									id="contract-advance"
@@ -655,10 +677,21 @@
 								/>
 							</div>
 							<div class="flex flex-wrap items-center justify-center gap-2">
-								<label
-									class="block w-20 select-none text-center font-thin uppercase"
-									for="contract-royalties">Royalties</label
-								>
+								<Tooltip position="top">
+									<label
+										slot="trigger"
+										class="block w-20 cursor-help select-none text-center font-thin uppercase"
+										for="contract-royalties"
+									>
+										Royalties
+										<InformationCircleIcon class="inline-block h-3.5 w-3.5 text-gray-400" />
+									</label>
+									<div class="text-sm">
+										<strong>Royalty Percentage:</strong> The share of revenue the artist receives from
+										their music sales and streams. Higher percentages favor the artist, lower percentages
+										favor the label.
+									</div>
+								</Tooltip>
 								<NumericField
 									class="w-full max-w-44"
 									id="contract-royalties"
