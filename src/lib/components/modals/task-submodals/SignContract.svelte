@@ -14,7 +14,7 @@
 	import NumericField from '$lib/components/formfields/NumericField.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import CostEstimation from './CostEstimation.svelte';
-	import { predictSignArtistContractCost } from '$lib/api';
+	import { predictSignArtistContractCost, predictContractAcceptanceChance } from '$lib/api';
 	import type { Artist } from '$lib/types/nonPlayingCharacter';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	import type { TaskCostPrediction } from '$lib/types/task';
@@ -29,6 +29,12 @@
 	let loadingCost = false;
 	let costPrediction: TaskCostPrediction | null = null;
 	let costPredictionRequestId = 0;
+
+	// Acceptance chance state
+	let loadingAcceptanceChance = false;
+	let acceptanceChance: number | null = null;
+	let acceptanceChanceRequestId = 0;
+	let acceptanceChanceDebounceTimer: number | null = null;
 
 	const modalData = modalStore.getData();
 	const artist = (modalData?.artist as Artist | undefined) ?? null;
@@ -75,14 +81,25 @@
 	$: totalReleases =
 		(contractAlbums ?? 0) + (contractEps ?? 0) + (contractMixtapes ?? 0) + (contractSingles ?? 0);
 	$: usesDuration = contractType === 0;
+	$: contractTermsStepIndex = hasHistory ? 2 : 1;
+	$: onContractTermsStep = activeStepIndex === contractTermsStepIndex;
 	$: readyForCostPrediction =
 		Boolean($currentLabel && $currentPlayer && artist?.id) &&
 		activeStepIndex === totalSteps - 1 &&
 		((usesDuration && contractLengthYears !== null && contractLengthYears > 0) ||
 			(!usesDuration && totalReleases > 0));
+	$: readyForAcceptanceChance =
+		Boolean($currentLabel && $currentPlayer && artist?.id) &&
+		onContractTermsStep &&
+		((usesDuration && contractLengthYears !== null && contractLengthYears > 0) ||
+			(!usesDuration && totalReleases > 0));
 
 	$: if (!readyForCostPrediction) {
 		costPrediction = null;
+	}
+
+	$: if (!readyForAcceptanceChance) {
+		acceptanceChance = null;
 	}
 
 	// Trigger cost prediction when on review step (step 2)
@@ -98,6 +115,22 @@
 			contractLengthYears !== undefined)
 	) {
 		fetchCostPrediction();
+	}
+
+	// Trigger acceptance chance prediction when on contract terms step with debounce
+	$: if (
+		readyForAcceptanceChance &&
+		(signingBonus !== undefined ||
+			advance !== undefined ||
+			royaltyPercentage !== undefined ||
+			contractAlbums !== undefined ||
+			contractEps !== undefined ||
+			contractMixtapes !== undefined ||
+			contractSingles !== undefined ||
+			contractLengthYears !== undefined ||
+			contractType !== undefined)
+	) {
+		fetchAcceptanceChance();
 	}
 
 	function handleMakeOffer() {
@@ -201,6 +234,38 @@
 				loadingCost = false;
 			}
 		}
+	}
+
+	async function fetchAcceptanceChance() {
+		const payload = buildCostPredictionRequest();
+		if (!payload) return;
+
+		// Clear existing timer
+		if (acceptanceChanceDebounceTimer !== null) {
+			clearTimeout(acceptanceChanceDebounceTimer);
+		}
+
+		// Set a new debounced timer (500ms delay)
+		acceptanceChanceDebounceTimer = window.setTimeout(async () => {
+			const requestId = ++acceptanceChanceRequestId;
+			loadingAcceptanceChance = true;
+
+			try {
+				const result = await predictContractAcceptanceChance(payload);
+				if (requestId === acceptanceChanceRequestId) {
+					acceptanceChance = result.acceptanceChance;
+				}
+			} catch (error) {
+				if (requestId === acceptanceChanceRequestId) {
+					acceptanceChance = null;
+				}
+				console.error('Failed to fetch contract acceptance chance', error);
+			} finally {
+				if (requestId === acceptanceChanceRequestId) {
+					loadingAcceptanceChance = false;
+				}
+			}
+		}, 500);
 	}
 </script>
 
@@ -605,6 +670,62 @@
 								/>
 							</div>
 						</div>
+
+						<!-- Acceptance Chance Meter -->
+						{#if readyForAcceptanceChance}
+							<div class="mx-auto w-full max-w-2xl space-y-3 pt-4">
+								<div class="flex items-center justify-between text-sm">
+									<span class="font-semibold uppercase tracking-wide text-gray-400"
+										>Acceptance Likelihood</span
+									>
+									{#if loadingAcceptanceChance}
+										<span class="text-gray-500">Calculating...</span>
+									{:else if acceptanceChance !== null}
+										<span class="text-lg font-bold text-white">{acceptanceChance}%</span>
+									{/if}
+								</div>
+
+								<!-- Progress Bar -->
+								<div class="relative h-6 overflow-hidden rounded-full bg-gray-800 shadow-inner">
+									{#if loadingAcceptanceChance}
+										<!-- Loading animation -->
+										<div
+											class="absolute inset-0 bg-gradient-to-r from-transparent via-gray-600 to-transparent"
+											style="animation: shimmer 1.5s infinite;"
+										></div>
+									{:else if acceptanceChance !== null}
+										<!-- Acceptance bar with color gradient -->
+										{@const barColor =
+											acceptanceChance >= 70
+												? 'bg-gradient-to-r from-green-600 to-green-400'
+												: acceptanceChance >= 40
+													? 'bg-gradient-to-r from-yellow-600 to-yellow-400'
+													: 'bg-gradient-to-r from-red-600 to-red-400'}
+										<div
+											class="h-full transition-all duration-500 ease-out {barColor}"
+											style="width: {acceptanceChance}%"
+										>
+											<div
+												class="h-full w-full bg-gradient-to-t from-white/20 to-transparent"
+											></div>
+										</div>
+									{/if}
+								</div>
+
+								<!-- Helper text -->
+								{#if acceptanceChance !== null && !loadingAcceptanceChance}
+									<p class="text-center text-xs text-gray-500">
+										{#if acceptanceChance >= 70}
+											The artist is likely to accept this offer.
+										{:else if acceptanceChance >= 40}
+											The artist might consider this offer.
+										{:else}
+											The artist is unlikely to accept this offer.
+										{/if}
+									</p>
+								{/if}
+							</div>
+						{/if}
 					</div>
 				</ContentPanelItem>
 				<ContentPanelItem>
@@ -718,3 +839,14 @@
 		</ContentPanel>
 	</svelte:fragment>
 </ScrollableContainer>
+
+<style>
+	@keyframes shimmer {
+		0% {
+			transform: translateX(-100%);
+		}
+		100% {
+			transform: translateX(100%);
+		}
+	}
+</style>
