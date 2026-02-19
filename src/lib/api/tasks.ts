@@ -58,6 +58,19 @@ export async function predictSignArtistContractCost(
 	});
 }
 
+export interface ContractAcceptanceChance {
+	acceptanceChance: number;
+}
+
+export async function predictContractAcceptanceChance(
+	data: SignArtistContractRequest
+): Promise<ContractAcceptanceChance> {
+	return apiFetch<ContractAcceptanceChance>('/api/v1/task-estimates/contract-acceptance-chance', {
+		method: 'POST',
+		body: JSON.stringify(data)
+	});
+}
+
 export async function createSignArtistContractTask(
 	data: SignArtistContractRequest
 ): Promise<TimedTask> {
