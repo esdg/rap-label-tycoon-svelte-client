@@ -46,7 +46,7 @@ export async function loginAndRedirect(email: string, password: string): Promise
 		await loadClientConfig();
 
 		// Update centralized app state
-		appState.initialize({ player: playerData, labels });
+		appState.initialize({ player: playerData, labels, firebaseUser });
 
 		// Redirect based on whether user has labels
 		if (labels.length > 0) {
@@ -102,7 +102,7 @@ export async function googleSignInAndRedirect(): Promise<AuthResult> {
 		await loadClientConfig();
 
 		// Update centralized app state
-		appState.initialize({ player: playerData, labels });
+		appState.initialize({ player: playerData, labels, firebaseUser });
 
 		// Redirect based on whether user has labels
 		if (labels.length > 0) {
@@ -143,7 +143,7 @@ export async function registerAndRedirect(
 		const playerData = await createPlayer(createPlayerData);
 
 		// Update centralized app state (no labels for new users)
-		appState.initialize({ player: playerData, labels: [] });
+		appState.initialize({ player: playerData, labels: [], firebaseUser });
 
 		// Load client configuration for immediate availability
 		await loadClientConfig();

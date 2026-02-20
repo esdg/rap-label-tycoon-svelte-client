@@ -115,11 +115,17 @@ function createAppState() {
 		},
 
 		// Initialize with full data (after login)
-		initialize: (data: { player: Player; labels: Label[]; currentLabel?: Label }) => {
+		initialize: (data: {
+			player: Player;
+			labels: Label[];
+			currentLabel?: Label;
+			firebaseUser?: User;
+		}) => {
 			const currentLabel = data.currentLabel || data.labels[0] || null;
 
 			update((state) => ({
 				...state,
+				firebaseUser: data.firebaseUser ?? state.firebaseUser,
 				player: data.player,
 				labels: data.labels,
 				currentLabel,
