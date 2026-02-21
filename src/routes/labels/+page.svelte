@@ -233,11 +233,13 @@
 	<div></div>
 	<!-- 3 col -->
 	<div class="flex flex-col items-center gap-8">
-		<div class="flex w-full items-center gap-4">
+		<div class="relative right-8 flex w-full items-center gap-4">
 			<div class="rounded-md border border-gray-500 bg-primary-950">
 				<NotificationCenter />
 			</div>
-			<div class="flex flex-col overflow-hidden rounded-md border border-gray-500 bg-primary-950">
+			<div
+				class="flex w-64 flex-col overflow-hidden rounded-md border border-gray-500 bg-primary-950"
+			>
 				<div class="p-2 text-center text-sm font-thin">
 					Next Report: <span class="font-normal">{reportCountdown}</span>
 				</div>
@@ -245,7 +247,7 @@
 					value={reportProgress}
 					lengthClass="w-full"
 					rounded={false}
-					thicknessClass="h-1"
+					thicknessClass="h-0.5"
 					progressClass="bg-gray-200"
 					ariaLabel="Progress to next financial report"
 				/>
