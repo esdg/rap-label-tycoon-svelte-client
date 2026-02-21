@@ -233,7 +233,7 @@
 	<div></div>
 	<!-- 3 col -->
 	<div class="flex flex-col items-center gap-8">
-		<div class="relative right-8 flex w-full items-center gap-4">
+		<div class="relative right-7 flex w-full items-center gap-4">
 			<div class="rounded-md border border-gray-500 bg-primary-950">
 				<NotificationCenter />
 			</div>
