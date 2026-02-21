@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal';
 	import { currentLabel, appState } from '$lib/stores/appState';
-	import { currentTime, serverAdjustedTime } from '$lib/stores/globalTime';
+	import { currentTime } from '$lib/stores/globalTime';
 	import Button from '$lib/components/Button.svelte';
 	import bgImage from '$lib/assets/main-bg-office.png';
-	import { type ScoutingTaskResponse, type ScoutingTaskResults } from '$lib/types/task';
+	import { type ScoutingTaskResponse } from '$lib/types/task';
 	import {
 		createLabelTasksQuery,
 		createTasksByType,
@@ -12,22 +12,19 @@
 		serverTimeOffset
 	} from '$lib/queries/taskQueries';
 	import { createLabelContractsQuery } from '$lib/queries/contractQueries';
-	import { addDiscoveredArtists, createArtistsByIdsQuery } from '$lib/queries/artistQueries';
+	import { createArtistsByIdsQuery } from '$lib/queries/artistQueries';
 	import { createPerformanceReportsByLabelQuery } from '$lib/queries/performanceReportQueries';
 	import { queryKeys } from '$lib/queries/queryClient';
 	import { useQueryClient } from '@tanstack/svelte-query';
-	import { fetchArtistsByIds } from '$lib/api/artists';
 	import {
 		formatCurrency,
 		formatTimeRemaining,
 		getTaskProgress,
 		getTaskStatus,
-		handleError,
 		formatDuration,
 		getLabelRankInfo
 	} from '$lib/utils';
 	import { getDateRange } from '$lib/utils/performanceUtils';
-	import { errorNotifications } from '$lib/stores/errorNotifications';
 	import { openScoutingModal, openScoutResultsModal } from '$lib/modals/helpers';
 	import ScoutingTaskCard from '$lib/components/cards/ScoutingTaskCard.svelte';
 	import ContractsCard from '$lib/components/cards/ContractsCard.svelte';
@@ -35,6 +32,7 @@
 	import { ContractStatus } from '$lib/types/contracts';
 	import { RapMusicStyleNames, type RapMusicStyle } from '$lib/types/musicStyles';
 	import NotificationCenter from '$lib/components/notifications/NotificationCenter.svelte';
+	import ProgressBar from '$lib/components/progress-bars/ProgressBar.svelte';
 
 	// Helper to check if a task is optimistic (has temporary ID and extra data)
 	function getOptimisticTaskData(task: any) {
@@ -139,6 +137,36 @@
 			? getLabelRankInfo($currentLabel.rankId, $currentLabel.xp, $appState.clientConfig)
 			: null;
 
+	// Calculate next financial report time (04:00 UTC daily)
+	$: nextReportTime = (() => {
+		const now = $currentTime;
+		const nowDate = new Date(now);
+
+		// Create a date for today at 04:00 UTC
+		const todayReport = new Date(
+			Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), nowDate.getUTCDate(), 4, 0, 0, 0)
+		);
+
+		// If we're past today's report time, use tomorrow's
+		if (now >= todayReport.getTime()) {
+			return new Date(todayReport.getTime() + 24 * 60 * 60 * 1000);
+		}
+
+		return todayReport;
+	})();
+
+	// Calculate time until next report and progress through 24-hour cycle
+	$: timeUntilReport = Math.max(0, nextReportTime.getTime() - $currentTime);
+	$: reportProgress = Math.max(
+		0,
+		Math.min(100, ((24 * 60 * 60 * 1000 - timeUntilReport) / (24 * 60 * 60 * 1000)) * 100)
+	);
+	$: reportCountdown = formatTimeRemaining(
+		nextReportTime.toISOString(),
+		$currentTime,
+		$serverTimeOffset
+	);
+
 	// Time tracking for UI updates (progress bars, countdowns)
 	// Note: Using global time store - no local timer needed!
 	// Task claiming is now handled globally by taskClaimingService
@@ -209,8 +237,18 @@
 			<div class="rounded-md border border-gray-500 bg-primary-950">
 				<NotificationCenter />
 			</div>
-			<div class="rounded-md border border-gray-500 bg-primary-950 p-2">
-				Next financial report in: <span class="font-bold">xxxx</span>
+			<div class="flex flex-col overflow-hidden rounded-md border border-gray-500 bg-primary-950">
+				<div class="p-2 text-center text-sm font-thin">
+					Next Report: <span class="font-normal">{reportCountdown}</span>
+				</div>
+				<ProgressBar
+					value={reportProgress}
+					lengthClass="w-full"
+					rounded={false}
+					thicknessClass="h-1"
+					progressClass="bg-gray-200"
+					ariaLabel="Progress to next financial report"
+				/>
 			</div>
 		</div>
 		<div id="label-stats" class="flex grow flex-col gap-4">
