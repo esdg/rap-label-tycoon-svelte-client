@@ -113,6 +113,12 @@
 			.join(', ');
 	}
 
+	// Helper function to get release/album name for a track
+	function getTrackReleaseName(trackId: string): string {
+		const release = releases.find((r) => r.trackIds.includes(trackId));
+		return release?.title ?? 'Unknown';
+	}
+
 	// Helper function to format date
 	function formatDate(dateString: string): string {
 		return new Date(dateString).toLocaleDateString();
@@ -241,7 +247,7 @@
 									{formatDate(release.releaseDate)}
 								</div>
 								<div class="text-center text-primary-200">
-									{release.rating.toFixed(1)}/10
+									{release.rating.toFixed(1)}
 								</div>
 								<div class="text-center text-primary-200">
 									{release.hype}
@@ -292,10 +298,11 @@
 					<div>
 						<!-- Header -->
 						<div
-							class="grid grid-cols-[2fr_1fr_100px_100px_80px_80px_100px] gap-4 rounded-t border-b border-primary-300 bg-primary-900 px-4 py-3 text-xs uppercase text-primary-300"
+							class="grid grid-cols-[2fr_1fr_1fr_100px_100px_80px_80px_100px] gap-4 rounded-t border-b border-primary-300 bg-primary-900 px-4 py-3 text-xs uppercase text-primary-300"
 						>
 							<div>Title</div>
 							<div>Artist(s)</div>
+							<div>Album</div>
 							<div class="text-center">Duration</div>
 							<div class="text-center">Genre</div>
 							<div class="text-center">Rating</div>
@@ -306,11 +313,14 @@
 						<!-- Tracks List -->
 						{#each tracks as track (track.id)}
 							<div
-								class="grid grid-cols-[2fr_1fr_100px_100px_80px_80px_100px] items-center gap-4 border-b border-primary-800 px-4 py-3 text-sm transition-colors hover:bg-primary-900"
+								class="grid grid-cols-[2fr_1fr_1fr_100px_100px_80px_80px_100px] items-center gap-4 border-b border-primary-800 px-4 py-3 text-sm transition-colors hover:bg-primary-900"
 							>
 								<div class="truncate font-medium text-primary-100">{track.title}</div>
 								<div class="truncate text-primary-200">
 									{getArtistNames(track.artistId)}
+								</div>
+								<div class="truncate text-primary-200">
+									{getTrackReleaseName(track.id)}
 								</div>
 								<div class="text-center text-primary-200">
 									{formatDuration(track.durationSeconds)}
@@ -319,7 +329,7 @@
 									{RapMusicStyleNames[track.productionStyle]}
 								</div>
 								<div class="text-center text-primary-200">
-									{track.rating.toFixed(1)}/10
+									{track.rating.toFixed(1)}
 								</div>
 								<div class="text-center text-primary-200">
 									{track.hype}
@@ -368,7 +378,7 @@
 								<div class="truncate font-medium text-primary-100">{beat.title}</div>
 								<div class="truncate text-primary-200">{beat.genre}</div>
 								<div class="text-center text-primary-200">{beat.bpm}</div>
-								<div class="text-center text-primary-200">{beat.rating.toFixed(1)}/10</div>
+								<div class="text-center text-primary-200">{beat.rating.toFixed(1)}</div>
 								<div class="text-center text-primary-200">{beat.rarity}</div>
 								<div class="flex justify-center">
 									{#if beat.isExclusive}
